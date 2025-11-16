@@ -9,6 +9,7 @@ namespace Explorer.Tours.Infrastructure.Database;
 public class ToursContext : DbContext
 {
     public DbSet<Equipment> Equipment { get; set; }
+    public DbSet<Tour> Tours { get; set; }
     public DbSet<TouristEquipment> TouristEquipment { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Quiz> Quizzes { get; set; }
@@ -50,5 +51,9 @@ public class ToursContext : DbContext
             b.Property(te => te.EquipmentId)
                 .IsRequired();
         });
+
+        modelBuilder.Entity<Tour>().HasKey(t => t.Id);
+        modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
+                                                                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
     }
 }
