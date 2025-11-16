@@ -8,6 +8,7 @@ public class StakeholderProfile : Profile
 {
     public StakeholderProfile()
     {
+        CreateMap<MonumentDto, Monument>().ReverseMap();
         CreateMap<UserProfile, UserProfileDto>().ReverseMap();
     }
 }
