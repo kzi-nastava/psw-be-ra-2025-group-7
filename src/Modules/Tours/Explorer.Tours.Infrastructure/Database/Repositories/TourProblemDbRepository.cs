@@ -37,7 +37,7 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
 
         public TourProblem Get(int id)
         {
-            var entity = _dbSet.Find(id);
+            var entity = _dbSet.AsNoTracking().FirstOrDefault(e => e.Id == id);
             if (entity == null) throw new KeyNotFoundException("Not found: " + id);
             return entity;
         }
@@ -49,9 +49,16 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
         }
         public TourProblem Update(TourProblem entity)
         {
+            var local = _dbSet.Local.FirstOrDefault(e => e.Id == entity.Id);
+            if (local != null)
+            {
+                _dbContext.Entry(local).State = EntityState.Detached;
+            }
+            _dbContext.Attach(entity);
+            _dbContext.Entry(entity).State = EntityState.Modified;
+
             try
             {
-                _dbContext.Update(entity);
                 _dbContext.SaveChanges();
             }
             catch (DbUpdateException e)

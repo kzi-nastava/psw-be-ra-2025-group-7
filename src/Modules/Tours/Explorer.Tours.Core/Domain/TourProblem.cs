@@ -22,7 +22,7 @@ namespace Explorer.Tours.Core.Domain
         public TourProblem(int tourId, int touristId, ProblemCategory category, ProblemPriority priority, string description, DateTime timeReported)
         {
             if (tourId <= 0) throw new ArgumentException("Invalid TourId.");
-            if (touristId <= 0) throw new ArgumentException("Invalid TouristId.");
+            if (touristId < 0) throw new ArgumentException("Invalid TouristId.");
             if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
             TourId = tourId;
             TouristId = touristId;
