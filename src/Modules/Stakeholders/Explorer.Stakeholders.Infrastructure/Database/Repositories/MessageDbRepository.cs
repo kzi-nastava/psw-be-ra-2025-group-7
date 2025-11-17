@@ -53,10 +53,10 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
             return task.Result;
         }
 
-        public PagedResult<Message> GetPagedByRecipientId(long recipientId, int pageNumber, int pageSize)
+        public PagedResult<Message> GetPagedRecent(long recipientId, int pageNumber, int pageSize)
         {
             var task = _dbSet
-                .Where(m => m.SentToUserId == recipientId)
+                .Where(m => m.SentToUserId == recipientId || m.SentByUserId == recipientId)
                 .GetPagedById(pageNumber, pageSize);
             task.Wait();
             return task.Result;

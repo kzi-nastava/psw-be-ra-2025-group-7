@@ -29,9 +29,9 @@ public class MessageController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<PagedResult<MessageDto>> GetPagedByRecipientId([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 30)
+    public ActionResult<PagedResult<MessageDto>> GetPagedRecent([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 30)
     {
-        var result = _messageService.GetPagedByRecipientId(User.PersonId(), pageNumber, pageSize);
+        var result = _messageService.GetPagedRecent(User.PersonId(), pageNumber, pageSize);
         return Ok(result);
     }
 
