@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Explorer.BuildingBlocks.Core.Domain;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Explorer.Tours.Core.Domain
         Other
     }
 
-    public class Facility
+    public class Facility : Entity
     {
         public string Name { get; init; }
         public double Latitude { get; init; }
