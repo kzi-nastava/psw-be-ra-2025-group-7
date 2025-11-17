@@ -64,12 +64,23 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
 
         public PagedResult<long> GetPagedContacts(long userId, int pageNumber, int pageSize)
         {
-            var task = _dbSet
+            // Build an intermediate projection with the contact id and message id
+            var messagesForUser = _dbSet
                 .Where(m => m.SentToUserId == userId || m.SentByUserId == userId)
-                .GroupBy(m => m.SentByUserId == userId ? m.SentToUserId : m.SentByUserId)
-                .Select(g => g.First())
-                .GetPagedById(pageNumber, pageSize);
+                .Select(m => new { m.Id, ContactId = m.SentByUserId == userId ? m.SentToUserId : m.SentByUserId });
+
+            // Get the latest message Id per contact (translated to SQL)
+            var latestMessageIdsPerContact = messagesForUser
+                .GroupBy(x => x.ContactId)
+                .Select(g => g.Max(x => x.Id));
+
+            // Select the messages that are the latest per contact
+            var latestMessagesQuery = _dbSet.Where(m => latestMessageIdsPerContact.Contains(m.Id));
+
+            // Use existing paging extension (orders by Id desc, pages by Id)
+            var task = latestMessagesQuery.GetPagedById(pageNumber, pageSize);
             task.Wait();
+
             var ids = task.Result.Results.Select(r => r.SentByUserId == userId ? r.SentToUserId : r.SentByUserId);
             return new PagedResult<long>(ids.ToList(), task.Result.TotalCount);
         }
