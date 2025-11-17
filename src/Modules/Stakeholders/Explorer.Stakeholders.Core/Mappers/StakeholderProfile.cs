@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.Core.Domain;
 
@@ -12,5 +12,6 @@ public class StakeholderProfile : Profile
         CreateMap<AccountCreateDto, Account>();
         CreateMap<MonumentDto, Monument>().ReverseMap();
         CreateMap<UserProfile, UserProfileDto>().ReverseMap();
+        CreateMap<Domain.Message, API.Dtos.MessageDto>().ReverseMap();
     }
 }
