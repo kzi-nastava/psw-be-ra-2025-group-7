@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers;
 
-[Authorize(Policy = "authorPolicy")]
+[Authorize(Policy = "touristPolicy")]
 [Route("api/user/profile")]
 [ApiController]
 public class UserProfileController : ControllerBase
