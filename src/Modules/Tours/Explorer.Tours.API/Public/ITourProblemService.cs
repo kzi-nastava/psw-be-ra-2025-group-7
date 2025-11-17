@@ -10,7 +10,7 @@ namespace Explorer.Tours.API.Public
 {
     public interface ITourProblemService
     {
-        PagedResult<TourProblemDto> GetTouristPages(int touristid,int page, int pageSize);
+        PagedResult<TourProblemDto> GetTouristProblemsPages(int touristid,int page, int pageSize);
         TourProblemDto Create(TourProblemDto tourProblem,int touristId);
         TourProblemDto Update(TourProblemDto tourProblem,int touristId);
         void Delete(int id,int touristId);
