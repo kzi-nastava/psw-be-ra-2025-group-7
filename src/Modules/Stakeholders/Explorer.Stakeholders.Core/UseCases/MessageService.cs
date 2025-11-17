@@ -28,9 +28,9 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _repository.GetPagedContacts(userId, pageNumber, pageSize);
         }
 
-        public PagedResult<MessageDto> GetPagedByRecipientId(long recipientId, int pageNumber, int pageSize)
+        public PagedResult<MessageDto> GetPagedRecent(long recipientId, int pageNumber, int pageSize)
         {
-            var res = _repository.GetPagedByRecipientId(recipientId, pageNumber, pageSize);
+            var res = _repository.GetPagedRecent(recipientId, pageNumber, pageSize);
             var items = res.Results.Select(_mapper.Map<MessageDto>).ToList();
             return new PagedResult<MessageDto>(items, res.TotalCount);
         }
