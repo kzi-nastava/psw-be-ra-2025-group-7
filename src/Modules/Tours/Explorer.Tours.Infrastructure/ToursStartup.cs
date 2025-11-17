@@ -25,10 +25,12 @@ public static class ToursStartup
         SetupInfrastructure(services);
         return services;
     }
-    
+
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
+        services.AddScoped<ITourProblemService, TourProblemService>();
+
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
         services.AddScoped<IFacilityService, FacilityService>();
@@ -37,6 +39,8 @@ public static class ToursStartup
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
+        services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
+
         services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<IQuizRepository, QuizRepository>();
