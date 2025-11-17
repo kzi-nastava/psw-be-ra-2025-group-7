@@ -1,8 +1,12 @@
 using Explorer.API.Middleware;
 using Explorer.API.Startup;
+using Explorer.Stakeholders.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddDbContext<StakeholdersContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers();
 builder.Services.ConfigureSwagger(builder.Configuration);
 const string corsPolicy = "_corsPolicy";
@@ -10,6 +14,8 @@ builder.Services.ConfigureCors(corsPolicy);
 builder.Services.ConfigureAuth();
 
 builder.Services.RegisterModules();
+
+
 
 var app = builder.Build();
 

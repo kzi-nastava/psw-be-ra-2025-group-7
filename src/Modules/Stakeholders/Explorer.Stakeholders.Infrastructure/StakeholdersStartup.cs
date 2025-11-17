@@ -38,12 +38,14 @@ public static class StakeholdersStartup
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IUserProfileService, UserProfileService>();
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IReviewService, ReviewService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
+        services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IMessageRepository, MessageDbRepository>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
