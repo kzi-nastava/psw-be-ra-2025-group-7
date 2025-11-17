@@ -26,6 +26,18 @@ public class TourProblemService : ITourProblemService
 
     public TourProblemDto Create(TourProblemDto dto, int touristId)
     {
+        if (dto.TourId <= 0)
+            throw new ArgumentException("TourId is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.Category))
+            throw new ArgumentException("Category is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.Priority))
+            throw new ArgumentException("Priority is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.Description))
+            throw new ArgumentException("Description is required.");
+
         dto.TouristId = touristId;
         if (dto.TimeReported == default) dto.TimeReported = DateTime.UtcNow;
 
