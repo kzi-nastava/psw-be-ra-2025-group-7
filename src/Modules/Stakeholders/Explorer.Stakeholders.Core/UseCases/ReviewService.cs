@@ -19,13 +19,12 @@ namespace Explorer.Stakeholders.Core.UseCases
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        // Kreira novu recenziju
         public ReviewDto CreateReview(CreateReviewDto dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
 
             var review = new Review(
-                reviewId: 0, // EF će generisati ID
+                reviewId: 0,
                 rating: dto.Rating,
                 comment: dto.Comment,
                 personId: dto.PersonId
@@ -35,7 +34,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<ReviewDto>(review);
         }
 
-        // Vraća recenziju za datog korisnika
         public ReviewDto GetMyReview(long personId)
         {
             var review = _repo.GetByPersonId(personId);
@@ -44,7 +42,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<ReviewDto>(review);
         }
 
-        // Ažurira postojeću recenziju
         public ReviewDto UpdateReview(int id, UpdateReviewDto dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
@@ -59,7 +56,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<ReviewDto>(review);
         }
 
-        // Briše recenziju
         public void DeleteReview(int id)
         {
             var review = _repo.Get(id);
@@ -69,7 +65,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             _repo.Delete(id);
         }
 
-        // Vraća sve recenzije
         public List<ReviewDto> GetAll()
         {
             var reviews = _repo.GetAll();
