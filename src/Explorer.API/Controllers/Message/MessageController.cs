@@ -54,6 +54,7 @@ public class MessageController : ControllerBase
     [HttpPut]
     public ActionResult<MessageDto> EditMessage([FromBody] MessageDto messageDto)
     {
+        messageDto.SentByUserId = User.PersonId();
         var result = _messageService.EditMessage(messageDto);
         return Ok(result);
     }

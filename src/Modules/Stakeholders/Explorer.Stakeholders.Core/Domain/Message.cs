@@ -24,6 +24,13 @@ namespace Explorer.Stakeholders.Core.Domain
             Validate();
         }
 
+        public void Edit(string content, DateTime editedAt)
+        {
+            Content = content;
+            EditedAt = editedAt;
+            Validate();
+        }
+
         private void Validate()
         {
             if (SentByUserId == 0) throw new ArgumentException("Invalid SentByUserId");
