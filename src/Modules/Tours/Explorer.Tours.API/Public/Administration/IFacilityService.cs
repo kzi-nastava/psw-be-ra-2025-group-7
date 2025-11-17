@@ -13,6 +13,6 @@ namespace Explorer.Tours.API.Public.Administration
         PagedResult<FacilityDto> GetPaged(int page, int pageSize);
         FacilityDto Create(FacilityDto facility);
         FacilityDto Update(FacilityDto facility);
-        void Delete(int id);
+        void Delete(long id);
     }
 }

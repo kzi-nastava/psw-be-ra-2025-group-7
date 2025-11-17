@@ -12,7 +12,7 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
         PagedResult<Facility> GetPaged(int page, int pageSize);
         Facility Create(Facility facility);
         Facility Update(Facility facility);
-        void Delete(int id);
-        Facility? GetById(int id);
+        void Delete(long id);
+        Facility? GetById(long id);
     }
 }

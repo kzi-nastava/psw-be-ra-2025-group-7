@@ -44,7 +44,7 @@ namespace Explorer.Tours.Core.UseCases.Administration
             return _mapper.Map<FacilityDto>(result);
         }
 
-        public void Delete(int id)
+        public void Delete(long id)
         {
             _facilityRepository.Delete(id);
         }
