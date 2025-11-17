@@ -7,6 +7,7 @@ public class StakeholdersContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Person> People { get; set; }
+    public DbSet<Message> Messages { get; set; }
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
@@ -18,6 +19,8 @@ public class StakeholdersContext : DbContext
         modelBuilder.HasDefaultSchema("stakeholders");
 
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
+        modelBuilder.Entity<Message>()
+            .HasIndex(m => new { m.SentByUserId, m.SentToUserId, m.Id });
 
         ConfigureStakeholder(modelBuilder);
     }

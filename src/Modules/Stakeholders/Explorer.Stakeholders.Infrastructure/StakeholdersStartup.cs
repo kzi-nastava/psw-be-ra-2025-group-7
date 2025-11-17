@@ -1,4 +1,4 @@
-using Explorer.BuildingBlocks.Infrastructure.Database;
+﻿using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.API.Public.Administration;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
@@ -33,6 +33,7 @@ public static class StakeholdersStartup
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IUserProfileService, UserProfileService>();
@@ -43,6 +44,7 @@ public static class StakeholdersStartup
     {
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
+        services.AddScoped<IMessageRepository, MessageDbRepository>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
 
