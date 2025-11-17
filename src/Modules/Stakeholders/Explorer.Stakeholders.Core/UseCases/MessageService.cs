@@ -45,6 +45,7 @@ namespace Explorer.Stakeholders.Core.UseCases
         public MessageDto SendMessage(MessageDto messageDto)
         {
             messageDto.SentAt = DateTime.UtcNow;
+            messageDto.EditedAt = DateTime.MinValue;
             var message = _mapper.Map<Message>(messageDto);
             var createdMessage = _repository.Create(message);
             return _mapper.Map<MessageDto>(createdMessage);
@@ -53,7 +54,17 @@ namespace Explorer.Stakeholders.Core.UseCases
         public MessageDto EditMessage(MessageDto messageDto)
         {
             messageDto.EditedAt = DateTime.UtcNow;
-            var message = _mapper.Map<Message>(messageDto);
+
+            var message = _repository.Get(messageDto.Id);
+
+            if(message.SentByUserId != messageDto.SentByUserId)
+            {
+                throw new UnauthorizedAccessException("You are not allowed to edit this message.");
+            }
+
+            // Only the content and EditedAt fields are updatable
+            message.Edit(messageDto.Content, DateTime.UtcNow);
+
             var updatedMessage = _repository.Update(message);
             return _mapper.Map<MessageDto>(updatedMessage);
         }
