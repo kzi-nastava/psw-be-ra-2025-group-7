@@ -9,6 +9,7 @@ public class QuizRepository : IQuizRepository
 
 {
 	private readonly ToursContext _context;
+	private readonly IMapper _mapper;
 
     public QuizRepository(ToursContext context, IMapper mapper)
     {
