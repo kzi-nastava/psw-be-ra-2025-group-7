@@ -28,22 +28,16 @@ public static class StakeholdersStartup
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
-<<<<<<< HEAD
         services.AddScoped<IUserProfileService, UserProfileService>();
-=======
         services.AddScoped<IMonumentService, MonumentService>();
->>>>>>> development
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
-<<<<<<< HEAD
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
-=======
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
->>>>>>> development
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

@@ -7,11 +7,8 @@ public class StakeholdersContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Person> People { get; set; }
-<<<<<<< HEAD
     public DbSet<UserProfile> UserProfiles { get; set; }
-=======
     public DbSet<Monument> Monuments { get; set; }
->>>>>>> development
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
