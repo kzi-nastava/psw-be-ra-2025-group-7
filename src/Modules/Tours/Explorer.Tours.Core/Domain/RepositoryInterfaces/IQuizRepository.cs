@@ -1,5 +1,7 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
 using System.Collections.Generic;
+using Explorer.Tours.Core.Domain.Entities;// Quiz, Question, Option
+
 
 namespace Explorer.Tours.Core.Domain.RepositoryInterfaces;
 

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Explorer.Tours.Infrastructure.Database; // Adjust namespace if your ToursContext is elsewhere
 
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
@@ -95,4 +96,13 @@ public class QuizRepository : IQuizRepository
             throw new KeyNotFoundException($"Quiz with id {id} not found.");
         }
     }
+
+    public List<Quiz> GetByAuthor(long authorId)
+	{
+		return _context.Quizzes
+			.Include(q => q.Questions)
+			.ThenInclude(q => q.Options)
+			.Where(q => q.AuthorId == authorId)
+			.ToList();
+	}
 }

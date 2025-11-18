@@ -1,20 +1,12 @@
-﻿using System.Collections.Generic;
+﻿namespace Explorer.Tours.API.Dtos;
 
-namespace Explorer.Tours.API.Dtos;
+using System.Collections.Generic;
 
 public class QuestionDto
 {
     public long Id { get; set; }
     public string Content { get; set; }
     public bool AllowsMultipleCorrect { get; set; }
-
-    public List<OptionDto> Options { get; set; } = new();
-}
-
-public class CreateQuestionDto
-{
-    public string Content { get; set; }
-    public bool AllowsMultipleCorrect { get; set; }
-    public List<CreateOptionDto> Options { get; set; } = new();
+    public List<OptionDto> Options { get; set; } = new List<OptionDto>();
 }
 

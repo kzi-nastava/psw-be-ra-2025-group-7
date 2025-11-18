@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-namespace Explorer.Tours.Core.UseCases
+using Explorer.Tours.Core.Domain.Entities;// Quiz, Question, Option
+using Explorer.Tours.Core.Domain.RepositoryInterfaces; // IQuizRepository
+using Explorer.Tours.API.Dtos; // QuizDto, QuestionDto, OptionDto
+using AutoMapper; // IMapper
+using Explorer.Tours.API.Public; // IQuizService
+
+namespace Explorer.Tours.Core.UseCases.Administration
 {
-	public class QuizService : IQuizService
-	{
+    public class QuizService : IQuizService
+    {
 		private readonly IQuizRepository _quizRepository;
 		private readonly IMapper _mapper;
 
@@ -13,7 +19,7 @@ namespace Explorer.Tours.Core.UseCases
 			_mapper = mapper;
         }
 
-		public Quiz GetQuiz(long id)
+		public QuizDto Get(long id)
 		{
 			var quiz = _quizRepository.Get(id);
 			if (quiz == null)
@@ -22,13 +28,13 @@ namespace Explorer.Tours.Core.UseCases
 			return _mapper.Map<QuizDto>(quiz); // mapira entitet u dto
         }
 
-		public List<Quiz> GetByAuthor(long authorId) 
+		public List<QuizDto> GetByAuthor(long authorId) 
 		{ 
 			var quizzes = _quizRepository.GetByAuthor(authorId);
-			return _mapper.Map<List<QuizDto>>(quizzes); // mapira lisu entitet u dto
+			return _mapper.Map<List<QuizDto>>(quizzes); // mapira listu entiteta u dto
         }
 
-		public Quiz CreateQuiz(QuizDto quizDto) 
+		public QuizDto Create(QuizDto quizDto) 
 		{
             if (quizDto == null)
                 throw new ArgumentNullException(nameof(quizDto));
@@ -40,7 +46,7 @@ namespace Explorer.Tours.Core.UseCases
 			return _mapper.Map<QuizDto>(createdQuiz); // mapira entitet u dto
         }
 
-		public Quiz UpdateQuiz(QuizDto quizDto) 
+		public QuizDto Update(QuizDto quizDto) 
 		{ 
 			if (quizDto == null)
 				throw new ArgumentNullException(nameof(quizDto));
@@ -50,7 +56,7 @@ namespace Explorer.Tours.Core.UseCases
 			return _mapper.Map<QuizDto>(updatedQuiz); // mapira entitet u dto
         }
 
-		public void DeleteQuiz(long id) 
+		public void Delete(long id) 
 		{ 
 			if ( _quizRepository.Get(id) == null)
 				throw new KeyNotFoundException($"Quiz with id {id} not found.");
@@ -59,7 +65,7 @@ namespace Explorer.Tours.Core.UseCases
 
         }
 
-		public Quiz AddQuestion(long quizId, QuestionDto questionDto) 
+		public QuizDto AddQuestion(long quizId, QuestionDto questionDto) 
 		{ 
 			if (questionDto == null)
 				throw new ArgumentNullException(nameof(questionDto));
@@ -72,7 +78,7 @@ namespace Explorer.Tours.Core.UseCases
 
         }
 
-		public Quiz RemoveQuestion(long quizId, long questionId) 
+		public QuizDto RemoveQuestion(long quizId, long questionId) 
 		{ 
 			if (_quizRepository.Get(quizId) == null)
 				throw new KeyNotFoundException($"Quiz with id {quizId} not found.");
@@ -85,5 +91,3 @@ namespace Explorer.Tours.Core.UseCases
 
     }
 }
-
-

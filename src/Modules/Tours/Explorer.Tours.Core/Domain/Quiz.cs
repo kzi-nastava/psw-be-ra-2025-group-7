@@ -24,6 +24,9 @@ namespace Explorer.Tours.Core.Domain.Entities
 
             AuthorId = authorId;
 			SetTitle(title);
+
+            if (questions != null)
+                Questions = questions.ToList();
         }
 
 		private void SetTitle(string title)

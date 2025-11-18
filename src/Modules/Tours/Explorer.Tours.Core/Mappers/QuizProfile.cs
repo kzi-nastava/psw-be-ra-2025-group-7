@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
-using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.Entities;
 
 namespace Explorer.Tours.Core.Mappers;
 
@@ -9,9 +9,9 @@ public class QuizProfile : Profile
     public QuizProfile()
     {
         // read dtos
-        CreateMap<QuizDto, Quiz>().ReverseMap();
-        CreateMap<QuestionDto, Question>().ReverseMap();
-        CreateMap<OptionDto, Option>().ReverseMap();
+        CreateMap<Quiz, QuizDto>().ReverseMap();
+        CreateMap<Question, QuestionDto>().ReverseMap();
+        CreateMap<Option, OptionDto>().ReverseMap();
 
         // create dtos
         CreateMap<CreateQuizDto, Quiz>();
