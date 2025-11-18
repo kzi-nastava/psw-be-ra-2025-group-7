@@ -12,6 +12,83 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
 {
     public UserProfileTests(StakeholdersTestFactory factory) : base(factory) { }
 
+    [Fact]
+    public void GetByUserId_Returns_Profile()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        // Act
+        var result = service.GetByUserId(-13);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.UserId.ShouldBe(-13);
+        result.FirstName.ShouldBe("Sara");
+        result.LastName.ShouldBe("Sarić");
+        result.Biography.ShouldBe("Ljubitelj prirode i avanturista koji voli da deli svoja iskustva.");
+        result.Motto.ShouldBe("Adventure is out there!");
+    }
+
+    [Fact]
+    public void GetByUserId_Returns_NotFound_For_NonExistent_User()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        // Act & Assert
+        Should.Throw<KeyNotFoundException>(() => service.GetByUserId(-999));
+    }
+
+    [Fact]
+    public void GetByUserId_Returns_NotFound_For_User_Without_Profile()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        // Act & Assert - Steva (-23) postoji ali nema profil
+        Should.Throw<KeyNotFoundException>(() => service.GetByUserId(-23));
+    }
+
+    [Fact]
+    public void Create_Creates_Valid_Profile()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        var newProfile = new UserProfileDto
+        {
+            UserId = -23, // Steva - korisnik koji postoji ali nema profil
+            FirstName = "Steva",
+            LastName = "Stević",
+            ProfilePicture = "https://example.com/steva.jpg",
+            Biography = "Novi korisnik platforme koji voli planinarenje.",
+            Motto = "The mountains are calling!"
+        };
+
+        // Act
+        var result = service.Create(newProfile);
+
+        // Assert - Response
+        result.ShouldNotBeNull();
+        result.Id.ShouldBeGreaterThan(0);
+        result.UserId.ShouldBe(-23);
+        result.FirstName.ShouldBe("Steva");
+        result.LastName.ShouldBe("Stević");
+        result.Biography.ShouldBe("Novi korisnik platforme koji voli planinarenje.");
+        result.Motto.ShouldBe("The mountains are calling!");
+
+        // Assert - Database
+        dbContext.ChangeTracker.Clear();
+        var storedProfile = dbContext.UserProfiles.FirstOrDefault(up => up.UserId == -23);
+        storedProfile.ShouldNotBeNull();
+        storedProfile.FirstName.ShouldBe("Steva");
+    }
 
     [Fact]
     public void Create_Fails_For_Invalid_FirstName()
@@ -71,5 +148,80 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
 
         // Act & Assert
         Should.Throw<System.ArgumentException>(() => service.Create(invalidProfile));
+    }
+
+    [Fact]
+    public void Update_Updates_Profile_Successfully()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        var updatedProfile = new UserProfileDto
+        {
+            Id = -21, // Perin postojeći profil
+            UserId = -21,
+            FirstName = "Petar", // Izmenjeno ime
+            LastName = "Petrović", // Izmenjeno prezime
+            ProfilePicture = "https://example.com/new-pera.jpg",
+            Biography = "Ažurirana biografija nakon godina putovanja.",
+            Motto = "Never stop exploring!"
+        };
+
+        // Act
+        var result = service.Update(updatedProfile);
+
+        // Assert - Response
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(-21);
+        result.FirstName.ShouldBe("Petar");
+        result.LastName.ShouldBe("Petrović");
+        result.Biography.ShouldBe("Ažurirana biografija nakon godina putovanja.");
+        result.Motto.ShouldBe("Never stop exploring!");
+
+        // Assert - Database
+        dbContext.ChangeTracker.Clear();
+        var storedProfile = dbContext.UserProfiles.FirstOrDefault(up => up.UserId == -21);
+        storedProfile.ShouldNotBeNull();
+        storedProfile.FirstName.ShouldBe("Petar");
+        storedProfile.LastName.ShouldBe("Petrović");
+    }
+
+    [Fact]
+    public void Update_Fails_For_NonExistent_Profile()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        var nonExistentProfile = new UserProfileDto
+        {
+            UserId = -999, // Ne postoji
+            FirstName = "Test",
+            LastName = "User"
+        };
+
+        // Act & Assert
+        Should.Throw<KeyNotFoundException>(() => service.Update(nonExistentProfile));
+    }
+
+    [Fact]
+    public void Update_Fails_For_Invalid_Data()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        var invalidProfile = new UserProfileDto
+        {
+            Id = -21,
+            UserId = -21,
+            FirstName = "", // Prazno ime
+            LastName = "Test"
+        };
+
+        // Act & Assert
+        Should.Throw<System.ArgumentException>(() => service.Update(invalidProfile));
     }
 }
