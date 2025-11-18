@@ -1,7 +1,7 @@
-using System.Security.Claims;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,24 +19,12 @@ public class TourJournalController : ControllerBase
         _tourJournalService = tourJournalService;
     }
 
-    private long GetCurrentUserId()
-    {
-        var idClaim = User.FindFirst("personId") ?? User.FindFirst(ClaimTypes.NameIdentifier);
-
-        if (idClaim == null || !long.TryParse(idClaim.Value, out var userId))
-        {
-            throw new UnauthorizedAccessException("User personId is missing from token.");
-        }
-
-        return userId;
-    }
-
     [HttpGet]
     public ActionResult<PagedResult<TourJournalDto>> GetMyTourJournals(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
-        var touristId = GetCurrentUserId();
+        var touristId = User.PersonId();
         var result = _tourJournalService.GetPagedByTourist(touristId, page, pageSize);
         return Ok(result);
     }
@@ -44,7 +32,7 @@ public class TourJournalController : ControllerBase
     [HttpPost]
     public ActionResult<TourJournalDto> Create([FromBody] TourJournalDto tourJournal)
     {
-        var touristId = GetCurrentUserId();
+        var touristId = User.PersonId();
         tourJournal.TouristId = touristId;
         var result = _tourJournalService.Create(tourJournal);
         return Ok(result);
@@ -53,6 +41,8 @@ public class TourJournalController : ControllerBase
     [HttpPut("{id:long}")]
     public ActionResult<TourJournalDto> Update([FromBody] TourJournalDto tourJournal)
     {
+        var touristId = User.PersonId();
+        tourJournal.TouristId = touristId;
         var result = _tourJournalService.Update(tourJournal);
         return Ok(result);
     }
@@ -60,7 +50,8 @@ public class TourJournalController : ControllerBase
     [HttpDelete("{id:long}")]
     public ActionResult Delete(long id)
     {
-        _tourJournalService.Delete(id);
+        var touristId = User.PersonId();
+        _tourJournalService.Delete(id, touristId);
         return Ok();
     }
 }

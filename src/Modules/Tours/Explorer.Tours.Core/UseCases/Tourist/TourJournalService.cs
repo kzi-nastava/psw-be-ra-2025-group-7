@@ -1,4 +1,5 @@
 using AutoMapper;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
@@ -42,6 +43,12 @@ public class TourJournalService : ITourJournalService
     {
         var tourJournal = _tourJournalRepository.Get(tourJournalDto.Id);
         
+        // Provera vlasništva
+        if (tourJournal.TouristId != tourJournalDto.TouristId)
+        {
+            throw new UnauthorizedAccessException("You are not authorized to update this tour journal.");
+        }
+        
         tourJournal.Update(
             tourJournalDto.Name,
             tourJournalDto.Country,
@@ -52,8 +59,16 @@ public class TourJournalService : ITourJournalService
         return _mapper.Map<TourJournalDto>(result);
     }
 
-    public void Delete(long id)
+    public void Delete(long id, long touristId)
     {
+        var tourJournal = _tourJournalRepository.Get(id);
+        
+        // Provera vlasništva
+        if (tourJournal.TouristId != touristId)
+        {
+            throw new UnauthorizedAccessException("You are not authorized to delete this tour journal.");
+        }
+        
         _tourJournalRepository.Delete(id);
     }
 }

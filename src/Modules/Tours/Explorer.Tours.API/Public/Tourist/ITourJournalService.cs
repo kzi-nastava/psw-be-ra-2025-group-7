@@ -8,5 +8,5 @@ public interface ITourJournalService
     PagedResult<TourJournalDto> GetPagedByTourist(long touristId, int page, int pageSize);
     TourJournalDto Create(TourJournalDto tourJournal);
     TourJournalDto Update(TourJournalDto tourJournal);
-    void Delete(long id);
+    void Delete(long id, long touristId);
 }

@@ -13,7 +13,7 @@ public class TourJournal : Entity
 
     public TourJournal(long touristId, string name, string country, string? city = null)
     {
-        if (touristId <= 0) throw new ArgumentException("Invalid TouristId.");
+        if (touristId == 0) throw new ArgumentException("Invalid TouristId.");
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Invalid Name.");
         if (string.IsNullOrWhiteSpace(country)) throw new ArgumentException("Invalid Country.");
         
