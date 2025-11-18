@@ -57,6 +57,7 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
         {
             var task = _dbSet
                 .Where(m => m.SentToUserId == recipientId || m.SentByUserId == recipientId)
+                .OrderByDescending(m => m.SentAt)
                 .GetPagedById(pageNumber, pageSize);
             task.Wait();
             return task.Result;
