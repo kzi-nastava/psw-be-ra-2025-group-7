@@ -40,6 +40,18 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             if (entity == null) throw new KeyNotFoundException("Not found: " + id);
             return entity;
         }
+        public PagedResult<TourProblem> GetAll(int page, int pageSize)
+        {
+            var query = _dbSet.OrderBy(tp => tp.Id);
+
+            var totalCount = query.Count();
+            var items = query
+                .Skip(page * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<TourProblem>(items, totalCount);
+        }
         public TourProblem Create(TourProblem entity)
         {
             _dbSet.Add(entity);

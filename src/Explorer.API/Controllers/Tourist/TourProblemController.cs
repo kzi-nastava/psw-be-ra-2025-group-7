@@ -1,5 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Stakeholders.Infrastructure.Authentication; // User.PersonId()
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
@@ -20,8 +20,20 @@ namespace Explorer.API.Controllers.Tourist
             _service = service;
         }
 
+        // NEW: returns ALL problems (public)
+        [HttpGet("all")]
+        [AllowAnonymous]
+        public ActionResult<PagedResult<TourProblemDto>> GetAll(
+            [FromQuery] int page,
+            [FromQuery] int pageSize)
+        {
+            var result = _service.GetAllProblems(page, pageSize);
+            return Ok(result);
+        }
+
+        // returns ONLY logged-in user's problems
         [HttpGet]
-        public ActionResult<PagedResult<TourProblemDto>> GetTouristProblems(
+        public ActionResult<PagedResult<TourProblemDto>> GetMine(
             [FromQuery] int page,
             [FromQuery] int pageSize)
         {
@@ -56,6 +68,7 @@ namespace Explorer.API.Controllers.Tourist
         public ActionResult Delete(int id)
         {
             var touristId = (int)User.PersonId();
+
             try
             {
                 _service.Delete(id, touristId);

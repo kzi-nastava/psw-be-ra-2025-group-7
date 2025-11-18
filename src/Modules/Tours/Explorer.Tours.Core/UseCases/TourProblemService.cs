@@ -17,6 +17,14 @@ public class TourProblemService : ITourProblemService
         _mapper = mapper;
     }
 
+    // NEW: get all problems
+    public PagedResult<TourProblemDto> GetAllProblems(int page, int pageSize)
+    {
+        var result = _repository.GetAll(page, pageSize);
+        var items = _mapper.Map<List<TourProblemDto>>(result.Results);
+        return new PagedResult<TourProblemDto>(items, result.TotalCount);
+    }
+
     public PagedResult<TourProblemDto> GetTouristProblemsPages(int touristId, int page, int pageSize)
     {
         var result = _repository.GetByTourist(touristId, page, pageSize);
@@ -27,19 +35,16 @@ public class TourProblemService : ITourProblemService
     public TourProblemDto Create(TourProblemDto dto, int touristId)
     {
         if (dto.TourId <= 0)
-            throw new ArgumentException("TourId is required.");
+            throw new ArgumentException("TourId required.");
 
-        if (string.IsNullOrWhiteSpace(dto.Category))
-            throw new ArgumentException("Category is required.");
-
-        if (string.IsNullOrWhiteSpace(dto.Priority))
-            throw new ArgumentException("Priority is required.");
-
-        if (string.IsNullOrWhiteSpace(dto.Description))
-            throw new ArgumentException("Description is required.");
+        if (string.IsNullOrWhiteSpace(dto.Category) ||
+            string.IsNullOrWhiteSpace(dto.Priority) ||
+            string.IsNullOrWhiteSpace(dto.Description))
+            throw new ArgumentException("Missing fields.");
 
         dto.TouristId = touristId;
-        if (dto.TimeReported == default) dto.TimeReported = DateTime.UtcNow;
+        if (dto.TimeReported == default)
+            dto.TimeReported = DateTime.UtcNow;
 
         var entity = _mapper.Map<TourProblem>(dto);
         var created = _repository.Create(entity);
@@ -48,34 +53,21 @@ public class TourProblemService : ITourProblemService
 
     public TourProblemDto Update(TourProblemDto dto, int touristId)
     {
-        TourProblem existing;
-
-        try
-        {
-            existing = _repository.Get(dto.Id);
-        }
-        catch (KeyNotFoundException)
-        {
-            throw new NotFoundException("TourProblem not found.");
-        }
+        var existing = _repository.Get(dto.Id);
 
         if (existing.TouristId != touristId)
-            throw new UnauthorizedAccessException("Cannot update another user's problem report.");
+            throw new UnauthorizedAccessException();
 
         var entity = _mapper.Map<TourProblem>(dto);
         var updated = _repository.Update(entity);
         return _mapper.Map<TourProblemDto>(updated);
     }
 
-
     public void Delete(int id, int touristId)
     {
-        // get throws NotFoundException if not exists
         var problem = _repository.Get(id);
-
-        // owner check
         if (problem.TouristId != touristId)
-            throw new UnauthorizedAccessException("Forbidden: not the owner");
+            throw new UnauthorizedAccessException();
 
         _repository.Delete(id);
     }
