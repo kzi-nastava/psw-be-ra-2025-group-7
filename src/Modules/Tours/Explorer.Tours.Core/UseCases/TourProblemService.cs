@@ -53,15 +53,32 @@ public class TourProblemService : ITourProblemService
 
     public TourProblemDto Update(TourProblemDto dto, int touristId)
     {
-        var existing = _repository.Get(dto.Id);
+        TourProblem existing;
+        try
+        {
+            existing = _repository.Get(dto.Id);
+        }
+        catch (KeyNotFoundException)
+        {
+            throw new NotFoundException("TourProblem not found.");
+        }
 
         if (existing.TouristId != touristId)
-            throw new UnauthorizedAccessException();
+            throw new UnauthorizedAccessException("Cannot update another user's problem report.");
 
         var entity = _mapper.Map<TourProblem>(dto);
-        var updated = _repository.Update(entity);
-        return _mapper.Map<TourProblemDto>(updated);
+
+        try
+        {
+            var updated = _repository.Update(entity);
+            return _mapper.Map<TourProblemDto>(updated);
+        }
+        catch (KeyNotFoundException)
+        {
+            throw new NotFoundException("TourProblem not found.");
+        }
     }
+
 
     public void Delete(int id, int touristId)
     {
