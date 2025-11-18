@@ -11,5 +11,7 @@ public class ToursProfile : Profile
         CreateMap<EquipmentDto, Equipment>().ReverseMap();
         CreateMap<FacilityDto, Facility>().ReverseMap();
         CreateMap<TourDto, Tour>().ReverseMap();
+        CreateMap<TourJournalDto, TourJournal>().ReverseMap()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
     }
 }
