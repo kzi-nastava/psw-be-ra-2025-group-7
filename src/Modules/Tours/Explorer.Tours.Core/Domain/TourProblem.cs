@@ -28,6 +28,7 @@ namespace Explorer.Tours.Core.Domain
             Priority = priority;
             Description = description;
             TimeReported = DateTime.UtcNow;
+
         }
 
     }
