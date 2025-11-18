@@ -1,5 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Infrastructure.Authentication; // User.PersonId()
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
 using Microsoft.AspNetCore.Authorization;
@@ -55,8 +56,19 @@ namespace Explorer.API.Controllers.Tourist
         public ActionResult Delete(int id)
         {
             var touristId = (int)User.PersonId();
-            _service.Delete(id, touristId);
-            return Ok();
+            try
+            {
+                _service.Delete(id, touristId);
+                return Ok();
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
         }
     }
 }

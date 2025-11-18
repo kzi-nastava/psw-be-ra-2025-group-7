@@ -70,9 +70,12 @@ public class TourProblemService : ITourProblemService
 
     public void Delete(int id, int touristId)
     {
-        var existing = _repository.Get(id);
-        if (existing.TouristId != touristId)
-            throw new UnauthorizedAccessException("Cannot delete another user's problem report.");
+        // get throws NotFoundException if not exists
+        var problem = _repository.Get(id);
+
+        // owner check
+        if (problem.TouristId != touristId)
+            throw new UnauthorizedAccessException("Forbidden: not the owner");
 
         _repository.Delete(id);
     }
