@@ -12,4 +12,8 @@ public interface ITouristEquipmentRepository
 
     /// <summary>Briše jedan zapis po njegovom Id-ju.</summary>
     void Delete(long id);
+
+    IEnumerable<Equipment> GetAll();
+
+
 }

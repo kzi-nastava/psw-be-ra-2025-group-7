@@ -19,6 +19,7 @@ public class EquipmentController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public ActionResult<PagedResult<EquipmentDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
     {
         return Ok(_equipmentService.GetPaged(page, pageSize));

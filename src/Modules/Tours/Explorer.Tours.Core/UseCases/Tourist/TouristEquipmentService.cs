@@ -19,11 +19,31 @@ public class TouristEquipmentService : ITouristEquipmentService
         _mapper = mapper;
     }
 
+    public List<EquipmentDto> GetAllEquipment()
+    {
+        var items = _touristEquipmentRepository.GetAll();   // IEnumerable<Equipment>
+        return items.Select(_mapper.Map<EquipmentDto>).ToList();
+    }
+
+
+
     public List<TouristEquipmentDto> GetByTourist(long touristId)
     {
         var entities = _touristEquipmentRepository.GetByTourist(touristId);
         return entities.Select(_mapper.Map<TouristEquipmentDto>).ToList();
     }
+
+    public void AddEquipmentToTourist(long touristId, long equipmentId)
+    {
+        var entity = new TouristEquipment(touristId, equipmentId);
+        _touristEquipmentRepository.Create(entity);
+    }
+
+    public void RemoveEquipmentFromTourist(long touristEquipmentId)
+    {
+        _touristEquipmentRepository.Delete(touristEquipmentId);
+    }
+
 
     public List<TouristEquipmentDto> UpdateForTourist(UpdateTouristEquipmentDto request)
     {
