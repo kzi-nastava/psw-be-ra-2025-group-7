@@ -5,29 +5,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection.Metadata;
+using Explorer.Stakeholders.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain.Entities
 {
 	public class Quiz : Entity
     {
-		public long AuthorId { get; private set; }
-		public string Title { get; private set; }
+		public long AuthorId { get; set; }
+        public User Author { get; set; }
 
-        public List<Question> Questions { get; private set; } = new();
+		public string Title { get; set; }
 
-        protected Quiz() { } // potreban za EF
+        public ICollection<Question> Questions { get; set; } = null!;
 
-        public Quiz(long authorId, string title, IEnumerable<Question> questions = null)
-		{
-            if (authorId <= 0)
-                throw new ArgumentException("AuthorId must be a positive number.", nameof(authorId));
-
-            AuthorId = authorId;
-			SetTitle(title);
-
-            if (questions != null)
-                Questions = questions.ToList();
-        }
+        public Quiz() { }
 
 		private void SetTitle(string title)
 		{

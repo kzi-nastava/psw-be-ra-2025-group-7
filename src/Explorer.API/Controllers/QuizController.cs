@@ -27,15 +27,15 @@ namespace Explorer.API.Controllers
         }
 
         [HttpPost]
-        public ActionResult<QuizDto> Create([FromBody] QuizDto quiz)
+        public ActionResult<QuizDto> Create([FromBody] CreateQuizDto quiz)
         {
             return Ok(_quizService.Create(quiz));
         }
 
-        [HttpPut]
-        public ActionResult<QuizDto> Update([FromBody] QuizDto quiz)
+        [HttpPut("{id}")]
+        public ActionResult<QuizDto> Update(long id, [FromBody] QuizDto quiz)
         {
-            return Ok(_quizService.Update(quiz));
+            return Ok(_quizService.Update(quiz, id));
         }
 
         [HttpDelete("{id}")]

@@ -34,7 +34,7 @@ namespace Explorer.Tours.Core.UseCases.Administration
 			return _mapper.Map<List<QuizDto>>(quizzes); // mapira listu entiteta u dto
         }
 
-		public QuizDto Create(QuizDto quizDto) 
+		public QuizDto Create(CreateQuizDto quizDto) 
 		{
             if (quizDto == null)
                 throw new ArgumentNullException(nameof(quizDto));
@@ -46,12 +46,12 @@ namespace Explorer.Tours.Core.UseCases.Administration
 			return _mapper.Map<QuizDto>(createdQuiz); // mapira entitet u dto
         }
 
-		public QuizDto Update(QuizDto quizDto) 
+		public QuizDto Update(QuizDto quizDto, long id) 
 		{ 
 			if (quizDto == null)
 				throw new ArgumentNullException(nameof(quizDto));
 			var quiz = _mapper.Map<Quiz>(quizDto); // mapira dto u entitet
-			var updatedQuiz = _quizRepository.Update(quiz);
+			var updatedQuiz = _quizRepository.Update(quiz, id);
 
 			return _mapper.Map<QuizDto>(updatedQuiz); // mapira entitet u dto
         }

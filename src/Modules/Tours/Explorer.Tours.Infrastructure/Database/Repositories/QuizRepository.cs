@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Explorer.Tours.Infrastructure.Database; // Adjust namespace if your ToursContext is elsewhere
+using Explorer.Tours.Infrastructure.Database;
+using AutoMapper; // Adjust namespace if your ToursContext is elsewhere
 
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
@@ -13,17 +14,19 @@ public class QuizRepository : IQuizRepository
 
 {
 	private readonly ToursContext _context;
+	private readonly IMapper _mapper;
 
-	public QuizRepository(ToursContext context)
-	{
-		_context = context;
-	}
+    public QuizRepository(ToursContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
 
-	public Quiz Get(long id)
+    public Quiz Get(long id)
 	{
 		var quiz = _context.Quizzes
-			.Include(q => q.Questions)
-			.ThenInclude(q => q.Options)
+			//.Include(q => q.Questions)
+			//.ThenInclude(q => q.Options)
 			.FirstOrDefault(q => q.Id == id);
 		return quiz;
 	}
@@ -35,9 +38,14 @@ public class QuizRepository : IQuizRepository
 		return quiz;
 	}
 
-	public Quiz Update(Quiz quiz)
+	public Quiz Update(Quiz quiz, long id)
 	{
-		_context.Quizzes.Update(quiz);
+		var existing = _context.Quizzes.FirstOrDefault(x => x.Id == id);
+		if (existing != null)
+		{
+			existing.Title = quiz.Title;
+        }
+		//_context.Quizzes.Update(quiz);
 		_context.SaveChanges();
 		return quiz;
     }

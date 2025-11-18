@@ -10,7 +10,7 @@ public interface IQuizRepository
     Quiz Get(long id);
     List<Quiz> GetByAuthor(long authorId);
     Quiz Create(Quiz quiz);
-    Quiz Update(Quiz quiz);
+    Quiz Update(Quiz quiz, long id);
     void Delete(long id);
 
     void AddQuestion(long quizId, Question question);

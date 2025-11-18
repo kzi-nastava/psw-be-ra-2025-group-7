@@ -9,8 +9,8 @@ namespace Explorer.Tours.API.Public
     {
         QuizDto Get(long id);
         List<QuizDto> GetByAuthor(long authorId);
-        QuizDto Create(QuizDto quizDto);
-        QuizDto Update(QuizDto quizDto);
+        QuizDto Create(CreateQuizDto quizDto);
+        QuizDto Update(QuizDto quizDto, long id);
         void Delete(long id);
 
         QuizDto AddQuestion(long quizId, QuestionDto questionDto);

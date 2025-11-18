@@ -16,7 +16,7 @@ namespace Explorer.Tours.Core.Domain.Entities
         public long QuizId { get; private set; }
         public Quiz Quiz { get; private set; }
 
-        public List<Option> Options { get; private set; } = new();
+        public ICollection<Option> Options { get; private set; }
 
 
         protected Question() { } // potreban za EF

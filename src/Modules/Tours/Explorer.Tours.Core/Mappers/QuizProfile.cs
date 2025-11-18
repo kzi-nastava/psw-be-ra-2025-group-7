@@ -10,12 +10,24 @@ public class QuizProfile : Profile
     {
         // read dtos
         CreateMap<Quiz, QuizDto>().ReverseMap();
-        CreateMap<Question, QuestionDto>().ReverseMap();
-        CreateMap<Option, OptionDto>().ReverseMap();
+        CreateMap<CreateQuizDto, Quiz>();
+        //.ConstructUsing(src => new Quiz
+        //{
+        //    AuthorId = src.AuthorId,
+        //    Title = src.Title
+        //});
+
+
+
+        //CreateMap<CreateQuizDto, Quiz>().ForMember(x => x.Questions, opt => opt.Ignore());
+
+
+
+        //CreateMap<Question, QuestionDto>().ReverseMap();
+        //CreateMap<Option, OptionDto>().ReverseMap();
 
         // create dtos
-        CreateMap<CreateQuizDto, Quiz>();
-        CreateMap<CreateQuestionDto, Question>();
-        CreateMap<CreateOptionDto, Option>();
+        //CreateMap<CreateQuestionDto, Question>();
+        //CreateMap<CreateOptionDto, Option>();
     }
 }
