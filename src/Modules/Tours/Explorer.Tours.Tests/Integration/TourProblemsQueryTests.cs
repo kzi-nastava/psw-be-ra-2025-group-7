@@ -21,7 +21,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             var controller = CreateController(scope);
 
             // Act
-            var result = ((ObjectResult)controller.GetTouristProblems(0, 10).Result)?.Value as PagedResult<TourProblemDto>;
+            var result = ((ObjectResult)controller.GetMine(0, 10).Result)?.Value as PagedResult<TourProblemDto>;
 
             // Assert
             result.ShouldNotBeNull();
