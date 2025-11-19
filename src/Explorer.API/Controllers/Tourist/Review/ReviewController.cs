@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers.Tourist
 {
-    [Authorize(Policy = "touristPolicy")]
+    [Authorize]
     [Route("api/reviews")]
     public class ReviewController : ControllerBase
     {
@@ -27,7 +27,20 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet("{personId}")]
         public ActionResult<ReviewDto> GetMyReview(long personId)
         {
-            return Ok(_service.GetMyReview(personId));
+            var review = _service.GetMyReview(personId);
+
+            Console.WriteLine("===== REVIEW CHECK =====");
+            Console.WriteLine("Review ID returned from service: " + review?.Id);
+            Console.WriteLine("========================");
+
+            return Ok(review);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult<List<ReviewDto>> GetAll()
+        {
+            return Ok(_service.GetAll());
         }
 
         // PUT: update review

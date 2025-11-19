@@ -23,15 +23,9 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var repo = scope.ServiceProvider.GetRequiredService<IReviewRepository>();
 
-        // Očisti stare testne podatke
-        foreach (var r in repo.GetAll().Where(r => r.ReviewId < 0))
-        {
-            repo.Delete(r.ReviewId);
-        }
-
         // Dodaj testne review-e
-        repo.Add(new Review(-1, 5, "Test review 1", -1));
-        repo.Add(new Review(-2, 4, "Test review 2", -1));
+        repo.Add(new Review(5, "Test review 1", -1));
+        repo.Add(new Review(4, "Test review 2", -1));
     }
 
     // Helper metoda za kreiranje kontrolera sa servisom iz DI
@@ -85,7 +79,7 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
         var review = repo.Get(-1);
         if (review == null)
         {
-            repo.Add(new Review(-1, 5, "Test review 1", -1));
+            repo.Add(new Review(5, "Test review 1", -1));
         }
 
         var controller = CreateController(scope);
@@ -113,7 +107,7 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
         var review = repo.Get(-1);
         if (review == null)
         {
-            repo.Add(new Review(-1, 5, "Test review 1", -1));
+            repo.Add(new Review(5, "Test review 1", -1));
         }
 
         // Koristi isti scope za kontroler

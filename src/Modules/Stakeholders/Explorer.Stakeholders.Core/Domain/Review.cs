@@ -10,16 +10,14 @@ namespace Explorer.Stakeholders.Core.Domain
 {
     public class Review : Entity
     {
-        public int ReviewId { get; private set; }
         public int Rating { get; private set; }
         public string Comment { get; private set; }
         public long PersonId { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
 
-        public Review(int reviewId, int rating, string comment, long personId)
+        public Review(int rating, string comment, long personId)
         {
-            ReviewId = reviewId;
             Rating = rating;
             Comment = comment;
             PersonId = personId;

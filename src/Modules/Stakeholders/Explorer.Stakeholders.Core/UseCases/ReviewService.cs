@@ -24,7 +24,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             if (dto == null) throw new ArgumentNullException(nameof(dto));
 
             var review = new Review(
-                reviewId: 0,
                 rating: dto.Rating,
                 comment: dto.Comment,
                 personId: dto.PersonId
