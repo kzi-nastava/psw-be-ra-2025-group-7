@@ -5,3 +5,5 @@ DELETE FROM "stakeholders"."Accounts";
 DELETE FROM stakeholders."Users";
 DELETE FROM stakeholders."Messages";
 DELETE FROM "Reviews";
+DELETE FROM stakeholders."Reviews";
+DELETE FROM stakeholders."Monuments";
