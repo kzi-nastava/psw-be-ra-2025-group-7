@@ -12,7 +12,6 @@ public class ToursContext : DbContext
 
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
-    public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
