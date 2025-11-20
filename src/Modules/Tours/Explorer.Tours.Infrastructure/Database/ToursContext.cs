@@ -10,6 +10,7 @@ public class ToursContext : DbContext
     public DbSet<Tour> Tours { get; set; }
 
 
+    public DbSet<TourProblem> TourProblems { get; set; }
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
