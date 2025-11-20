@@ -1,67 +1,75 @@
-﻿using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using Explorer.API.Controllers.Tourist;
 using Explorer.Tours.API.Dtos;
-using Xunit;
+using Explorer.Tours.API.Public.Tourist;
+using Explorer.Tours.Infrastructure.Database;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
+using System.Collections.Generic;
 
 namespace Explorer.Tours.Tests;
 
+[Collection("Sequential")]
 public class TouristEquipmentTests : BaseToursIntegrationTest
 {
-    private readonly HttpClient _client;
-
-    public TouristEquipmentTests(ToursTestFactory factory) : base(factory)
-    {
-        // isti pattern kao u drugim testovima (EquipmentCommandTests itd.)
-        _client = factory.CreateClient();
-    }
-
+    public TouristEquipmentTests(ToursTestFactory factory) : base(factory) { }
     [Fact]
-    public async Task Get_Returns_Test_Data()
+    public void Get_Returns_Test_Data()
     {
         // Arrange
-        long touristId = -100;
+        using var scope = Factory.Services.CreateScope();
+
+        var controller = CreateController(scope);
+        var touristId = -100;
 
         // Act
-        var response = await _client.GetAsync($"/api/tourists/equipment/{touristId}");
+        var actionResult = controller.GetByTourist(touristId);
+        var result = (actionResult.Result as ObjectResult)?.Value as List<TouristEquipmentDto>;
 
         // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-        var result = await response.Content.ReadFromJsonAsync<List<TouristEquipmentDto>>();
-
-        Assert.NotNull(result);
-        Assert.Equal(2, result!.Count); // dva reda iz b-insert-tourist-equipment.sql
+        result.ShouldNotBeNull();
+        result.Count.ShouldBe(2); // iz SQL insert skripte: -200 i -201
     }
 
     [Fact]
-    public async Task Update_Changes_Data_In_Database()
+    public void Update_Changes_Data_In_Database()
     {
         // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
         var dto = new UpdateTouristEquipmentDto
         {
-            TouristId = -100,
-            EquipmentIds = new List<long> { -1 }   // hoćemo da ostane samo oprema -1
+            TouristId = 1,
+            EquipmentIds = new List<long> { 1 }   // želimo da ostane samo 1
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/tourists/equipment", dto);
+        var actionResult = controller.Update(dto);
+        var updateResult = (actionResult.Result as ObjectResult)?.Value as List<TouristEquipmentDto>;
 
-        // Assert HTTP OK
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // Assert
+        updateResult.ShouldNotBeNull();
+        updateResult.Count.ShouldBe(1);
+        updateResult[0].EquipmentId.ShouldBe(1);
 
-        var result = await response.Content.ReadFromJsonAsync<List<TouristEquipmentDto>>();
-        Assert.NotNull(result);
-        Assert.Single(result!);
-        Assert.Equal(-1, result![0].EquipmentId);
+        // Assert iz baze
+        var stored = dbContext.TouristEquipment
+                              .Where(x => x.TouristId == 1)
+                              .ToList();
 
-        // Assert ponovnim čitanjem iz baze
-        var dbResponse = await _client.GetAsync($"/api/tourists/equipment/{dto.TouristId}");
-        var dbResult = await dbResponse.Content.ReadFromJsonAsync<List<TouristEquipmentDto>>();
+        stored.Count.ShouldBe(1);
+        stored[0].EquipmentId.ShouldBe(1);
+    }
 
-        Assert.NotNull(dbResult);
-        Assert.Single(dbResult!);
-        Assert.Equal(-1, dbResult![0].EquipmentId);
+
+    private static TouristEquipmentController CreateController(IServiceScope scope)
+    {
+        return new TouristEquipmentController(
+            scope.ServiceProvider.GetRequiredService<ITouristEquipmentService>())
+        {
+            ControllerContext = BuildContext("-1")
+        };
     }
 }
