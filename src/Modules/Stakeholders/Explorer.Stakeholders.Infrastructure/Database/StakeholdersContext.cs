@@ -7,8 +7,11 @@ public class StakeholdersContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Person> People { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<Monument> Monuments { get; set; }
+    public DbSet<Account> Accounts { get; set; }
 
-    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
+    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,5 +28,10 @@ public class StakeholdersContext : DbContext
             .HasOne<User>()
             .WithOne()
             .HasForeignKey<Person>(s => s.UserId);
+
+        modelBuilder.Entity<UserProfile>()
+            .HasOne<User>()
+            .WithOne()
+            .HasForeignKey<UserProfile>(up => up.UserId);
     }
 }

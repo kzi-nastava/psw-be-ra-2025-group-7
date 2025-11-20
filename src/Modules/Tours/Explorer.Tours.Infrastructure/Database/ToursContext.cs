@@ -6,14 +6,22 @@ namespace Explorer.Tours.Infrastructure.Database;
 public class ToursContext : DbContext
 {
     public DbSet<Equipment> Equipment { get; set; }
+    public DbSet<Facility> Facility { get; set; }
+    public DbSet<Tour> Tours { get; set; }
     public DbSet<TouristEquipment> TouristEquipment { get; set; }
 
+
+    public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Postojeća konfiguracija
         modelBuilder.HasDefaultSchema("tours");
+
+        modelBuilder.Entity<Tour>().HasKey(t => t.Id);
+        modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
+                                                                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
 
         // ===== Equipment konfiguracija =====
         modelBuilder.Entity<Equipment>(b =>
