@@ -1,5 +1,6 @@
 using Explorer.API.Middleware;
 using Explorer.API.Startup;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,13 @@ builder.Services.RegisterModules();
 
 var app = builder.Build();
 
+
+//folder za slike za blog
+var webRootPath = app.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+var imagesPath = Path.Combine(webRootPath, "blog-images");
+Directory.CreateDirectory(imagesPath);
+
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -24,6 +32,11 @@ else
 {
     app.UseHsts();
 }
+
+
+//file za slike za blog
+
+app.UseStaticFiles();   //serviranje statickih fajlova
 
 app.UseRouting();
 app.UseCors(corsPolicy);

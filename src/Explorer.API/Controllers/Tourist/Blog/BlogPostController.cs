@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers.Tourist.Blog
 {
-    [Authorize(Roles = "tourist,author")]
+    [Authorize(Policy = "touristAuthorPolicy")]
     [Route("api/touristauthor/blog-posts")]
     [ApiController]
     public class BlogPostController : ControllerBase
@@ -23,16 +23,18 @@ namespace Explorer.API.Controllers.Tourist.Blog
         // helper – uzima ID trenutno ulogovanog korisnika iz JWT tokena
         private long GetCurrentUserId()
         {
-            // proveri kako vam se zove claim u tokenu (često "id" ili ClaimTypes.NameIdentifier)
-            var idClaim = User.FindFirst("id") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            var idClaim = User?.FindFirst("id") ?? User?.FindFirst(ClaimTypes.NameIdentifier);
 
-            if (idClaim == null || !long.TryParse(idClaim.Value, out var userId))
-            {
-                throw new UnauthorizedAccessException("User id is missing from token.");
-            }
+            // Ako nema tokena (Swagger scenario), ne crashuj
+            if (idClaim == null)
+                return 0; // SWAGGER MODE
+
+            if (!long.TryParse(idClaim.Value, out var userId))
+                return 0;
 
             return userId;
         }
+
 
         /// <summary>
         /// Vraća moje blog postove (paginirano).
