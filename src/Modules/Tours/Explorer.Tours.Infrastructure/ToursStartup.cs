@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
@@ -21,10 +22,12 @@ public static class ToursStartup
         SetupInfrastructure(services);
         return services;
     }
-    
+
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
+        services.AddScoped<ITourProblemService, TourProblemService>();
+
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<ITourService, TourService>();
     }
@@ -32,6 +35,8 @@ public static class ToursStartup
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
+        services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
+
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>();
 
