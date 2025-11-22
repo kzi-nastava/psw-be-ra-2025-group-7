@@ -10,13 +10,13 @@ namespace Explorer.Tours.Core.Domain.Entities
 {
 	public class Question : Entity
     {
-		public string Content { get; private set; }
-		public bool AllowsMultipleCorrect { get; private set; }
+		public string Content { get;  set; }
+		public bool AllowsMultipleCorrect { get; set; }
 
-        public long QuizId { get; private set; }
-        public Quiz Quiz { get; private set; }
+        public long QuizId { get; set; }
+        public Quiz Quiz { get; set; }
 
-        public ICollection<Option> Options { get; private set; }
+        public ICollection<Option> Options { get; set; } = null!;
 
 
         protected Question() { } // potreban za EF

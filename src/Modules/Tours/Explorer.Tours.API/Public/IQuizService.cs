@@ -13,7 +13,7 @@ namespace Explorer.Tours.API.Public
         QuizDto Update(QuizDto quizDto, long id);
         void Delete(long id);
 
-        QuizDto AddQuestion(long quizId, QuestionDto questionDto);
+        QuizDto AddQuestion(long quizId, CreateQuestionDto questionDto);
         QuizDto RemoveQuestion(long quizId, long questionId);
     }
 

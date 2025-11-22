@@ -1,11 +1,4 @@
-﻿using System;
-using System.Diagnostics.Eventing.Reader;
-using Explorer.BuildingBlocks.Core.Domain;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection.Metadata;
+﻿using Explorer.BuildingBlocks.Core.Domain;
 using Explorer.Stakeholders.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain.Entities

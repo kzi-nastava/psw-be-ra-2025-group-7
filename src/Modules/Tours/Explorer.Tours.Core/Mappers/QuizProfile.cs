@@ -11,23 +11,12 @@ public class QuizProfile : Profile
         // read dtos
         CreateMap<Quiz, QuizDto>().ReverseMap();
         CreateMap<CreateQuizDto, Quiz>();
-        //.ConstructUsing(src => new Quiz
-        //{
-        //    AuthorId = src.AuthorId,
-        //    Title = src.Title
-        //});
+    
+        CreateMap<Question, QuestionDto>().ReverseMap();
+        CreateMap<CreateQuestionDto, Question>();
+        //    .ForCtorParam("quizId", opt => opt.MapFrom((src, ctx) => (long)ctx.Items["quizId"]));
 
-
-
-        //CreateMap<CreateQuizDto, Quiz>().ForMember(x => x.Questions, opt => opt.Ignore());
-
-
-
-        //CreateMap<Question, QuestionDto>().ReverseMap();
-        //CreateMap<Option, OptionDto>().ReverseMap();
-
-        // create dtos
-        //CreateMap<CreateQuestionDto, Question>();
-        //CreateMap<CreateOptionDto, Option>();
+    //    CreateMap<Option, OptionDto>().ReverseMap();
+    //    CreateMap<CreateOptionDto, Option>();
     }
 }

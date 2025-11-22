@@ -39,6 +39,9 @@ namespace Explorer.Tours.Core.UseCases.Administration
             if (quizDto == null)
                 throw new ArgumentNullException(nameof(quizDto));
 
+            if (quizDto.Questions != null && quizDto.Questions.Count > 5)
+                throw new InvalidOperationException("A quiz cannot have more than 5 questions.");
+
             var quiz = _mapper.Map<Quiz>(quizDto); // mapira dto u entitet
 			var createdQuiz = _quizRepository.Create(quiz);
 
@@ -65,16 +68,20 @@ namespace Explorer.Tours.Core.UseCases.Administration
 
         }
 
-		public QuizDto AddQuestion(long quizId, QuestionDto questionDto) 
-		{ 
-			if (questionDto == null)
+		public QuizDto AddQuestion(long quizId, CreateQuestionDto questionDto) 
+		{
+            if (questionDto == null)
 				throw new ArgumentNullException(nameof(questionDto));
 
-			var question = _mapper.Map<Question>(questionDto); // mapira dto u entitet
-			_quizRepository.AddQuestion(quizId, question);
+			var quiz = _quizRepository.Get(quizId);
+			if (quiz == null) { throw new Exception("Quiz not found"); }	
 
-            var updatedQuiz = _quizRepository.Get(quizId);
-            return _mapper.Map<QuizDto>(updatedQuiz);
+			var question = _mapper.Map<Question>(questionDto); // mapira dto u entitet
+          
+            quiz.AddQuestion(question); // dodaje pitanje u kviz
+            _quizRepository.Update(quiz, quizId); // azurira kviz u repozitorijumu
+
+            return _mapper.Map<QuizDto>(quiz); // mapira entitet u dto
 
         }
 

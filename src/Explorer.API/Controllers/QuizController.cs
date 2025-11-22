@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,12 @@ namespace Explorer.API.Controllers
     public class QuizController : ControllerBase
     {
         private readonly IQuizService _quizService;
-        public QuizController(IQuizService quizService)
+        private readonly IMapper _mapper;
+        public QuizController(IQuizService quizService, IMapper mapper)
         {
             _quizService = quizService;
+            _mapper = mapper;
+
         }
 
         [HttpGet("{id}")]
@@ -43,6 +47,25 @@ namespace Explorer.API.Controllers
         {
             _quizService.Delete(id);
             return NoContent();
+        }
+
+        // question endpoints
+        [HttpPost("{quizId}/questions")]
+        public ActionResult<QuizDto> AddQuestion(long quizId, [FromBody] CreateQuestionDto question)
+        {
+            if (question == null)
+                return BadRequest("Question cannot be null.");
+
+           // var questionDto = _mapper.Map<QuestionDto>(question);
+            var updatedQuiz = _quizService.AddQuestion(quizId, question);
+            return Ok(updatedQuiz);
+        }
+
+        [HttpDelete("{quizId}/questions/{questionId}")]
+        public ActionResult<QuizDto> RemoveQuestion(long quizId, long questionId)
+        {
+            var updatedQuiz = _quizService.RemoveQuestion(quizId, questionId);
+            return Ok(updatedQuiz);
         }
     }
 }

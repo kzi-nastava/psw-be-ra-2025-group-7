@@ -6,5 +6,5 @@ public class CreateQuestionDto
 {
     public string Content { get; set; }
     public bool AllowsMultipleCorrect { get; set; }
-    public List<CreateOptionDto> Options { get; set; } = new List<CreateOptionDto>();
+   // public List<CreateOptionDto> Options { get; set; } = new();
 }

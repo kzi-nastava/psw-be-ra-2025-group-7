@@ -11,7 +11,7 @@ public interface IQuizRepository
     List<Quiz> GetByAuthor(long authorId);
     Quiz Create(Quiz quiz);
     Quiz Update(Quiz quiz, long id);
-    void Delete(long id);
+    void Delete(long id); //brise kviz po id-u
 
     void AddQuestion(long quizId, Question question);
     void RemoveQuestion(long quizId, long questionId);

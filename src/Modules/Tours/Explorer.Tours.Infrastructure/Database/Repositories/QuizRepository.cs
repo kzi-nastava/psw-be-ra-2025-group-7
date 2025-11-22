@@ -1,10 +1,6 @@
 ﻿using Explorer.Tours.Core.Domain.Entities;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Explorer.Tours.Infrastructure.Database;
 using AutoMapper; // Adjust namespace if your ToursContext is elsewhere
 
 
@@ -24,16 +20,17 @@ public class QuizRepository : IQuizRepository
 
     public Quiz Get(long id)
 	{
-		var quiz = _context.Quizzes
-			//.Include(q => q.Questions)
-			//.ThenInclude(q => q.Options)
+		var quiz = _context.Quizzes.Include(q => q.Questions).ThenInclude(q => q.Options)
 			.FirstOrDefault(q => q.Id == id);
 		return quiz;
 	}
 
 	public Quiz Create(Quiz quiz)
 	{
-		_context.Quizzes.Add(quiz);
+        if (quiz.AuthorId == 0)
+            throw new InvalidOperationException("AuthorId is required.");
+
+        _context.Quizzes.Add(quiz);
 		_context.SaveChanges();
 		return quiz;
 	}
@@ -44,8 +41,9 @@ public class QuizRepository : IQuizRepository
 		if (existing != null)
 		{
 			existing.Title = quiz.Title;
+			existing.Questions = quiz.Questions;
+			//existing.
         }
-		//_context.Quizzes.Update(quiz);
 		_context.SaveChanges();
 		return quiz;
     }
