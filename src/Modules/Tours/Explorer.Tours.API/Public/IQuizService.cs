@@ -15,6 +15,7 @@ namespace Explorer.Tours.API.Public
 
         QuizDto AddQuestion(long quizId, CreateQuestionDto questionDto);
         QuizDto RemoveQuestion(long quizId, long questionId);
+
     }
 
 }

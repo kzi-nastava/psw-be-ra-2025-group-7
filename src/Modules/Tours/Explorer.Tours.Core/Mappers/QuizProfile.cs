@@ -16,7 +16,7 @@ public class QuizProfile : Profile
         CreateMap<CreateQuestionDto, Question>();
         //    .ForCtorParam("quizId", opt => opt.MapFrom((src, ctx) => (long)ctx.Items["quizId"]));
 
-    //    CreateMap<Option, OptionDto>().ReverseMap();
-    //    CreateMap<CreateOptionDto, Option>();
+        CreateMap<Option, OptionDto>().ReverseMap();
+        CreateMap<CreateOptionDto, Option>();
     }
 }

@@ -42,7 +42,6 @@ public class QuizRepository : IQuizRepository
 		{
 			existing.Title = quiz.Title;
 			existing.Questions = quiz.Questions;
-			//existing.
         }
 		_context.SaveChanges();
 		return quiz;

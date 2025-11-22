@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Tours.Infrastructure.Migrations
 {
     [DbContext(typeof(ToursContext))]
-    [Migration("20251122164525_AddQuizTable")]
+    [Migration("20251122191636_AddQuizTable")]
     partial class AddQuizTable
     {
         /// <inheritdoc />

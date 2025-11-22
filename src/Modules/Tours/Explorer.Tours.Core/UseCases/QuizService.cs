@@ -96,5 +96,6 @@ namespace Explorer.Tours.Core.UseCases.Administration
 			return _mapper.Map<QuizDto>(updatedQuiz);
         }
 
+		
     }
 }

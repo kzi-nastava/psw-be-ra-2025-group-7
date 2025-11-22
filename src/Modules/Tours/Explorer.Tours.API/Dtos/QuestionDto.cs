@@ -7,6 +7,8 @@ public class QuestionDto
     public string Content { get; set; }
     public bool AllowsMultipleCorrect { get; set; }
 
-  //  ICollection<OptionDto> Options { get; set; } = new();
+    public List<OptionDto> Options { get; set; } = new();
+
+
 
 }
