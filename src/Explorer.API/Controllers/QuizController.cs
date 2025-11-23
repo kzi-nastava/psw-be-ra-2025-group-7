@@ -12,11 +12,18 @@ namespace Explorer.API.Controllers
     {
         private readonly IQuizService _quizService;
         private readonly IMapper _mapper;
+        private IQuizService quizService;
+
         public QuizController(IQuizService quizService, IMapper mapper)
         {
             _quizService = quizService;
             _mapper = mapper;
 
+        }
+
+        public QuizController(IQuizService quizService)
+        {
+            this.quizService = quizService;
         }
 
         [HttpGet("{id}")]
@@ -67,6 +74,7 @@ namespace Explorer.API.Controllers
             var updatedQuiz = _quizService.RemoveQuestion(quizId, questionId);
             return Ok(updatedQuiz);
         }
+
     }
 }
 
