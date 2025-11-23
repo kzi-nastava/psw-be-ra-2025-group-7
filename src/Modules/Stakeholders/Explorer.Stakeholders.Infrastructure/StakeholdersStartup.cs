@@ -1,4 +1,4 @@
-using Explorer.BuildingBlocks.Infrastructure.Database;
+﻿using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.API.Public.Administration;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
@@ -11,6 +11,12 @@ using Explorer.Stakeholders.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Explorer.Stakeholders.API.Services;
+using Explorer.Stakeholders.Core.UseCases;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Stakeholders.Infrastructure.Database.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace Explorer.Stakeholders.Infrastructure;
 
@@ -27,9 +33,12 @@ public static class StakeholdersStartup
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
         services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IUserProfileService, UserProfileService>();
         services.AddScoped<IMonumentService, MonumentService>();
+        services.AddScoped<IAccountService, AccountService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -37,6 +46,8 @@ public static class StakeholdersStartup
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
+        services.AddScoped<IMessageRepository, MessageDbRepository>();
+        services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
@@ -46,5 +57,6 @@ public static class StakeholdersStartup
         services.AddDbContext<StakeholdersContext>(opt =>
             opt.UseNpgsql(dataSource,
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "stakeholders")));
+        services.AddScoped<IAccountRepository, AccountRepository>();
     }
 }
