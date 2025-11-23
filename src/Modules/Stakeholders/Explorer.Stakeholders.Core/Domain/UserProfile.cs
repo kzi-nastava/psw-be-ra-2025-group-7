@@ -10,6 +10,9 @@ namespace Explorer.Stakeholders.Core.Domain
         public string? ProfilePicture { get; private set; }
         public string? Biography { get; private set; }
         public string? Motto { get; private set; }
+        public double? CurrentLatitude { get; private set; }
+        public double? CurrentLongitude { get; private set; }
+
 
         public UserProfile(long userId, string firstName, string lastName,
                            string? profilePicture = null, string? biography = null, string? motto = null)
@@ -38,6 +41,19 @@ namespace Explorer.Stakeholders.Core.Domain
             Motto = motto;
         }
 
+        public void UpdateLocation(double latitude, double longitude)
+        {
+            if (latitude < -90 || latitude > 90)
+                throw new ArgumentException("Invalid Latitude");
+
+            if (longitude < -180 || longitude > 180)
+                throw new ArgumentException("Invalid Longitude");
+
+            CurrentLatitude = latitude;
+            CurrentLongitude = longitude;
+        }
+
+
         private void Validate()
         {
             if (UserId == 0) throw new ArgumentException("Invalid UserId");
@@ -45,6 +61,12 @@ namespace Explorer.Stakeholders.Core.Domain
             ValidateLastName(LastName);
             ValidateBiography(Biography);
             ValidateMotto(Motto);
+            if (CurrentLatitude is not null && (CurrentLatitude < -90 || CurrentLatitude > 90))
+                throw new ArgumentException("Invalid Latitude");
+
+            if (CurrentLongitude is not null && (CurrentLongitude < -180 || CurrentLongitude > 180))
+                throw new ArgumentException("Invalid Longitude");
+
         }
 
         private void ValidateFirstName(string firstName)
