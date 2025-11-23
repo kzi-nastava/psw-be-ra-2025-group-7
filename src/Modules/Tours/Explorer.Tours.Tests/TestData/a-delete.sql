@@ -9,3 +9,6 @@ DELETE FROM tours."Questions";
 DELETE FROM tours."Option";
 DELETE FROM tours."Equipment";
 DELETE FROM tours."TouristEquipment";
+DELETE FROM tours.Quizzes;
+DELETE FROM tours."Questions";
+DELETE FROM tours."Option";

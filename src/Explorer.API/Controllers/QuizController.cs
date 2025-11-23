@@ -25,6 +25,7 @@ namespace Explorer.API.Controllers
 
         }
 
+
         [HttpGet("{id}")]
         public ActionResult<QuizDto> Get(long id)
         {
