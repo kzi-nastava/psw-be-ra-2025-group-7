@@ -2,11 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 
@@ -28,7 +23,7 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
         {
             var query = _dbSet.Where(tp => tp.TouristId == touristId).OrderBy(tp => tp.Id);
             var totalCount = query.Count();
-            var items = query.Skip(page * pageSize).Take(pageSize).ToList(); // FORCE paging
+            var items = query.Skip(page * pageSize).Take(pageSize).ToList();
             return new PagedResult<TourProblem>(items, totalCount);
         }
 
@@ -39,18 +34,6 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             var entity = _dbSet.AsNoTracking().FirstOrDefault(e => e.Id == id);
             if (entity == null) throw new KeyNotFoundException("Not found: " + id);
             return entity;
-        }
-        public PagedResult<TourProblem> GetAll(int page, int pageSize)
-        {
-            var query = _dbSet.OrderBy(tp => tp.Id);
-
-            var totalCount = query.Count();
-            var items = query
-                .Skip(page * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            return new PagedResult<TourProblem>(items, totalCount);
         }
         public TourProblem Create(TourProblem entity)
         {
