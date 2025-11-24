@@ -11,5 +11,6 @@ namespace Explorer.Stakeholders.API.Public.Tourist
     {
         TouristLocationDto UpdateLocation(long userId, double latitude, double longitude);
         TouristLocationDto GetLocation(long userId);
+        List<MonumentDto> GetNearbyMonuments(long userId, int limit = 40);
     }
 }

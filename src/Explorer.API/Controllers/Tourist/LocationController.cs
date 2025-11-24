@@ -36,5 +36,12 @@ namespace Explorer.API.Controllers.Tourist
             var result = _locationService.UpdateLocation(GetUserId(), dto.Latitude, dto.Longitude);
             return Ok(result);
         }
+
+        [HttpGet("nearby-monuments")]
+        public ActionResult<List<MonumentDto>> GetNearbyMonuments()
+        {
+            var result = _locationService.GetNearbyMonuments(GetUserId());
+            return Ok(result);
+        }
     }
 }
