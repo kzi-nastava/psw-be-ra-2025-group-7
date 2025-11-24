@@ -13,7 +13,31 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
             _context = context;
         }
 
+        //DODATO ZA ISPIS INFO OD OSOBE ***********
         public Review Get(int id)
+        {
+            return _context.Reviews
+                .Include(r => r.Person)
+                .FirstOrDefault(r => r.Id == id);
+        }
+
+        public Review GetByPersonId(long personId)
+        {
+            return _context.Reviews
+                .Include(r => r.Person)
+                .FirstOrDefault(r => r.PersonId == personId);
+        }
+
+        public List<Review> GetAll()
+        {
+            return _context.Reviews
+                .Include(r => r.Person)
+                .ToList();
+        }
+
+        //*******************
+
+        /*public Review Get(int id)
         {
             return _context.Reviews.FirstOrDefault(r => r.Id == id);
         }
@@ -26,7 +50,7 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
         public List<Review> GetAll()
         {
             return _context.Reviews.ToList();
-        }
+        }*/
 
         public void Add(Review review)
         {
