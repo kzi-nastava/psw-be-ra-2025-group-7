@@ -19,15 +19,5 @@ public class ToursContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("tours");
-
-        //modelBuilder.Entity<Quiz>()
-        //.HasMany(q => q.Questions)
-        //.WithOne(q => q.Quiz)
-        //.HasForeignKey(q => q.QuizId);
-
-        //modelBuilder.Entity<Question>()
-        //    .HasMany(q => q.Options)
-        //    .WithOne(o => o.Question)
-        //    .HasForeignKey(o => o.QuestionId);
     }
 }
