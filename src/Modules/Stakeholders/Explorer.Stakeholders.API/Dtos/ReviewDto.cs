@@ -14,6 +14,8 @@ namespace Explorer.Stakeholders.API.Dtos
         public long PersonId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public string PersonFirstName { get; set; }
+        public string PersonLastName { get; set; }
     }
 
 }

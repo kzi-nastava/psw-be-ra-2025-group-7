@@ -11,9 +11,20 @@ namespace Explorer.Stakeholders.Core.Mappers
 {
     public class ReviewProfile : Profile
     {
-        public ReviewProfile()
+        /*public ReviewProfile()
         {
             CreateMap<Review, ReviewDto>();
+        }*/
+
+        public ReviewProfile()
+        {
+            CreateMap<Review, ReviewDto>()
+                .ForMember(
+                    dest => dest.PersonFirstName,
+                    opt => opt.MapFrom(src => src.Person.Name))
+                .ForMember(
+                    dest => dest.PersonLastName,
+                    opt => opt.MapFrom(src => src.Person.Surname));
         }
     }
 
