@@ -1,4 +1,4 @@
-using Explorer.BuildingBlocks.Core.UseCases;
+﻿using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 

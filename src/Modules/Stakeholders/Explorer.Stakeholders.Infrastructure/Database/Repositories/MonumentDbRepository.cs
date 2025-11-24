@@ -1,4 +1,4 @@
-using Explorer.BuildingBlocks.Core.Exceptions;
+﻿using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Stakeholders.Core.Domain;
