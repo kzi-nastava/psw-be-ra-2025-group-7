@@ -2,7 +2,7 @@
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public;
+using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
@@ -15,14 +15,6 @@ public class TourProblemService : ITourProblemService
     {
         _repository = repository;
         _mapper = mapper;
-    }
-
-    // NEW: get all problems
-    public PagedResult<TourProblemDto> GetAllProblems(int page, int pageSize)
-    {
-        var result = _repository.GetAll(page, pageSize);
-        var items = _mapper.Map<List<TourProblemDto>>(result.Results);
-        return new PagedResult<TourProblemDto>(items, result.TotalCount);
     }
 
     public PagedResult<TourProblemDto> GetTouristProblemsPages(int touristId, int page, int pageSize)
