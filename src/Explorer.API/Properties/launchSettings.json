@@ -24,7 +24,29 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DATABASE_SCHEMA": "explorer-v1",
+        "DATABASE_SCHEMA_NAME": "tours",
+        "DATABASE_HOST": "localhost",
+        "DATABASE_PORT": "5432",
+        "DATABASE_USERNAME": "postgres",
+        "DATABASE_PASSWORD": "root"
+      }
+    }
+    ,
+    "Explorer.API": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:5299",
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DATABASE_SCHEMA": "explorer-v1",
+        "DATABASE_SCHEMA_NAME": "tours",
+        "DATABASE_HOST": "localhost",
+        "DATABASE_PORT": "5432",
+        "DATABASE_USERNAME": "postgres",
+        "DATABASE_PASSWORD": "root"
       }
     }
   }
