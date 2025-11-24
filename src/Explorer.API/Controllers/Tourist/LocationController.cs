@@ -33,8 +33,8 @@ namespace Explorer.API.Controllers.Tourist
         [HttpPut]
         public IActionResult Update([FromBody] TouristLocationDto dto)
         {
-            _locationService.UpdateLocation(GetUserId(), dto.Latitude, dto.Longitude);
-            return Ok();
+            var result = _locationService.UpdateLocation(GetUserId(), dto.Latitude, dto.Longitude);
+            return Ok(result);
         }
     }
 }

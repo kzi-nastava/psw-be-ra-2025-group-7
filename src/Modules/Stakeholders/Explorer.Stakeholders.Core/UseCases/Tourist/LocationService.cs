@@ -28,7 +28,7 @@ namespace Explorer.Stakeholders.Core.UseCases.Tourist
             };
         }
 
-        public void UpdateLocation(long userId, double latitude, double longitude)
+        public TouristLocationDto UpdateLocation(long userId, double latitude, double longitude)
         {
             var profile = _userProfileRepository.GetByUserId(userId);
             if (profile == null)
@@ -36,6 +36,12 @@ namespace Explorer.Stakeholders.Core.UseCases.Tourist
 
             profile.UpdateLocation(latitude, longitude);
             _userProfileRepository.Update(profile);
+
+            return new TouristLocationDto
+            {
+                Latitude = profile.CurrentLatitude ?? 0,
+                Longitude = profile.CurrentLongitude ?? 0
+            };
         }
     }
 }

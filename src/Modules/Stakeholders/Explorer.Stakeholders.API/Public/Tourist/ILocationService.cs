@@ -9,7 +9,7 @@ namespace Explorer.Stakeholders.API.Public.Tourist
 {
     public interface ILocationService
     {
-        void UpdateLocation(long userId, double latitude, double longitude);
+        TouristLocationDto UpdateLocation(long userId, double latitude, double longitude);
         TouristLocationDto GetLocation(long userId);
     }
 }
