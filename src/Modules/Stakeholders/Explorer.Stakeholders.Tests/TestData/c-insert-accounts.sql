@@ -1,4 +1,4 @@
-INSERT INTO "stakeholders"."Accounts"
+﻿INSERT INTO "stakeholders"."Accounts"
     ("Id", "Username", "Password", "Email", "Role", "IsBlocked")
 VALUES
     (-1, 'test_author', 'test_password', 'author@test.com', 'Author', false),
