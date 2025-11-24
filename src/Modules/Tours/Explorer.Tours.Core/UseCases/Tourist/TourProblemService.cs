@@ -26,9 +26,7 @@ public class TourProblemService : ITourProblemService
 
     public TourProblemDto Create(TourProblemDto dto, int touristId)
     {
-        if (dto.TourId <= 0)
-            throw new ArgumentException("TourId required.");
-
+      
         if (string.IsNullOrWhiteSpace(dto.Category) ||
             string.IsNullOrWhiteSpace(dto.Priority) ||
             string.IsNullOrWhiteSpace(dto.Description))
