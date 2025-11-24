@@ -1,8 +1,12 @@
 using Explorer.API.Middleware;
 using Explorer.API.Startup;
+
+
+using Microsoft.Extensions.FileProviders;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using System;
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<StakeholdersContext>(options =>
@@ -25,6 +29,13 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+
+//folder za slike za blog
+var webRootPath = app.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+var imagesPath = Path.Combine(webRootPath, "blog-images");
+Directory.CreateDirectory(imagesPath);
+
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -36,6 +47,11 @@ else
 {
     app.UseHsts();
 }
+
+
+//file za slike za blog
+
+app.UseStaticFiles();   //serviranje statickih fajlova
 
 app.UseRouting();
 app.UseCors(corsPolicy);
