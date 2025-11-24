@@ -19,10 +19,10 @@ VALUES (-13, -13, 'Sara', 'Sarić', 'https://example.com/sara.jpg',
 
 -- UserProfiles za turiste
 INSERT INTO stakeholders."UserProfiles"(
-    "Id", "UserId", "FirstName", "LastName", "ProfilePicture", "Biography", "Motto")
+    "Id", "UserId", "FirstName", "LastName", "ProfilePicture", "Biography", "Motto", "CurrentLatitude", "CurrentLongitude")
 VALUES (-21, -21, 'Pera', 'Perić', 'https://example.com/pera.jpg', 
     'Student računarstva koji voli da putuje i upoznaje nove kulture.', 
-    'Carpe diem!');
+    'Carpe diem!', 44.8176, 20.4633);
 
 INSERT INTO stakeholders."UserProfiles"(
     "Id", "UserId", "FirstName", "LastName", "ProfilePicture", "Biography", "Motto")
