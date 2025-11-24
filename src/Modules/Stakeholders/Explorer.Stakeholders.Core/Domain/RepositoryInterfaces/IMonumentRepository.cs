@@ -8,4 +8,5 @@ public interface IMonumentRepository
     Monument Create(Monument monument);
     Monument Update(Monument monument);
     void Delete(long id);
+    List<Monument> GetAll();
 }

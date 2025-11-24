@@ -53,4 +53,9 @@ public class MonumentDbRepository : IMonumentRepository
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
     }
+
+    public List<Monument> GetAll()
+    {
+        return _dbSet.ToList();
+    }
 }
