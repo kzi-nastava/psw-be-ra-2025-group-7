@@ -56,8 +56,9 @@ public class TourProblemService : ITourProblemService
         if (existing.TouristId != touristId)
             throw new UnauthorizedAccessException("Cannot update another user's problem report.");
 
-        var entity = _mapper.Map<TourProblem>(dto);
+        dto.TimeReported = DateTime.UtcNow;
 
+        var entity = _mapper.Map<TourProblem>(dto);
         try
         {
             var updated = _repository.Update(entity);
