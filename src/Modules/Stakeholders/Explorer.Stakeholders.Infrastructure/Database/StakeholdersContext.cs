@@ -12,6 +12,7 @@ public class StakeholdersContext : DbContext
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<Club> Clubs { get; set; }
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 

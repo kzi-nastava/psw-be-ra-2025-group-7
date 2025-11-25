@@ -38,7 +38,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             var club = _clubRepository.GetAll().FirstOrDefault(c => c.Id == id);
             if (club != null)
             {
-                _clubRepository.Delete(club);
+                _clubRepository.Delete(id);
             }
         }
         public List<ClubDto> GetAll()

@@ -10,7 +10,7 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
     {
         Club Create(Club club);
         Club Update(Club club);
-        void Delete(Club club);
+        void Delete(long id);
         List<Club> GetAll();
 
     }
