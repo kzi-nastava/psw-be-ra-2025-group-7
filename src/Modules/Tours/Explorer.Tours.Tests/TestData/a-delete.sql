@@ -1,4 +1,4 @@
-﻿DELETE FROM tours."TourProblems";
+DELETE FROM tours."TourProblems";
 
 DELETE FROM tours."Facility";
 

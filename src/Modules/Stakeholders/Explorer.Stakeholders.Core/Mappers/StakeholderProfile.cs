@@ -8,6 +8,8 @@ public class StakeholderProfile : Profile
 {
     public StakeholderProfile()
     {
+        CreateMap<Domain.Message, API.Dtos.MessageDto>().ReverseMap();
+        CreateMap<UserProfile, UserProfileDto>().ReverseMap();
         CreateMap<Account, AccountDto>();
         CreateMap<AccountCreateDto, Account>();
 
@@ -20,8 +22,5 @@ public class StakeholderProfile : Profile
                 src.Longitude
             ))
             .ReverseMap();
-        CreateMap<MonumentDto, Monument>().ReverseMap();
-        CreateMap<UserProfile, UserProfileDto>().ReverseMap();
-        CreateMap<Domain.Message, API.Dtos.MessageDto>().ReverseMap();
     }
 }

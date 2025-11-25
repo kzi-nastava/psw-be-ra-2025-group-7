@@ -5,6 +5,13 @@ using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using System;
 
+
+using Microsoft.Extensions.FileProviders;
+using Explorer.Stakeholders.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
+using System;
+
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<StakeholdersContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

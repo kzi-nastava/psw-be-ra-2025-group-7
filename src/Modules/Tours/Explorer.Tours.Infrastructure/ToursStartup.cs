@@ -31,26 +31,25 @@ public static class ToursStartup
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourProblemService, TourProblemService>();
 
+        services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
         services.AddScoped<IFacilityService, FacilityService>();
+        services.AddScoped<ITourService, TourService>();
+        services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
-        services.AddScoped<IQuizService, QuizService>();
-        services.AddScoped<IQuizRepository, QuizRepository>();
-
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
 
-        services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
-        services.AddScoped<IQuizService, QuizService>();
-        services.AddScoped<IQuizRepository, QuizRepository>();
-
-        services.AddScoped<ITourRepository, TourDbRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
-
+        services.AddScoped<ITourRepository, TourDbRepository>();
+        services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
+        services.AddScoped<IFacilityRepository, FacilityDbRepository>();
+        services.AddScoped<ITourRepository, TourDbRepository>();
+        services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
         var dataSource = dataSourceBuilder.Build();
