@@ -5,8 +5,10 @@ using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
 using Explorer.Tours.Core.UseCases.Administration;
 using Explorer.Tours.Core.UseCases.Tourist;
+using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
+using Explorer.Tours.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -23,22 +25,34 @@ public static class ToursStartup
         SetupInfrastructure(services);
         return services;
     }
-    
+
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
+        services.AddScoped<ITourProblemService, TourProblemService>();
+
+        services.AddScoped<IFacilityService, FacilityService>();
+        services.AddScoped<ITourService, TourService>();
+        services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<ITourJournalService, TourJournalService>();
+        services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
+        services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
+
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>();
         services.AddScoped<ITourJournalRepository, TourJournalDbRepository>();
 
+        services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
+        services.AddScoped<IFacilityRepository, FacilityDbRepository>();
+        services.AddScoped<ITourRepository, TourDbRepository>();
+        services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
         var dataSource = dataSourceBuilder.Build();

@@ -1,4 +1,4 @@
-using Explorer.BuildingBlocks.Core.Exceptions;
+﻿using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Stakeholders.Core.Domain;
@@ -52,5 +52,10 @@ public class MonumentDbRepository : IMonumentRepository
         if (entity == null) throw new NotFoundException("Not found: " + id);
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
+    }
+
+    public List<Monument> GetAll()
+    {
+        return _dbSet.ToList();
     }
 }
