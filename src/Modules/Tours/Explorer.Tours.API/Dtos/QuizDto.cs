@@ -1,6 +1,7 @@
 ﻿namespace Explorer.Tours.API.Dtos;
 
 
+
 public class QuizDto
 {
     public long Id { get; set; }
