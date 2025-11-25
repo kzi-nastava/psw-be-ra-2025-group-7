@@ -17,11 +17,27 @@ namespace Explorer.Stakeholders.Core.UseCases.Tourist
             _monumentRepository = monumentRepository;
         }
 
-        public TouristLocationDto GetLocation(long userId)
+        private UserProfile GetOrCreateProfile(long userId)
         {
             var profile = _userProfileRepository.GetByUserId(userId);
+
             if (profile == null)
-                throw new NotFoundException($"UserProfile for user {userId} not found.");
+            {
+                profile = new UserProfile(
+                    userId,
+                    "User",
+                    "Profile"
+                );
+
+                _userProfileRepository.Create(profile);
+            }
+
+            return profile;
+        }
+
+        public TouristLocationDto GetLocation(long userId)
+        {
+            var profile = GetOrCreateProfile(userId);
 
             return new TouristLocationDto
             {
@@ -32,9 +48,7 @@ namespace Explorer.Stakeholders.Core.UseCases.Tourist
 
         public TouristLocationDto UpdateLocation(long userId, double latitude, double longitude)
         {
-            var profile = _userProfileRepository.GetByUserId(userId);
-            if (profile == null)
-                throw new NotFoundException($"UserProfile for user {userId} not found.");
+            var profile = GetOrCreateProfile(userId);
 
             profile.UpdateLocation(latitude, longitude);
             _userProfileRepository.Update(profile);
@@ -48,9 +62,7 @@ namespace Explorer.Stakeholders.Core.UseCases.Tourist
 
         public List<MonumentDto> GetNearbyMonuments(long userId, int limit = 40)
         {
-            var profile = _userProfileRepository.GetByUserId(userId);
-            if (profile == null)
-                throw new NotFoundException($"UserProfile for user {userId} not found.");
+            var profile = GetOrCreateProfile(userId);
 
             if (!profile.CurrentLatitude.HasValue || !profile.CurrentLongitude.HasValue)
                 throw new ArgumentException($"User {userId} does not have a location set.");
@@ -85,7 +97,6 @@ namespace Explorer.Stakeholders.Core.UseCases.Tourist
 
         private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
-            // Haversine formula to calculate distance between two points on Earth
             const double earthRadiusKm = 6371.0;
 
             var dLat = DegreesToRadians(lat2 - lat1);
