@@ -1,8 +1,7 @@
 ﻿using Explorer.Tours.Core.Domain.Entities;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper; // Adjust namespace if your ToursContext is elsewhere
-
+using AutoMapper; 
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
@@ -10,15 +9,13 @@ public class QuizRepository : IQuizRepository
 
 {
 	private readonly ToursContext _context;
-	private readonly IMapper _mapper;
 
     public QuizRepository(ToursContext context, IMapper mapper)
     {
         _context = context;
-        _mapper = mapper;
     }
 
-    public Quiz Get(long id)
+    public Quiz Get(long id) // get by id
 	{
 		var quiz = _context.Quizzes.Include(q => q.Questions).ThenInclude(q => q.Options)
 			.FirstOrDefault(q => q.Id == id);
@@ -110,4 +107,16 @@ public class QuizRepository : IQuizRepository
 			.Where(q => q.AuthorId == authorId)
 			.ToList();
 	}
+
+    public List<Quiz> GetAll()
+    {
+        var count = _context.Quizzes.Count();   
+        Console.WriteLine("Ukupno kvizova u bazi: " + count);
+
+        return _context.Quizzes
+            .Include(q => q.Questions)
+            .ThenInclude(q => q.Options)
+            .ToList();
+    }
+
 }

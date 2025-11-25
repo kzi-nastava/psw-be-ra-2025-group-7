@@ -96,6 +96,44 @@ namespace Explorer.Tours.Core.UseCases.Administration
 			return _mapper.Map<QuizDto>(updatedQuiz);
         }
 
-		
+		public List<QuizDto> GetAll() 
+		{ 
+			var quizzes = _quizRepository.GetAll();
+			return _mapper.Map<List<QuizDto>>(quizzes); // mapira listu entiteta u dto
+        }
+
+        public QuizResultDto SubmitAnswers(long quizId, QuizSolveDto dto) 
+		{
+            var quiz = _quizRepository.Get(quizId);
+            if (quiz == null)
+                throw new KeyNotFoundException("Quiz not found");
+
+            var result = new QuizResultDto
+            {
+                TotalQuestions = quiz.Questions.Count,
+                CorrectCount = 0,
+                Feedback = new List<QuestionFeedbackDto>()
+            };
+
+
+			int correctlyAnswered = 0;
+
+			foreach(var question in quiz.Questions)
+			{
+				var correctAnswers = question.Options.Where(x => x.IsCorrect).Select(x=>x.Id).ToList();
+				var givenAnswers = dto.SelectedAnswers[question.Id].ToList();
+                bool areEqual = correctAnswers.Count == givenAnswers.Count &&
+								!correctAnswers.Except(givenAnswers).Any();
+
+				if (areEqual) correctlyAnswered++;
+			}
+
+			result.CorrectCount = correctlyAnswered;
+			result.TotalQuestions = quiz.Questions.Count;
+
+            return result;
+        }
+        
+
     }
 }

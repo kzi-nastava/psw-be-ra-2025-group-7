@@ -1,25 +1,25 @@
-﻿using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
-using Microsoft.AspNetCore.Mvc;
+using Explorer.Tours.Core.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 
 namespace Explorer.API.Controllers
 {
-    [Authorize(Roles = "Author")]
+    //[Authorize(Roles = "Author")]
+    [Authorize]
     [Route("api/quizzes")]
     [ApiController]
     public class QuizController : ControllerBase
     {
         private readonly IQuizService _quizService;
-        private readonly IMapper _mapper;
 
-        public QuizController(IQuizService quizService, IMapper mapper)
+        public QuizController(IQuizService quizService)
         {
             _quizService = quizService;
-            _mapper = mapper;
 
         }
 
@@ -28,10 +28,32 @@ namespace Explorer.API.Controllers
         {
             return Ok(_quizService.Get(id));
         }
+
         [HttpGet("author/{authorId}")]
         public ActionResult<List<QuizDto>> GetByAuthor(long authorId)
         {
             return Ok(_quizService.GetByAuthor(authorId));
+        }
+
+        [HttpGet("my-quizzes")]
+        [Authorize(Roles = "author")]
+        public ActionResult<List<QuizDto>> GetAllMyQuizzes()
+        {
+            var authorId = GetUserIdFromToken();
+            return Ok(_quizService.GetByAuthor(authorId));
+        }
+
+        [HttpGet]
+        public ActionResult<List<QuizDto>> GetAll()
+        {
+            return Ok(_quizService.GetAll());
+        }
+      
+
+        [HttpPost("{id}/submit-answers")]
+        public ActionResult<QuizResultDto> SubmitAnswers([FromRoute] long id, [FromBody] QuizSolveDto answers)
+        {
+            return Ok(_quizService.SubmitAnswers(id, answers));
         }
 
         [HttpPost]

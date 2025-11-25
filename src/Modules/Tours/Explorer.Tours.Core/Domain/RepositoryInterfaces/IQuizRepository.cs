@@ -15,4 +15,6 @@ public interface IQuizRepository
 
     void AddQuestion(long quizId, Question question);
     void RemoveQuestion(long quizId, long questionId);
+
+    List<Quiz> GetAll();
 }
