@@ -46,6 +46,14 @@ namespace Explorer.API.Controllers
             return Ok(_quizService.GetByAuthor(authorId));
         }
 
+        [HttpGet("my-quizzes")]
+        [Authorize(Roles = "author")]
+        public ActionResult<List<QuizDto>> GetAllMyQuizzes()
+        {
+            var authorId = GetUserIdFromToken();
+            return Ok(_quizService.GetByAuthor(authorId));
+        }
+
         [HttpGet]
         public ActionResult<List<QuizDto>> GetAll()
         {
