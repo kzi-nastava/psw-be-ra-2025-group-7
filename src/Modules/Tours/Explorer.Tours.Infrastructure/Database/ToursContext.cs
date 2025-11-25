@@ -10,6 +10,7 @@ public class ToursContext : DbContext
 {
     public DbSet<Equipment> Equipment { get; set; }
     public DbSet<Tour> Tours { get; set; }
+    public DbSet<TourJournal> TourJournals { get; set; }
     public DbSet<TouristEquipment> TouristEquipment { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Quiz> Quizzes { get; set; }
@@ -23,6 +24,17 @@ public class ToursContext : DbContext
         // Postojeća konfiguracija
         modelBuilder.HasDefaultSchema("tours");
 
+        modelBuilder.Entity<Tour>().HasKey(t => t.Id);
+        modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
+                                                                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+
+        modelBuilder.Entity<TourJournal>().HasKey(tj => tj.Id);
+        modelBuilder.Entity<TourJournal>().Property(tj => tj.TouristId).IsRequired();
+        modelBuilder.Entity<TourJournal>().Property(tj => tj.Name).IsRequired().HasMaxLength(200);
+        modelBuilder.Entity<TourJournal>().Property(tj => tj.Country).IsRequired().HasMaxLength(100);
+        modelBuilder.Entity<TourJournal>().Property(tj => tj.City).HasMaxLength(100);
+        modelBuilder.Entity<TourJournal>().Property(tj => tj.CreatedAt).IsRequired();
+        modelBuilder.Entity<TourJournal>().Property(tj => tj.Status).IsRequired();
         // ===== Equipment konfiguracija =====
         modelBuilder.Entity<Equipment>(b =>
         {
