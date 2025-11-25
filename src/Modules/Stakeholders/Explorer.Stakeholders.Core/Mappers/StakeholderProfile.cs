@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.Core.Domain;
 
