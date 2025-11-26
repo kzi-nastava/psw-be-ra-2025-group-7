@@ -1,0 +1,67 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace Explorer.Tours.Infrastructure.Database.Repositories;
+
+public class AnnualAwardRepository : IAnnualAwardRepository
+{
+    protected readonly ToursContext DbContext;
+    private readonly DbSet<AnnualAward> _dbSet;
+
+    public AnnualAwardRepository(ToursContext dbContext)
+    {
+        DbContext = dbContext;
+        _dbSet = DbContext.Set<AnnualAward>();
+    }
+
+    public PagedResult<AnnualAward> GetPaged(int page, int pageSize)
+    {
+        var task = _dbSet.GetPagedById(page, pageSize);
+        task.Wait();
+        return task.Result;
+    }
+
+    public AnnualAward Get(long id)
+    {
+        var entity = _dbSet.Find(id);
+        if (entity == null) throw new NotFoundException("Not found: " + id);
+        return entity;
+    }
+
+    public AnnualAward Create(AnnualAward entity)
+    {
+        _dbSet.Add(entity);
+        DbContext.SaveChanges();
+        return entity;
+    }
+
+    public AnnualAward Update(AnnualAward entity)
+    {
+        try
+        {
+            DbContext.Update(entity);
+            DbContext.SaveChanges();
+        }
+        catch (DbUpdateException e)
+        {
+            throw new NotFoundException(e.Message);
+        }
+        return entity;
+    }
+
+    public void Delete(long id)
+    {
+        var entity = Get(id);
+        _dbSet.Remove(entity);
+        DbContext.SaveChanges();
+    }
+}
