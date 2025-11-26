@@ -15,7 +15,7 @@ namespace Explorer.Blog.Core.Domain
 
         public string Description { get; private set; }
 
-        public DateTime CreatedAt { get; private set; }
+        public DateOnly CreatedAt { get; private set; }
 
         public List<BlogImage> Images { get; private set; } = new();
 
@@ -23,14 +23,14 @@ namespace Explorer.Blog.Core.Domain
 
         public BlogPost(long authorId, string title, string description, IEnumerable<BlogImage>? images = null)
         {
-            if (authorId <= 0)
+            if (authorId == 0)
                 throw new ArgumentException("AuthorId must be a positive number.", nameof(authorId));
 
             SetTitle(title);
             SetDescription(description);
 
             AuthorId = authorId;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateOnly.FromDateTime(DateTime.Now);
 
             if (images != null)
             {
@@ -38,16 +38,17 @@ namespace Explorer.Blog.Core.Domain
             }
         }
 
-        public void Edit(string title, string description, IEnumerable<BlogImage>? images)
+        public void Edit(string title, string description, IEnumerable<BlogImage>? images, DateOnly CreatedAt)
         {
             SetTitle(title);
             SetDescription(description);
-
+            CreatedAt = CreatedAt;
             Images.Clear();
             if (images != null)
             {
                 Images.AddRange(images);
             }
+            
         }
 
         private void SetTitle(string title)

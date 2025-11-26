@@ -13,7 +13,7 @@ public class TouristEquipment : Entity
     public TouristEquipment(long touristId, long equipmentId)
     {
         if (touristId <= 0) throw new ArgumentException("Invalid tourist id.");
-        if (equipmentId <= 0) throw new ArgumentException("Invalid equipment id.");
+        if (equipmentId == 0) throw new ArgumentException("Invalid equipment id.");
 
         TouristId = touristId;
         EquipmentId = equipmentId;

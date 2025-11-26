@@ -37,7 +37,7 @@ namespace Explorer.Blog.Infrastructure.Migrations
                     b.Property<long>("AuthorId")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateOnly>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")

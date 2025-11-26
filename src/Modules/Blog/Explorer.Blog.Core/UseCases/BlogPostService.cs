@@ -56,7 +56,7 @@ namespace Explorer.Blog.Core.UseCases
 
             var images = _mapper.Map<IEnumerable<BlogImage>>(dto); // UpdateBlogPostDto → IEnumerable<BlogImage>
 
-            existing.Edit(dto.Title, dto.Description, images);
+            existing.Edit(dto.Title, dto.Description, images, existing.CreatedAt);
 
             var updated = _repository.Update(existing);
             return _mapper.Map<BlogPostDto>(updated);

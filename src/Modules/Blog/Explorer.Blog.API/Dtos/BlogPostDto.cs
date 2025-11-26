@@ -14,7 +14,7 @@ namespace Explorer.Blog.API.Dtos
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty; // markdown tekst
 
-        public DateTime CreatedAt { get; set; }
+        public DateOnly CreatedAt { get; set; }
 
         public List<BlogImageDto> Images { get; set; } = new();
     }

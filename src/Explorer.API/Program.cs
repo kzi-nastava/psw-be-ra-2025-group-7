@@ -32,6 +32,7 @@ builder.Services.AddAuthorization(options =>
 
 
 var app = builder.Build();
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 
 //folder za slike za blog

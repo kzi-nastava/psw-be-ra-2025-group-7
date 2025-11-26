@@ -25,7 +25,7 @@ namespace Explorer.Blog.Infrastructure.Migrations
                     AuthorId = table.Column<long>(type: "bigint", nullable: false),
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateOnly>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
