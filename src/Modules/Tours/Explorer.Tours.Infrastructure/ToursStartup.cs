@@ -29,20 +29,20 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourProblemService, TourProblemService>();
-
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
+        services.AddScoped<IAnnualAwardService, AnnualAwardService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
-
+        services.AddScoped<IAnnualAwardRepository, AnnualAwardRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>();
         services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
