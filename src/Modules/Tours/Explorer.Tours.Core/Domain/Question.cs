@@ -23,8 +23,6 @@ namespace Explorer.Tours.Core.Domain.Entities
 
 		public Question(long quizId, string content, bool allowsMultipleCorrect, IEnumerable<Option> options = null) 
 		{
-			if (quizId <= 0)
-				throw new ArgumentException("QuizId must be a positive number.", nameof(quizId));
 			
             QuizId = quizId;
             Content = content;

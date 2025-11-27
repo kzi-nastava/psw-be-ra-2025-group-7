@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Tours.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddQuizTable : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -119,7 +119,7 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Question",
+                name: "Questions",
                 schema: "tours",
                 columns: table => new
                 {
@@ -131,9 +131,9 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Question", x => x.Id);
+                    table.PrimaryKey("PK_Questions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Question_Quizzes_QuizId",
+                        name: "FK_Questions_Quizzes_QuizId",
                         column: x => x.QuizId,
                         principalSchema: "tours",
                         principalTable: "Quizzes",
@@ -150,17 +150,17 @@ namespace Explorer.Tours.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Text = table.Column<string>(type: "text", nullable: false),
                     IsCorrect = table.Column<bool>(type: "boolean", nullable: false),
-                    Feedback = table.Column<string>(type: "text", nullable: false),
+                    Feedback = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     QuestionId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Option", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Option_Question_QuestionId",
+                        name: "FK_Option_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalSchema: "tours",
-                        principalTable: "Question",
+                        principalTable: "Questions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -172,9 +172,9 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Question_QuizId",
+                name: "IX_Questions_QuizId",
                 schema: "tours",
-                table: "Question",
+                table: "Questions",
                 column: "QuizId");
         }
 
@@ -206,7 +206,7 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 schema: "tours");
 
             migrationBuilder.DropTable(
-                name: "Question",
+                name: "Questions",
                 schema: "tours");
 
             migrationBuilder.DropTable(

@@ -3,7 +3,6 @@ using System;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,11 +11,9 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Tours.Infrastructure.Migrations
 {
     [DbContext(typeof(ToursContext))]
-    [Migration("20251125100032_AddQuizTable")]
-    partial class AddQuizTable
+    partial class ToursContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,7 +33,8 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
                     b.Property<string>("Feedback")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("boolean");
@@ -77,7 +75,7 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("Question", "tours");
+                    b.ToTable("Questions", "tours");
                 });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Quiz", b =>
