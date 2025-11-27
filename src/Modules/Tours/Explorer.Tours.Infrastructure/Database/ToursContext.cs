@@ -1,7 +1,6 @@
 ﻿using Explorer.Tours.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 using Explorer.Tours.Core.Domain.Entities;
-using Explorer.Stakeholders.Core.Domain;
 
 
 namespace Explorer.Tours.Infrastructure.Database;
@@ -12,9 +11,9 @@ public class ToursContext : DbContext
     public DbSet<Tour> Tours { get; set; }
     public DbSet<TourJournal> TourJournals { get; set; }
     public DbSet<TouristEquipment> TouristEquipment { get; set; }
-    public DbSet<User> Users { get; set; }
     public DbSet<Quiz> Quizzes { get; set; }
     public DbSet<Question> Questions { get; set; }
+
     public DbSet<Facility> Facility { get; set; }
 
     public DbSet<TourProblem> TourProblems { get; set; }
@@ -63,6 +62,51 @@ public class ToursContext : DbContext
             b.Property(te => te.EquipmentId)
                 .IsRequired();
         });
+
+        modelBuilder.Entity<Quiz>(b =>
+        {
+            b.ToTable("Quizzes");
+            b.HasKey(q => q.Id);
+
+            b.Property(q => q.Title).IsRequired();
+            b.Property(q => q.AuthorId).IsRequired();
+        });
+
+        modelBuilder.Entity<Question>(b =>
+        {
+            b.ToTable("Questions"); 
+            b.HasKey(q => q.Id);
+
+            b.Property(q => q.Content).IsRequired();
+            b.Property(q => q.AllowsMultipleCorrect).IsRequired();
+
+            /*    b.HasOne<Quiz>()
+                 .WithMany(q => q.Questions)
+                 .HasForeignKey(q => q.QuizId);
+            */
+            b.HasOne(q => q.Quiz)
+            .WithMany(qz => qz.Questions)
+            .HasForeignKey(q => q.QuizId)
+            .IsRequired();
+        });
+
+        modelBuilder.Entity<Option>(b =>
+        {
+            b.ToTable("Option");
+            b.HasKey(o => o.Id);
+
+            b.Property(o => o.Text).IsRequired();
+            b.Property(o => o.IsCorrect).IsRequired();
+            b.Property(o => o.Feedback).HasMaxLength(500);
+
+       /*     b.HasOne<Question>()
+             .WithMany(q => q.Options)
+             .HasForeignKey(o => o.QuestionId); */
+            b.HasOne(o => o.Question).WithMany(q => q.Options)
+             .HasForeignKey(o => o.QuestionId)
+             .IsRequired();
+        });
+
 
         modelBuilder.Entity<Tour>().HasKey(t => t.Id);
         modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),

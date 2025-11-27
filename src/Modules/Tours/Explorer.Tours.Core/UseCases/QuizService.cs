@@ -120,13 +120,22 @@ namespace Explorer.Tours.Core.UseCases.Administration
 
 			foreach(var question in quiz.Questions)
 			{
-				var correctAnswers = question.Options.Where(x => x.IsCorrect).Select(x=>x.Id).ToList();
+                if (!dto.SelectedAnswers.ContainsKey(question.Id)) // preskoci ako nema odgovora
+                    continue;
+
+                var correctAnswers = question.Options.Where(x => x.IsCorrect).Select(x=>x.Id).ToList();
 				var givenAnswers = dto.SelectedAnswers[question.Id].ToList();
                 bool areEqual = correctAnswers.Count == givenAnswers.Count &&
 								!correctAnswers.Except(givenAnswers).Any();
 
 				if (areEqual) correctlyAnswered++;
-			}
+
+				result.Feedback.Add(new QuestionFeedbackDto
+				{
+					QuestionId = question.Id,
+					IsCorrect = areEqual
+				});
+            }
 
 			result.CorrectCount = correctlyAnswered;
 			result.TotalQuestions = quiz.Questions.Count;

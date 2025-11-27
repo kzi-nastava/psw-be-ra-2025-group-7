@@ -22,9 +22,7 @@ namespace Explorer.Tours.Core.Domain.Entities
 
 		public Option(long questionId, string text, bool isCorrect, string feedback)
 		{
-			if (questionId <= 0)
-				throw new ArgumentException("QuestionId must be a positive number.", nameof(questionId));
-
+			
             QuestionId = questionId;
             Text = text;
             IsCorrect = isCorrect;

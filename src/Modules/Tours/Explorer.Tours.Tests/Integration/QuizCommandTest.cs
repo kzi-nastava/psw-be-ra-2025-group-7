@@ -5,6 +5,7 @@ using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using System.Security.Claims;
 
 namespace Explorer.Tours.Tests.Integration;
 
@@ -23,7 +24,7 @@ public class QuizCommandTests : BaseToursIntegrationTest
 
         var newEntity = new CreateQuizDto
         {
-            AuthorId = 1,
+           // AuthorId = 1,
             Title = "Osnove geografije",
             Questions = new List<CreateQuestionDto>
             {
@@ -56,14 +57,30 @@ public class QuizCommandTests : BaseToursIntegrationTest
         var storedEntity = dbContext.Quizzes.FirstOrDefault(i => i.Title == newEntity.Title);
         storedEntity.ShouldNotBeNull();
         storedEntity.Title.ShouldBe(newEntity.Title);
-        storedEntity.AuthorId.ShouldBe(newEntity.AuthorId);
+        storedEntity.AuthorId.ShouldBe(1);
     }
 
     private static QuizController CreateController(IServiceScope scope)
     {
         return new QuizController(scope.ServiceProvider.GetRequiredService<IQuizService>())
         {
-            ControllerContext = BuildContext("-1")
+            ControllerContext = BuildContext("1")
+        };
+    }
+
+    private static ControllerContext BuildContext(string userId)
+    {
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim("id", userId)
+        }, "mock"));
+
+        return new ControllerContext
+        {
+            HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext
+            {
+                User = user
+            }
         };
     }
 

@@ -1,13 +1,10 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using Explorer.Stakeholders.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain.Entities
 {
 	public class Quiz : Entity
     {
 		public long AuthorId { get; set; }
-        public User Author { get; set; }
-
 		public string Title { get; set; }
 
         public ICollection<Question> Questions { get; set; } = null!;
