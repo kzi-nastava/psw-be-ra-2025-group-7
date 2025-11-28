@@ -81,6 +81,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Tourist
         [Fact]
         public void Fails_to_get_nearby_monuments_for_nonexistent_user()
         {
+
             using var scope = Factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
             var existingUserId = dbContext.Users.Select(u => u.Id).First();
@@ -94,6 +95,9 @@ namespace Explorer.Stakeholders.Tests.Integration.Tourist
 
             var controller = CreateController(scope, existingUserId.ToString());
             Should.Throw<ArgumentException>(() => controller.GetNearbyMonuments());
+
+            // Act & Assert
+            Should.Throw<NotFoundException>(() => controller.GetNearbyMonuments());
 
         }
 

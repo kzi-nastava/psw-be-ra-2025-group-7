@@ -135,7 +135,9 @@ namespace Explorer.Stakeholders.Tests.Integration.Messages
                 SentToUserId = -12
             };
             // Act & Assert
-            Should.Throw<NotFoundException>(() => controller.EditMessage(message));
+
+            Should.Throw<ArgumentException>(() => controller.EditMessage(message));
+
         }
 
         [Fact]

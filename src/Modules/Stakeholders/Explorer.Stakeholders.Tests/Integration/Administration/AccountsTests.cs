@@ -1,4 +1,4 @@
-﻿using Explorer.API.Controllers.Administrator;
+using Explorer.API.Controllers.Administrator;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Services;
 using Explorer.Stakeholders.Core.Domain;
@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Linq;
 using Xunit;
+
+
 
 
 namespace Explorer.Stakeholders.Tests.Integration.Administration

@@ -1,9 +1,4 @@
-<<<<<<< feat/admin-manage-facilities
-﻿DELETE FROM stakeholders."People";
-DELETE FROM stakeholders."Users";
-DELETE FROM stakeholders."Monuments";
-=======
-﻿DELETE FROM stakeholders."UserProfiles";
+DELETE FROM stakeholders."UserProfiles";
 DELETE FROM stakeholders."People";
 DELETE FROM stakeholders."Monuments";
 DELETE FROM stakeholders."Accounts";
@@ -12,4 +7,4 @@ DELETE FROM stakeholders."Messages";
 DELETE FROM stakeholders."Reviews";
 DELETE FROM stakeholders."Reviews";
 DELETE FROM stakeholders."Monuments";
->>>>>>> local
+
