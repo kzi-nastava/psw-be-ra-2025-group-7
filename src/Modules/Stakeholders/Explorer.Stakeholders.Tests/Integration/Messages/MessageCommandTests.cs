@@ -129,7 +129,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Messages
             var controller = CreateController(scope);
             var message = new MessageDto
             {
-                Id = -1,
+                Id = -1021,
                 Content = "",
                 SentByUserId = -11,
                 SentToUserId = -12
