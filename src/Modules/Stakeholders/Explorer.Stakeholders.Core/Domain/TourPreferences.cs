@@ -10,19 +10,10 @@ using Explorer.BuildingBlocks.Core.Domain;
 namespace Explorer.Stakeholders.Core.Domain
 {
     public enum Difficulty
-    { 
-        VeryEasy = 0,
+    {
         Easy = 1,
         Medium = 2,
         Hard = 3
-    }
-
-    public enum TransportMode
-    {
-        Walking = 0,
-        Bicycle = 1,
-        Car = 2,
-        Boat = 3
     }
 
     public class TourPreferences : Entity
@@ -30,9 +21,10 @@ namespace Explorer.Stakeholders.Core.Domain
         public long TouristId { get; private set; }
         public Difficulty PreferredDifficulty { get; private set; }
 
-        // Mapa sada: TransportMode -> Difficulty
-        public Dictionary<TransportMode, Difficulty> TransportDifficulties { get; private set; }
-
+        public int WalkingRating { get; private set; }
+        public int BicycleRating { get; private set; }
+        public int BoatRating { get; private set; }
+        public int CarRating { get; private set; }
         public List<string> Tags { get; private set; }
 
         private TourPreferences() { }
@@ -40,22 +32,19 @@ namespace Explorer.Stakeholders.Core.Domain
         public TourPreferences(
             long touristId,
             Difficulty preferredDifficulty,
-            Difficulty walkingDifficulty,
-            Difficulty bicycleDifficulty,
-            Difficulty carDifficulty,
-            Difficulty boatDifficulty,
+            int walkingRating,
+            int bicycleRating,
+            int carRating,
+            int boatRating,
             List<string> tags)
         {
             TouristId = touristId;
             PreferredDifficulty = ValidateDifficulty(preferredDifficulty);
 
-            TransportDifficulties = new Dictionary<TransportMode, Difficulty>
-            {
-                { TransportMode.Walking, ValidateDifficulty(walkingDifficulty) },
-                { TransportMode.Bicycle, ValidateDifficulty(bicycleDifficulty) },
-                { TransportMode.Car, ValidateDifficulty(carDifficulty) },
-                { TransportMode.Boat, ValidateDifficulty(boatDifficulty) }
-            };
+            WalkingRating = ValidateRating(walkingRating);
+            BicycleRating = ValidateRating(bicycleRating);
+            CarRating = ValidateRating(carRating);
+            BoatRating = ValidateRating(boatRating);
 
             Tags = tags ?? new List<string>();
         }
@@ -68,32 +57,30 @@ namespace Explorer.Stakeholders.Core.Domain
             return difficulty;
         }
 
-        public void SetDifficulty(TransportMode mode, Difficulty difficulty)
+        private static int ValidateRating(int rating)
         {
-            TransportDifficulties[mode] = ValidateDifficulty(difficulty);
+            if (rating < 0 || rating > 3)
+                throw new ArgumentOutOfRangeException("Score must be between 0 and 3.");
+            else
+                return rating;
         }
 
-        public Difficulty GetDifficulty(TransportMode mode)
-        {
-            return TransportDifficulties.TryGetValue(mode, out var diff)
-                ? diff
-                : Difficulty.Easy; // default
-        }
+  
 
         public void Update(
             Difficulty preferredDifficulty,
-            Difficulty walkingDifficulty,
-            Difficulty bicycleDifficulty,
-            Difficulty carDifficulty,
-            Difficulty boatDifficulty,
+            int walkingRating,
+            int bicycleRating,
+            int carRating,
+            int boatRating,
             List<string> tags)
         {
             PreferredDifficulty = ValidateDifficulty(preferredDifficulty);
 
-            TransportDifficulties[TransportMode.Walking] = ValidateDifficulty(walkingDifficulty);
-            TransportDifficulties[TransportMode.Bicycle] = ValidateDifficulty(bicycleDifficulty);
-            TransportDifficulties[TransportMode.Car] = ValidateDifficulty(carDifficulty);
-            TransportDifficulties[TransportMode.Boat] = ValidateDifficulty(boatDifficulty);
+            WalkingRating = ValidateRating(walkingRating);
+            BicycleRating = ValidateRating(bicycleRating);
+            CarRating = ValidateRating(carRating);
+            BoatRating = ValidateRating(boatRating);
 
             Tags = tags ?? new List<string>();
         }

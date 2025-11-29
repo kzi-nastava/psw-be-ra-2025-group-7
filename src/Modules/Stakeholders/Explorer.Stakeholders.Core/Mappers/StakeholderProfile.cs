@@ -13,27 +13,6 @@ public class StakeholderProfile : Profile
         CreateMap<Account, AccountDto>();
         CreateMap<AccountCreateDto, Account>();
         CreateMap<MonumentDto, Monument>().ReverseMap();
-
-
-        CreateMap<TourPreferences, TourPreferencesDto>();/*
-                .ForMember(dest => dest.TransportDifficulties,
-                    opt => opt.MapFrom(src =>
-                        src.TransportDifficulties.Select(x => new TransportDifficultyDto
-                        {
-                            TransportMode = (TransportModeDto)x.Key,
-                            Difficulty = (DifficultyDto)x.Value
-                        }).ToList()
-                    ));
-
-        CreateMap<TourPreferencesDto, TourPreferences>()
-            .ForMember(dest => dest.TransportDifficulties,
-                opt => opt.MapFrom(src =>
-                    src.TransportDifficulties == null
-                    ? new Dictionary<TransportMode, Difficulty>()
-                        : src.TransportDifficulties.ToDictionary(
-                            x => (TransportMode)x.TransportMode,
-                            x => (Difficulty)x.Difficulty
-                        )
-                ));*/
+        CreateMap<TourPreferences, TourPreferencesDto>().ReverseMap();
     }
 }

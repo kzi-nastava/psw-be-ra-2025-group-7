@@ -13,7 +13,6 @@ namespace Explorer.Stakeholders.API.Public
             TourPreferencesDto Create(TourPreferencesDto dto);
             TourPreferencesDto Update(TourPreferencesDto dto);
             void Delete(long id);
-            //List<TourPreferencesDto> GetAll(); // pripazi
         }
     
 }

@@ -33,66 +33,16 @@ namespace Explorer.Stakeholders.Core.UseCases
 
         public TourPreferencesDto Create(TourPreferencesDto dto)
         {
-            // Validacija preferred difficulty
-            ValidateDifficulty(dto.PreferredDifficulty);
-
-            // Validacija transport difficulty
-            foreach (var t in dto.TransportDifficulties ?? new List<TransportDifficultyDto>())
-            {
-                ValidateDifficulty(t.Difficulty);
-            }
-
-            // Kreiranje domen entity-ja
-            var transportMap = dto.TransportDifficulties?.ToDictionary(
-                x => (TransportMode)x.TransportMode,
-                x => (Difficulty)x.Difficulty
-            ) ?? new Dictionary<TransportMode, Difficulty>();
-
-            var entity = new TourPreferences(
-                dto.TouristId,
-                (Difficulty)dto.PreferredDifficulty,
-                transportMap.ContainsKey(TransportMode.Walking) ? transportMap[TransportMode.Walking] : Difficulty.VeryEasy,
-                transportMap.ContainsKey(TransportMode.Bicycle) ? transportMap[TransportMode.Bicycle] : Difficulty.VeryEasy,
-                transportMap.ContainsKey(TransportMode.Car) ? transportMap[TransportMode.Car] : Difficulty.VeryEasy,
-                transportMap.ContainsKey(TransportMode.Boat) ? transportMap[TransportMode.Boat] : Difficulty.VeryEasy,
-                dto.Tags ?? new List<string>()
-            );
-
+            var entity = _mapper.Map<TourPreferences>(dto);
             var created = _repository.Create(entity);
             return _mapper.Map<TourPreferencesDto>(created);
         }
 
         public TourPreferencesDto Update(TourPreferencesDto dto)
         {
-            ValidateDifficulty(dto.PreferredDifficulty);
-
-            foreach (var t in dto.TransportDifficulties ?? new List<TransportDifficultyDto>())
-            {
-                ValidateDifficulty(t.Difficulty);
-            }
-
-            var entity = _repository.GetByTouristId(dto.TouristId);
-            if (entity == null)
-                throw new InvalidOperationException("Preferences not found.");
-
-            // Pretvaranje liste u mapu
-            var transportMap = dto.TransportDifficulties?.ToDictionary(
-                x => (TransportMode)x.TransportMode,
-                x => (Difficulty)x.Difficulty
-            ) ?? new Dictionary<TransportMode, Difficulty>();
-
-            // Update domenskog entity-ja
-            entity.Update(
-                (Difficulty)dto.PreferredDifficulty,
-                transportMap.ContainsKey(TransportMode.Walking) ? transportMap[TransportMode.Walking] : Difficulty.VeryEasy,
-                transportMap.ContainsKey(TransportMode.Bicycle) ? transportMap[TransportMode.Bicycle] : Difficulty.VeryEasy,
-                transportMap.ContainsKey(TransportMode.Car) ? transportMap[TransportMode.Car] : Difficulty.VeryEasy,
-                transportMap.ContainsKey(TransportMode.Boat) ? transportMap[TransportMode.Boat] : Difficulty.VeryEasy,
-                dto.Tags ?? new List<string>()
-            );
-
-            var updated = _repository.Update(entity);
-            return _mapper.Map<TourPreferencesDto>(updated);
+            var entity = _mapper.Map<TourPreferences>(dto);
+            var created = _repository.Create(entity);
+            return _mapper.Map<TourPreferencesDto>(created);
         }
 
         public void Delete(long touristId)
@@ -100,17 +50,8 @@ namespace Explorer.Stakeholders.Core.UseCases
             _repository.Delete(touristId);
         }
 
-        private void ValidateDifficulty(DifficultyDto difficulty)
-        {
-            if (!Enum.IsDefined(typeof(Difficulty), (Difficulty)difficulty))
-            {
-                throw new ArgumentException($"Invalid difficulty value: {difficulty}");
-            }
-        }
     }
 }
-
-
 
 
 

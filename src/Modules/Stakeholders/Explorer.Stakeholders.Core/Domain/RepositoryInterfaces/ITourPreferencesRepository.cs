@@ -13,6 +13,5 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
         TourPreferences Create(TourPreferences entity);
         TourPreferences Update(TourPreferences entity);
         void Delete(long id);
-        //List<TourPreferencesDto> GetAll(); // pripazi
     }
 }
