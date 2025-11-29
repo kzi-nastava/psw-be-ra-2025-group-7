@@ -13,7 +13,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public long SentToUserId { get; init; }
         public string Content { get; private set; }
         public DateTime SentAt { get; private set; }
-        public DateTime EditedAt { get; private set; } = DateTime.MinValue;
+        public DateTime? EditedAt { get; private set; } = null;
 
         public Message(long sentByUserId, long sentToUserId, string content, DateTime sentAt)
         {
