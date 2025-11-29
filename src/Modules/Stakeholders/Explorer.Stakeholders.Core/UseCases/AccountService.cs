@@ -32,22 +32,41 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<IEnumerable<AccountDto>>(accounts);
         }
 
+        //public AccountDto BlockAccount(int accountId)
+        //{
+        //    var account = _repository.Get(accountId)
+        //                  ?? throw new ArgumentException($"Account with id {accountId} not found.");
+
+            
+        //    if (account.Role == "Author" || account.Role == "Tourist")
+        //    {
+        //        account.IsBlocked = true;
+        //    }
+        //    else
+        //    {
+        //        throw new InvalidOperationException("Only authors and tourists can be blocked.");
+        //    }
+
+        //    _repository.Update(account);
+        //    return _mapper.Map<AccountDto>(account);
+        //}
+
         public AccountDto BlockAccount(int accountId)
         {
             var account = _repository.Get(accountId)
                           ?? throw new ArgumentException($"Account with id {accountId} not found.");
 
-            
-            if (account.Role == "Author" || account.Role == "Tourist")
+            // Ne dozvoljavamo blokiranje admina, sve ostalo može
+            if (account.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                account.Role.Equals("Administrator", StringComparison.OrdinalIgnoreCase))
             {
-                account.IsBlocked = true;
-            }
-            else
-            {
-                throw new InvalidOperationException("Only authors and tourists can be blocked.");
+                throw new InvalidOperationException("Administrators cannot be blocked.");
             }
 
+            account.IsBlocked = true;
+
             _repository.Update(account);
+
             return _mapper.Map<AccountDto>(account);
         }
     }
