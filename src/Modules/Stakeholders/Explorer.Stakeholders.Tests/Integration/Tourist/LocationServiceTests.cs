@@ -96,9 +96,6 @@ namespace Explorer.Stakeholders.Tests.Integration.Tourist
             var controller = CreateController(scope, existingUserId.ToString());
             Should.Throw<ArgumentException>(() => controller.GetNearbyMonuments());
 
-            // Act & Assert
-            Should.Throw<NotFoundException>(() => controller.GetNearbyMonuments());
-
         }
 
         [Fact]
