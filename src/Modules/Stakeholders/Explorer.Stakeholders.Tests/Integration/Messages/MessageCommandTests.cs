@@ -135,7 +135,9 @@ namespace Explorer.Stakeholders.Tests.Integration.Messages
                 SentToUserId = -12
             };
             // Act & Assert
+
             Should.Throw<ArgumentException>(() => controller.EditMessage(message));
+
         }
 
         [Fact]
@@ -185,7 +187,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Messages
             var messages = dbContext.Messages.ToList();
 
             // Act & Assert
-            Should.Throw<UnauthorizedAccessException>(() => controller.DeleteMessage(-1001));
+            Should.Throw<UnauthorizedAccessException>(() => controller.DeleteMessage(-1023));
         }
 
         private static MessageController CreateController(IServiceScope scope)

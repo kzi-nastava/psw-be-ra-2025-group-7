@@ -81,12 +81,24 @@ namespace Explorer.Stakeholders.Tests.Integration.Tourist
         [Fact]
         public void Fails_to_get_nearby_monuments_for_nonexistent_user()
         {
-            // Arrange
+
             using var scope = Factory.Services.CreateScope();
-            var controller = CreateController(scope, "-99999"); // Non-existent user
+            var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+            var existingUserId = dbContext.Users.Select(u => u.Id).First();
+
+            var profile = dbContext.UserProfiles.SingleOrDefault(p => p.UserId == existingUserId);
+            if (profile != null)
+            {
+                dbContext.UserProfiles.Remove(profile);
+                dbContext.SaveChanges();
+            }
+
+            var controller = CreateController(scope, existingUserId.ToString());
+            Should.Throw<ArgumentException>(() => controller.GetNearbyMonuments());
 
             // Act & Assert
             Should.Throw<NotFoundException>(() => controller.GetNearbyMonuments());
+
         }
 
         [Fact]
