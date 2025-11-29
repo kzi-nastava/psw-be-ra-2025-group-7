@@ -21,7 +21,7 @@ namespace Explorer.Stakeholders.Core.Domain
             ImageUrls = imageUrls ?? new List<string>();
 
             CreatedAt = DateTime.UtcNow;
-            UpdatedAt = CreatedAt;
+            UpdatedAt = default;
 
             Validate();
         }
@@ -34,8 +34,8 @@ namespace Explorer.Stakeholders.Core.Domain
             if (string.IsNullOrWhiteSpace(Description))
                 throw new ArgumentException("Invalid Description");
 
-            if (CreatedBy <= 0)
-                throw new ArgumentException("Invalid CreatedBy");
+            //if (CreatedBy <= 0)
+            //    throw new ArgumentException("Invalid CreatedBy");
 
             if (ImageUrls == null || ImageUrls.Count == 0)
                 throw new ArgumentException("At least one image is required");
