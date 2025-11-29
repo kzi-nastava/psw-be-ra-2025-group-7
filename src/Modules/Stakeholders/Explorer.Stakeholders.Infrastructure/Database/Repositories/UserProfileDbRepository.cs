@@ -1,6 +1,8 @@
 ﻿using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using Explorer.Stakeholders.Infrastructure.Database;
+
 
 namespace Explorer.Stakeholders.Infrastructure.Database.Repositories;
 

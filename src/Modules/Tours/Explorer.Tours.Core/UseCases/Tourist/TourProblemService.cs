@@ -2,7 +2,7 @@
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public;
+using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
@@ -17,14 +17,6 @@ public class TourProblemService : ITourProblemService
         _mapper = mapper;
     }
 
-    // NEW: get all problems
-    public PagedResult<TourProblemDto> GetAllProblems(int page, int pageSize)
-    {
-        var result = _repository.GetAll(page, pageSize);
-        var items = _mapper.Map<List<TourProblemDto>>(result.Results);
-        return new PagedResult<TourProblemDto>(items, result.TotalCount);
-    }
-
     public PagedResult<TourProblemDto> GetTouristProblemsPages(int touristId, int page, int pageSize)
     {
         var result = _repository.GetByTourist(touristId, page, pageSize);
@@ -34,9 +26,7 @@ public class TourProblemService : ITourProblemService
 
     public TourProblemDto Create(TourProblemDto dto, int touristId)
     {
-        if (dto.TourId <= 0)
-            throw new ArgumentException("TourId required.");
-
+      
         if (string.IsNullOrWhiteSpace(dto.Category) ||
             string.IsNullOrWhiteSpace(dto.Priority) ||
             string.IsNullOrWhiteSpace(dto.Description))
@@ -66,8 +56,9 @@ public class TourProblemService : ITourProblemService
         if (existing.TouristId != touristId)
             throw new UnauthorizedAccessException("Cannot update another user's problem report.");
 
-        var entity = _mapper.Map<TourProblem>(dto);
+        dto.TimeReported = DateTime.UtcNow;
 
+        var entity = _mapper.Map<TourProblem>(dto);
         try
         {
             var updated = _repository.Update(entity);

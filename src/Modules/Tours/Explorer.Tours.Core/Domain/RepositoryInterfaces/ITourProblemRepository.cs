@@ -11,7 +11,6 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
     {
         PagedResult<TourProblem> GetByTourist(int touristId,int pageNumber, int pageSize);
         TourProblem Get(int id);
-        PagedResult<TourProblem> GetAll(int pageNumber, int pageSize);
         TourProblem Create(TourProblem tourProblem);
         TourProblem Update(TourProblem tourProblem);
         void Delete(int id);

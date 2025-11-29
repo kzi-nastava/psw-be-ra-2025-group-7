@@ -71,7 +71,13 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
             Motto = "The mountains are calling!"
         };
 
-        // Act
+        var existingProfile = dbContext.UserProfiles.SingleOrDefault(up => up.UserId == -23);
+        if (existingProfile != null)
+        {
+            dbContext.UserProfiles.Remove(existingProfile);
+            dbContext.SaveChanges();
+        }
+
         var result = service.Create(newProfile);
 
         // Assert - Response
@@ -188,6 +194,7 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
         storedProfile.LastName.ShouldBe("Petrović");
     }
 
+
     [Fact]
     public void Update_Fails_For_NonExistent_Profile()
     {
@@ -205,6 +212,7 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
         // Act & Assert
         Should.Throw<KeyNotFoundException>(() => service.Update(nonExistentProfile));
     }
+
 
     [Fact]
     public void Update_Fails_For_Invalid_Data()

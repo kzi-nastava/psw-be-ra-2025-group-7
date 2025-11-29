@@ -39,8 +39,8 @@ INSERT INTO stakeholders."Messages"(
 VALUES (-1010, -1, -11, 'Reminder: please update your profile with latest certifications.', '2024-01-16 08:00:00', '0001-01-01 00:00:00');
 
 INSERT INTO stakeholders."Messages"(
-	"Id", "SentByUserId", "SentToUserId", "Content", "SentAt", "EditedAt")
-VALUES (-1011, -1, -12, 'Your listing has new reviews. Consider responding to feedback.', '2024-01-16 08:05:00', '0001-01-01 00:00:00');
+    "Id", "SentByUserId", "SentToUserId", "Content", "SentAt", "EditedAt")
+VALUES (-1011, -1, -12, 'Your listing has new reviews. Consider responding to feedback.', '2024-01-16 08:05:00+01', '1970-01-01 00:00:00+01');
 
 INSERT INTO stakeholders."Messages"(
 	"Id", "SentByUserId", "SentToUserId", "Content", "SentAt", "EditedAt")
