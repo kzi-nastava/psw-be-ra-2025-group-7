@@ -46,7 +46,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Messages
             res.SentByUserId.ShouldBe(message.SentByUserId);
             res.SentToUserId.ShouldBe(message.SentToUserId);
             res.SentAt.ShouldBeGreaterThan(DateTime.UtcNow.AddMinutes(-1));
-            res.EditedAt.ShouldBe(DateTime.MinValue);
+            res.EditedAt.ShouldBe(null);
 
             // Assert - Database
             var dbMessage = dbContext.Messages.Find(res.Id);
@@ -55,7 +55,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Messages
             dbMessage.SentByUserId.ShouldBe(message.SentByUserId);
             dbMessage.SentToUserId.ShouldBe(message.SentToUserId);
             dbMessage.SentAt.ShouldBeGreaterThan(DateTime.UtcNow.AddMinutes(-1));
-            dbMessage.EditedAt.ShouldBe(DateTime.MinValue);
+            dbMessage.EditedAt.ShouldBe(null);
         }
 
         [Fact]
@@ -95,13 +95,13 @@ namespace Explorer.Stakeholders.Tests.Integration.Messages
             updateRes.ShouldNotBeNull();
             updateRes.Id.ShouldBe(message.Id);
             updateRes.Content.ShouldBe("Updated content");
-            updateRes.EditedAt.ShouldBeGreaterThan(DateTime.UtcNow.AddMinutes(-1));
+            updateRes.EditedAt?.ShouldBeGreaterThan(DateTime.UtcNow.AddMinutes(-1));
 
             // Assert - Database
             var dbMessage = dbContext.Messages.Find(message.Id);
             dbMessage.ShouldNotBeNull();
             dbMessage.Content.ShouldBe("Updated content");
-            dbMessage.EditedAt.ShouldBeGreaterThan(DateTime.UtcNow.AddMinutes(-1));
+            dbMessage.EditedAt?.ShouldBeGreaterThan(DateTime.UtcNow.AddMinutes(-1));
         }
 
         [Fact]

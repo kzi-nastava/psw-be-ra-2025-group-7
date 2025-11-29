@@ -3,6 +3,7 @@ using System;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Stakeholders.Infrastructure.Migrations
 {
     [DbContext(typeof(StakeholdersContext))]
-    partial class StakeholdersContextModelSnapshot : ModelSnapshot
+    [Migration("20251129162727_messages_nullable_editedat")]
+    partial class messages_nullable_editedat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
