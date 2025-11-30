@@ -7,6 +7,7 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Administration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 
 
@@ -25,37 +26,134 @@ namespace Explorer.API.Controllers.Tourist
             _service = service;
         }
 
-        // GET api/tourist/preferences/{touristId}
-        [HttpGet("{touristId:long}")]
-        public ActionResult<TourPreferencesDto> Get(long touristId)
+        private long GetAuthTouristId()
         {
-            var result = _service.GetByTouristId(touristId);
-            return Ok(result);
+            string[] possibleClaims =
+            {
+                ClaimTypes.NameIdentifier,
+                "id",
+                "userId",
+                "sub"
+            };
+
+            var claimValue = possibleClaims
+                .Select(type => User.FindFirstValue(type))
+                .FirstOrDefault(value => value != null);
+
+            if (claimValue == null || !long.TryParse(claimValue, out long touristId))
+            {
+                var allClaims = string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}"));
+                throw new UnauthorizedAccessException($"Invalid token. Available claims: {allClaims}");
+            }
+
+            return touristId;
         }
+
+
+        // GET api/tourist/preferences/
+        [HttpGet]
+        public ActionResult<TourPreferencesDto> Get()
+        {
+            try
+            {
+                var touristId = GetAuthTouristId();
+                var result = _service.GetByTouristId(touristId);
+
+                if (result == null)
+                {
+                    return NotFound("You have zero preferences.");
+                }
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+        }
+
 
         // POST api/tourist/preferences
         [HttpPost]
         public ActionResult<TourPreferencesDto> Create([FromBody] TourPreferencesDto tourPreferencesDto)
         {
-            var created = _service.Create(tourPreferencesDto);
-            return Ok(created);
+            try
+            {
+                var touristId = GetAuthTouristId();
+                tourPreferencesDto.TouristId = touristId;
+
+                var existing = _service.GetByTouristId(touristId);
+                if (existing != null)
+                {
+                    return BadRequest("You already have that same preference.");
+                }
+
+                var created = _service.Create(tourPreferencesDto);
+                return Ok(created);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // PUT api/tourist/preferences/{id}
+
+        // PUT api/tourist/preferences/
         [HttpPut("{id:long}")]
         public ActionResult<TourPreferencesDto> Update([FromBody] TourPreferencesDto tourPreferencesDto)
         {
-            var updated = _service.Update(tourPreferencesDto);
-            return Ok(updated);
+            try
+            {
+                var touristId = GetAuthTouristId();
+
+                var existing = _service.GetByTouristId(touristId);
+                if (existing == null)
+                {
+                    return NotFound("This preferences does not exist.");
+                }
+
+                tourPreferencesDto.Id = existing.Id;
+                tourPreferencesDto.TouristId = touristId;
+
+                var updated = _service.Update(tourPreferencesDto);
+                return Ok(updated);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // DELETE api/tourist/preferences/{id}
-        [HttpDelete("{id:long}")]
-        public ActionResult Delete(long id)
+
+        // DELETE api/tourist/preferences/
+        [HttpDelete]
+        public IActionResult Delete(long id)
         {
-            _service.Delete(id);
-            return Ok();
+            try
+            {
+                var touristId = GetAuthTouristId();
 
+                var existing = _service.GetByTouristId(touristId);
+                if (existing != null)
+                {
+                    _service.Delete(existing.Id);
+                }
+
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
         }
+
     }
 }

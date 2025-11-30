@@ -19,7 +19,7 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
         protected readonly StakeholdersContext DbContext;
         private readonly DbSet<TourPreferences> _dbSet;
 
-        TourPreferencesDbRepository(StakeholdersContext dbContext)
+        public TourPreferencesDbRepository(StakeholdersContext dbContext)
         {
             DbContext = dbContext;
             _dbSet = DbContext.Set<TourPreferences>(); ;

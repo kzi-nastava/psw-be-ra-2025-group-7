@@ -31,24 +31,62 @@ namespace Explorer.Stakeholders.Core.UseCases
             return _mapper.Map<TourPreferencesDto>(entity);
         }
 
-        public TourPreferencesDto Create(TourPreferencesDto dto)
+        public TourPreferencesDto Create(TourPreferencesDto tourPreferencesDto)
         {
-            var entity = _mapper.Map<TourPreferences>(dto);
+            var entity = new TourPreferences(
+                tourPreferencesDto.TouristId,
+                (Difficulty)ValidateDifficulty(tourPreferencesDto.PreferredDifficulty),
+                ValidateRating(tourPreferencesDto.WalkingRating),
+                ValidateRating(tourPreferencesDto.BicycleRating),
+                ValidateRating(tourPreferencesDto.CarRating),
+                ValidateRating(tourPreferencesDto.BoatRating),
+                tourPreferencesDto.Tags ?? new List<string>()
+                );
             var created = _repository.Create(entity);
             return _mapper.Map<TourPreferencesDto>(created);
         }
 
-        public TourPreferencesDto Update(TourPreferencesDto dto)
+        public TourPreferencesDto Update(TourPreferencesDto tourPreferencesDto)
         {
-            var entity = _mapper.Map<TourPreferences>(dto);
-            var created = _repository.Create(entity);
-            return _mapper.Map<TourPreferencesDto>(created);
+            var entity = _repository.GetByTouristId(tourPreferencesDto.TouristId);
+            if(entity == null || entity.Id != tourPreferencesDto.Id)
+            {
+                throw new InvalidOperationException("Preferences not found.");
+            }
+            entity.Update(
+                (Difficulty)ValidateDifficulty(tourPreferencesDto.PreferredDifficulty),
+                ValidateRating(tourPreferencesDto.WalkingRating),
+                ValidateRating(tourPreferencesDto.BicycleRating),
+                ValidateRating(tourPreferencesDto.CarRating),
+                ValidateRating(tourPreferencesDto.BoatRating),
+                tourPreferencesDto.Tags ?? new List<string>()
+                );
+            var updated = _repository.Update(entity);
+            return _mapper.Map<TourPreferencesDto>(updated);
         }
 
         public void Delete(long touristId)
         {
             _repository.Delete(touristId);
         }
+
+
+        private int ValidateDifficulty(int difficulty)
+        {
+            if (difficulty < 0 || difficulty > 2)
+                throw new ArgumentOutOfRangeException("Difficulty must be between 0 and 3.");
+            else
+                return difficulty;
+        }
+
+        private int ValidateRating(int rating)
+        {
+            if (rating < 0 || rating > 3)
+                throw new ArgumentOutOfRangeException("Score must be between 0 and 3.");
+            else
+                return rating;
+        }
+
 
     }
 }
