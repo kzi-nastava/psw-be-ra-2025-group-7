@@ -79,4 +79,9 @@ public class TourProblemService : ITourProblemService
 
         _repository.Delete(id);
     }
+
+    public List<TourProblemDto> GetAll() {
+    var tourProblems = _repository.GetAll();
+    return _mapper.Map<List<TourProblemDto>>(tourProblems);
+    }
 }

@@ -67,5 +67,10 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             _dbSet.Remove(entity);
             _dbContext.SaveChanges();
         }
+
+        public List<TourProblem> GetAll()
+        {
+         return _dbSet.AsNoTracking().ToList();
+        }
     }
 }
