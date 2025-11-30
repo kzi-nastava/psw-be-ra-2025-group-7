@@ -6,6 +6,7 @@ using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.API.Public;
 using Microsoft.Extensions.DependencyInjection;
 using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Infrastructure.Database;
 
 namespace Explorer.Stakeholders.Tests.Integration.Reviews;
 
@@ -17,18 +18,23 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
         SeedTestData();
     }
 
-    // Seed testnih podataka u bazu koju koriste testovi
+    
     private void SeedTestData()
     {
         using var scope = Factory.Services.CreateScope();
-        var repo = scope.ServiceProvider.GetRequiredService<IReviewRepository>();
+        var context = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
 
-        // Dodaj testne review-e
-        repo.Add(new Review(5, "Test review 1", -1));
-        repo.Add(new Review(4, "Test review 2", -1));
+        
+        context.Reviews.RemoveRange(context.Reviews);
+        context.SaveChanges();
+
+        
+        context.Reviews.Add(new Review(5, "Test review 1", -11));
+        context.Reviews.Add(new Review(4, "Test review 2", -12));
+        context.SaveChanges();
     }
 
-    // Helper metoda za kreiranje kontrolera sa servisom iz DI
+    
     private static ReviewController CreateController(IServiceScope scope)
     {
         return new ReviewController(
@@ -46,7 +52,7 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
         {
             Rating = 5,
             Comment = "Super aplikacija!",
-            PersonId = -1
+            PersonId = -11  // koristi validan PersonId iz seed baze
         };
 
         var result = ((ObjectResult)controller.Create(newReview).Result).Value as ReviewDto;
@@ -54,7 +60,7 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
         result.ShouldNotBeNull();
         result.Rating.ShouldBe(5);
         result.Comment.ShouldBe("Super aplikacija!");
-        result.PersonId.ShouldBe(-1);
+        result.PersonId.ShouldBe(-11); // promenjeno sa -1 na -11
     }
 
     [Fact]
@@ -63,10 +69,10 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
 
-        var result = ((ObjectResult)controller.GetMyReview(-1).Result).Value as ReviewDto;
+        var result = ((ObjectResult)controller.GetMyReview(-11).Result).Value as ReviewDto;
 
         result.ShouldNotBeNull();
-        result.PersonId.ShouldBe(-1);
+        result.PersonId.ShouldBe(-11);
     }
 
     [Fact]
@@ -75,11 +81,11 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var repo = scope.ServiceProvider.GetRequiredService<IReviewRepository>();
 
-        // Osiguraj da review postoji pre update-a
-        var review = repo.Get(-1);
+        
+        var review = repo.GetAll().FirstOrDefault(r => r.PersonId == -11);
         if (review == null)
         {
-            repo.Add(new Review(5, "Test review 1", -1));
+            repo.Add(new Review(5, "Test review 1", -11));
         }
 
         var controller = CreateController(scope);
@@ -90,7 +96,7 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
             Comment = "Dobar review!"
         };
 
-        var result = ((ObjectResult)controller.Update(-1, updateDto).Result).Value as ReviewDto;
+        var result = ((ObjectResult)controller.Update((int)review.Id, updateDto).Result).Value as ReviewDto;
 
         result.ShouldNotBeNull();
         result.Rating.ShouldBe(4);
@@ -103,19 +109,19 @@ public class ReviewControllerTests : BaseStakeholdersIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var repo = scope.ServiceProvider.GetRequiredService<IReviewRepository>();
 
-        // Seed review
-        var review = repo.Get(-1);
+        
+        var review = repo.GetAll().FirstOrDefault(r => r.PersonId == -11);
         if (review == null)
         {
-            repo.Add(new Review(5, "Test review 1", -1));
+            repo.Add(new Review(5, "Test review 1", -11));
+            review = repo.GetAll().First(r => r.PersonId == -11);
         }
 
-        // Koristi isti scope za kontroler
         var controller = CreateController(scope);
 
-        controller.Delete(-1);
+        controller.Delete((int)review.Id);
 
-        var deletedReview = repo.Get(-1);
+        var deletedReview = repo.Get((int)review.Id);
         deletedReview.ShouldBeNull();
     }
 }

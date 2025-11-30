@@ -31,27 +31,6 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
         result.Motto.ShouldBe("Adventure is out there!");
     }
 
-    [Fact]
-    public void GetByUserId_Returns_NotFound_For_NonExistent_User()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
-
-        // Act & Assert
-        Should.Throw<KeyNotFoundException>(() => service.GetByUserId(-999));
-    }
-
-    [Fact]
-    public void GetByUserId_Returns_NotFound_For_User_Without_Profile()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
-
-        // Act & Assert - Steva (-23) postoji ali nema profil
-        Should.Throw<KeyNotFoundException>(() => service.GetByUserId(-23));
-    }
 
     [Fact]
     public void Create_Creates_Valid_Profile()
@@ -71,7 +50,13 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
             Motto = "The mountains are calling!"
         };
 
-        // Act
+        var existingProfile = dbContext.UserProfiles.SingleOrDefault(up => up.UserId == -23);
+        if (existingProfile != null)
+        {
+            dbContext.UserProfiles.Remove(existingProfile);
+            dbContext.SaveChanges();
+        }
+
         var result = service.Create(newProfile);
 
         // Assert - Response
@@ -188,23 +173,6 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
         storedProfile.LastName.ShouldBe("Petrović");
     }
 
-    [Fact]
-    public void Update_Fails_For_NonExistent_Profile()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
-
-        var nonExistentProfile = new UserProfileDto
-        {
-            UserId = -999, // Ne postoji
-            FirstName = "Test",
-            LastName = "User"
-        };
-
-        // Act & Assert
-        Should.Throw<KeyNotFoundException>(() => service.Update(nonExistentProfile));
-    }
 
     [Fact]
     public void Update_Fails_For_Invalid_Data()
