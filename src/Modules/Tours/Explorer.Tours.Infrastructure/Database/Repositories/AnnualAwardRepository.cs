@@ -8,6 +8,7 @@ using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
@@ -32,8 +33,8 @@ public class AnnualAwardRepository : IAnnualAwardRepository
 
     public AnnualAward Get(long id)
     {
-        var entity = _dbSet.Find(id);
-        if (entity == null) throw new NotFoundException("Not found: " + id);
+        var entity = DbContext.AnnualAwards.Find(id);
+        if (entity == null) throw new NotFoundException($"Not found: {id}");
         return entity;
     }
 
@@ -60,8 +61,9 @@ public class AnnualAwardRepository : IAnnualAwardRepository
 
     public void Delete(long id)
     {
-        var entity = Get(id);
-        _dbSet.Remove(entity);
+        var award = DbContext.AnnualAwards.Find(id);
+        if (award == null) throw new NotFoundException($"Not found: {id}");
+        DbContext.AnnualAwards.Remove(award);
         DbContext.SaveChanges();
     }
 }
