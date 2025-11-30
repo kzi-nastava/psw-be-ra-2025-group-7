@@ -17,6 +17,12 @@ public class TourProblemService : ITourProblemService
         _mapper = mapper;
     }
 
+    public PagedResult<TourProblemDto> GetByAuthor(int authorId, int page, int pageSize)
+    {
+        var result = _repository.GetByAuthor(authorId, page, pageSize);
+        var items = _mapper.Map<List<TourProblemDto>>(result.Results);
+        return new PagedResult<TourProblemDto>(items, result.TotalCount);
+    }
     public PagedResult<TourProblemDto> GetTouristProblemsPages(int touristId, int page, int pageSize)
     {
         var result = _repository.GetByTourist(touristId, page, pageSize);

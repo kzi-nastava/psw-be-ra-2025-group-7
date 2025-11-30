@@ -9,6 +9,7 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
 {
     public interface ITourProblemRepository
     {
+        PagedResult<TourProblem> GetByAuthor(int authorId,int pageNumber, int pageSize);
         PagedResult<TourProblem> GetByTourist(int touristId,int pageNumber, int pageSize);
         TourProblem Get(int id);
         TourProblem Create(TourProblem tourProblem);

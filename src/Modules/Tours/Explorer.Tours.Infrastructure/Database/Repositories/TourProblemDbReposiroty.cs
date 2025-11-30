@@ -19,6 +19,26 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             _dbSet = _dbContext.Set<TourProblem>();
         }
 
+        public PagedResult<TourProblem> GetByAuthor(int authorId, int page, int pageSize)
+        {
+            // Spajamo TourProblem sa Tour preko TourId
+            var query =
+                from tp in _dbSet
+                join t in _dbContext.Tours on tp.TourId equals t.Id
+                where t.AuthorId == authorId
+                orderby tp.Id
+                select tp;
+
+            var totalCount = query.Count();
+
+            var items = query
+                .Skip(page * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<TourProblem>(items, totalCount);
+        }
+
         public PagedResult<TourProblem> GetByTourist(int touristId, int page, int pageSize)
         {
             var query = _dbSet.Where(tp => tp.TouristId == touristId).OrderBy(tp => tp.Id);

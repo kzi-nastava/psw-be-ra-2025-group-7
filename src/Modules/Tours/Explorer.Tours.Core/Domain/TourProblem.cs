@@ -9,9 +9,9 @@ namespace Explorer.Tours.Core.Domain
 {
     public enum ProblemCategory { Safety, Navigation, Equipment, Other }
     public enum ProblemPriority { Low, Medium, High }
-    public class TourProblem:Entity
+    public class TourProblem:AggregateRoot
     {
-        public int Id { get; init; }
+
         public int TourId { get; init; }
         public int TouristId { get; init; }
         public ProblemCategory Category { get; init; }

@@ -8,7 +8,7 @@ using Explorer.Tours.API.Public.Tourist;
 
 namespace Explorer.API.Controllers.Tourist
 {
-    [Authorize(Policy = "touristPolicy")]
+    
     [Route("api/tourist/tour-problems")]
     [ApiController]
     public class TourProblemController : ControllerBase
@@ -20,6 +20,7 @@ namespace Explorer.API.Controllers.Tourist
             _service = service;
         }
         // returns ONLY logged-in user's problems
+        [Authorize(Policy = "touristPolicy")]
         [HttpGet]
         public ActionResult<PagedResult<TourProblemDto>> GetMine(
             [FromQuery] int page,
@@ -29,7 +30,7 @@ namespace Explorer.API.Controllers.Tourist
             var result = _service.GetTouristProblemsPages(touristId, page, pageSize);
             return Ok(result);
         }
-
+        [Authorize(Policy = "touristPolicy")]
         [HttpPost]
         public ActionResult<TourProblemDto> Create([FromBody] TourProblemDto tourProblem)
         {
@@ -40,7 +41,7 @@ namespace Explorer.API.Controllers.Tourist
             var created = _service.Create(tourProblem, touristId);
             return Ok(created);
         }
-
+        [Authorize(Policy = "touristPolicy")]
         [HttpPut("{id:int}")]
         public ActionResult<TourProblemDto> Update(int id, [FromBody] TourProblemDto tourProblem)
         {
@@ -51,7 +52,7 @@ namespace Explorer.API.Controllers.Tourist
             var updated = _service.Update(tourProblem, touristId);
             return Ok(updated);
         }
-
+        [Authorize(Policy = "touristPolicy")]
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
@@ -71,5 +72,17 @@ namespace Explorer.API.Controllers.Tourist
                 return Forbid();
             }
         }
+        [Authorize(Policy = "authorPolicy")]
+        [HttpGet("author")]
+        public ActionResult<PagedResult<TourProblemDto>> GetByAuthor(
+            [FromQuery] int page,
+            [FromQuery] int pageSize)
+        {
+            var authorId = (int)User.PersonId();
+            var result = _service.GetByAuthor(authorId, page, pageSize);
+            return Ok(result);
+        }
+
+
     }
 }
