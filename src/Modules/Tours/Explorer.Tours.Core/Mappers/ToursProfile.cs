@@ -12,6 +12,8 @@ public class ToursProfile : Profile
         CreateMap<EquipmentDto, Equipment>().ReverseMap();
         CreateMap<FacilityDto, Facility>().ReverseMap();
         CreateMap<TourDto, Tour>().ReverseMap();
+        CreateMap<CreateTourDto, Tour>();
+        CreateMap<TourDto, Tour>().ReverseMap();
         CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
 
         CreateMap<TourProblemDto, TourProblem>()

@@ -26,6 +26,8 @@ public class ToursContext : DbContext
         modelBuilder.Entity<Tour>().HasKey(t => t.Id);
         modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
                                                                         v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+        modelBuilder.Entity<Tour>().Property(t => t.PublishedAt).IsRequired(false);
+        modelBuilder.Entity<Tour>().Property(t => t.ArchivedAt).IsRequired(false);
 
         modelBuilder.Entity<TourJournal>().HasKey(tj => tj.Id);
         modelBuilder.Entity<TourJournal>().Property(tj => tj.TouristId).IsRequired();
