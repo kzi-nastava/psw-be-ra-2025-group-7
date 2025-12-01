@@ -1,0 +1,60 @@
+﻿using Explorer.Blog.Core.Domain;
+using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Explorer.Blog.Infrastructure.Database.Repositories
+{
+    public class BlogCommentRepository : IBlogCommentRepository
+    {
+        private readonly BlogContext _context;
+
+        public BlogCommentRepository(BlogContext context)
+        {
+            _context = context;
+        }
+
+        public List<BlogComment> GetByBlogId(long blogId)
+        {
+            var blogPost = _context.BlogPosts
+                .Include(b => b.Comments)
+                .FirstOrDefault(b => b.Id == blogId);
+
+            return blogPost?.Comments.OrderBy(c => c.CreatedAt).ToList() ?? new List<BlogComment>();
+        }
+
+        public BlogComment Create(BlogComment comment)
+        {
+            // Učitaj blog post sa komentarima
+            var blogPost = _context.BlogPosts
+                .Include(b => b.Comments)
+                .FirstOrDefault(b => b.Id == comment.BlogId);
+
+            if (blogPost == null)
+                throw new KeyNotFoundException($"Blog post with ID {comment.BlogId} not found.");
+
+            // Dodaj komentar kroz agregat (poziva AddComment koja validira i ažurira status)
+            blogPost.AddComment(comment);
+
+            _context.SaveChanges();
+            return comment;
+        }
+
+        public BlogComment? Get(long id)
+        {
+            // Owned entity se pristupa kroz parent agregat
+            return _context.BlogPosts
+                .SelectMany(b => b.Comments)
+                .FirstOrDefault(c => c.Id == id);
+        }
+
+        public BlogComment Update(BlogComment comment)
+        {
+            // Ažuriranje owned entity-ja
+            _context.Entry(comment).State = EntityState.Modified;
+            _context.SaveChanges();
+            return comment;
+        }
+    }
+}

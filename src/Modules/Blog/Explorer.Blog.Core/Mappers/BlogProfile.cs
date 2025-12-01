@@ -27,5 +27,8 @@ public class BlogProfile : Profile
             .ForMember(d => d.Images, opt => opt.MapFrom(src => src.Images))
             .ForMember(d => d.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
+        CreateMap<BlogComment, BlogCommentDto>();
+        CreateMap<BlogCommentDto, BlogComment>();
+
     }
 }

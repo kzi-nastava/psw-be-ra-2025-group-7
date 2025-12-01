@@ -23,6 +23,8 @@ namespace Explorer.Blog.Core.Domain
 
         public List<BlogImage> Images { get; private set; } = new();
 
+        public List<BlogComment> Comments { get; private set; } = new();
+
         protected BlogPost() { }  
 
         public BlogPost(long authorId, string title, string description, IEnumerable<BlogImage>? images = null)
@@ -121,6 +123,31 @@ namespace Explorer.Blog.Core.Domain
         {
             if (Status != BlogStatus.Published)
                 throw new InvalidOperationException("Operation allowed only for published blogs.");
+        }
+
+        public void AddComment(BlogComment comment)
+        {
+            if (Status != BlogStatus.Published)
+                throw new InvalidOperationException("Comments can only be added to published blogs.");
+
+            Comments.Add(comment);
+            RecalculatePopularityStatus();
+        }
+
+        private void RecalculatePopularityStatus()
+        {
+            // Logika za automatsko promovisanje bloga na osnovu broja komentara
+            if (Status == BlogStatus.Published)
+            {
+                if (Comments.Count >= 10)
+                {
+                    Status = BlogStatus.Famous;
+                }
+                else if (Comments.Count >= 5)
+                {
+                    Status = BlogStatus.Active;
+                }
+            }
         }
     }
 }
