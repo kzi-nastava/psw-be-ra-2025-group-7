@@ -7,6 +7,7 @@ using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using Xunit;
 
 namespace Explorer.Tours.Tests.Integration.Author;
 
@@ -89,7 +90,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = ((ObjectResult)controller.Update(updatedEntity).Result)?.Value as TourDto;
+        var result = ((ObjectResult)controller.Update(updatedEntity.Id, updatedEntity).Result)?.Value as TourDto;
 
         // Assert - Response
         result.ShouldNotBeNull();
@@ -125,7 +126,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         };
 
         // Act & Assert
-        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity));
+        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity.Id, updatedEntity));
     }
 
     [Fact]

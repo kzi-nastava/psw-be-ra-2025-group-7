@@ -1,105 +1,161 @@
 ﻿using AutoMapper;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
-using Explorer.BuildingBlocks.Core.Exceptions;
 
-namespace Explorer.Tours.Core.UseCases.Administration;
-
-public class TourService : ITourService
+namespace Explorer.Tours.Core.UseCases.Administration
 {
-    private readonly ITourRepository _tourRepository;
-    private readonly IMapper _mapper;
-
-    public TourService(ITourRepository repository, IMapper mapper)
+    public class TourService : ITourService
     {
-        _tourRepository = repository;
-        _mapper = mapper;
-    }
+        private readonly ITourRepository _tourRepository;
+        private readonly IMapper _mapper;
 
-    public PagedResult<TourDto> GetPagedByAuthor(int page, int pageSize, long authorId)
-    {
-        var result = _tourRepository.GetPagedByAuthor(page, pageSize,authorId);
+        public TourService(ITourRepository repository, IMapper mapper)
+        {
+            _tourRepository = repository;
+            _mapper = mapper;
+        }
 
-        var items = result.Results.Select(_mapper.Map<TourDto>).ToList();
-        return new PagedResult<TourDto>(items, result.TotalCount);
-    }
+        public PagedResult<TourDto> GetPagedByAuthor(int page, int pageSize, long authorId)
+        {
+            var result = _tourRepository.GetPagedByAuthor(page, pageSize, authorId);
 
-    public TourDto Create(TourDto entity)
-    {
-        entity.PublishedAt = null;
-        entity.ArchivedAt = null;
-        entity.Status = 0;
-        var result = _tourRepository.Create(_mapper.Map<Tour>(entity));
-        return _mapper.Map<TourDto>(result);
-    }
+            var items = result.Results.Select(_mapper.Map<TourDto>).ToList();
+            return new PagedResult<TourDto>(items, result.TotalCount);
+        }
 
-    public TourDto Update(TourDto entity)
-    {
-        var existingTour = _tourRepository.Get(entity.Id);
+        public TourDto Create(TourDto entity)
+        {
+            // Životni ciklus – inicijalne vrednosti
+            entity.PublishedAt = null;
+            entity.ArchivedAt = null;
+            entity.Status = (int)TourStatus.Draft;
 
-        if (existingTour.AuthorId != entity.AuthorId)
-            throw new ForbiddenException("You can only update your own tours.");
+            var result = _tourRepository.Create(_mapper.Map<Tour>(entity));
+            return _mapper.Map<TourDto>(result);
+        }
 
-        _mapper.Map(entity, existingTour);
+        public TourDto Update(TourDto entity)
+        {
+            var existingTour = _tourRepository.Get(entity.Id);
 
-        existingTour.Validate();
+            if (existingTour.AuthorId != entity.AuthorId)
+                throw new ForbiddenException("You can only update your own tours.");
 
-        var result = _tourRepository.Update(existingTour);
-        return _mapper.Map<TourDto>(result);
-    }
+            // Mapiramo DTO → postojeći domen objekat
+            _mapper.Map(entity, existingTour);
 
-    public void Delete(long id, long authorId)
-    {
-        var tour = _tourRepository.Get(id);
+            existingTour.Validate();
 
-        if (tour.AuthorId != authorId)
-            throw new ForbiddenException("You can only delete your own tours.");
+            var result = _tourRepository.Update(existingTour);
+            return _mapper.Map<TourDto>(result);
+        }
 
-        if (tour.Status != TourStatus.Draft)
-            throw new InvalidOperationException("Only Draft tours can be deleted.");
+        public void Delete(long id, long authorId)
+        {
+            var tour = _tourRepository.Get(id);
 
-        _tourRepository.Delete(id);
-    }
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can only delete your own tours.");
 
-    public TourDto Publish(long id, long authorId)
-    {
-        var tour = _tourRepository.Get(id);
+            if (tour.Status != TourStatus.Draft)
+                throw new InvalidOperationException("Only Draft tours can be deleted.");
 
-        if (tour.AuthorId != authorId)
-            throw new ForbiddenException("You can only publish your own tours.");
+            _tourRepository.Delete(id);
+        }
 
-        tour.Publish();
-        var result = _tourRepository.Update(tour);
+        // ================= Kartica 3 – ključne tačke (tvoj deo) =================
 
-        return _mapper.Map<TourDto>(result);
-    }
+        public TourDto AddKeyPoint(long tourId, long authorId, KeyPointDto keyPointDto)
+        {
+            var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
 
-    public TourDto Archive(long id, long authorId)
-    {
-        var tour = _tourRepository.Get(id);
+            var keyPoint = _mapper.Map<KeyPoint>(keyPointDto);
+            tour.AddKeyPoint(keyPoint); // domen čuva pravilo "samo Draft"
 
-        if (tour.AuthorId != authorId)
-            throw new ForbiddenException("You can only archive your own tours.");
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
 
-        tour.Archive();
-        var result = _tourRepository.Update(tour);
+        public TourDto UpdateKeyPoint(long tourId, long authorId, int index, KeyPointDto keyPointDto)
+        {
+            var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
 
-        return _mapper.Map<TourDto>(result);
-    }
+            var keyPoint = _mapper.Map<KeyPoint>(keyPointDto);
+            tour.UpdateKeyPoint(index, keyPoint);
 
-    public TourDto Reactivate(long id, long authorId, int newStatus)
-    {
-        var tour = _tourRepository.Get(id);
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
 
-        if (tour.AuthorId != authorId)
-            throw new ForbiddenException("You can only reactivate your own tours.");
+        public TourDto RemoveKeyPoint(long tourId, long authorId, int index)
+        {
+            var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
 
-        tour.Reactivate((TourStatus)newStatus);
-        var result = _tourRepository.Update(tour);
+            tour.RemoveKeyPoint(index);
 
-        return _mapper.Map<TourDto>(result);
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
+
+        /// <summary>
+        /// Pomoćna metoda: osigurava da je tura autora i da je u Draft statusu.
+        /// </summary>
+        private Tour GetAuthorDraftTourOrThrow(long tourId, long authorId)
+        {
+            var tour = _tourRepository.Get(tourId);
+
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can modify only your own tours.");
+
+            if (tour.Status != TourStatus.Draft)
+                throw new InvalidOperationException("Key points can only be modified while tour is in Draft status.");
+
+            return tour;
+        }
+
+        // ================= Životni ciklus ture (član 1) =================
+
+        public TourDto Publish(long id, long authorId)
+        {
+            var tour = _tourRepository.Get(id);
+
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can only publish your own tours.");
+
+            tour.Publish();
+            var result = _tourRepository.Update(tour);
+
+            return _mapper.Map<TourDto>(result);
+        }
+
+        public TourDto Archive(long id, long authorId)
+        {
+            var tour = _tourRepository.Get(id);
+
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can only archive your own tours.");
+
+            tour.Archive();
+            var result = _tourRepository.Update(tour);
+
+            return _mapper.Map<TourDto>(result);
+        }
+
+        public TourDto Reactivate(long id, long authorId, int newStatus)
+        {
+            var tour = _tourRepository.Get(id);
+
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can only reactivate your own tours.");
+
+            tour.Reactivate((TourStatus)newStatus);
+            var result = _tourRepository.Update(tour);
+
+            return _mapper.Map<TourDto>(result);
+        }
     }
 }

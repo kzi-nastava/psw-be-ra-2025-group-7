@@ -3,6 +3,7 @@ using System;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Tours.Infrastructure.Migrations
 {
     [DbContext(typeof(ToursContext))]
-    partial class ToursContextModelSnapshot : ModelSnapshot
+    [Migration("20251130192630_AddKeyPointsToTour")]
+    partial class AddKeyPointsToTour
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -160,9 +163,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime?>("ArchivedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<long>("AuthorId")
                         .HasColumnType("bigint");
 
@@ -179,9 +179,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
-
-                    b.Property<DateTime?>("PublishedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");

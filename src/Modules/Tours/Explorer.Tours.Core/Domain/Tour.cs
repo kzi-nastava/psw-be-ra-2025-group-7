@@ -9,16 +9,22 @@ namespace Explorer.Tours.Core.Domain
         public string Name { get; private set; }
         public string Description { get; private set; }
         public TourDifficulty Difficulty { get; private set; }
-        public List<string>Tags { get; private set; }
+        public List<string> Tags { get; private set; }
         public TourStatus Status { get; private set; }
         public decimal Price { get; private set; }
 
+        // Životni ciklus ture (član 1)
         public DateTime? PublishedAt { get; private set; }
         public DateTime? ArchivedAt { get; private set; }
 
+        // Kartica 3 – kolekcija ključnih tačaka (tvoj deo)
+        public List<KeyPoint> KeyPoints { get; private set; } = new();
+
+        // Potreban EF-u
         public Tour()
         {
             Tags = new List<string>();
+            KeyPoints = new List<KeyPoint>();
         }
 
         public Tour(long authorId, string name, string description, TourDifficulty difficulty, List<string> tags)
@@ -30,10 +36,15 @@ namespace Explorer.Tours.Core.Domain
             Tags = tags ?? new List<string>();
             Status = TourStatus.Draft;
             Price = 0;
+
             PublishedAt = null;
             ArchivedAt = null;
+            KeyPoints = new List<KeyPoint>();
+
             Validate();
         }
+
+        // ================= ŽIVOTNI CIKLUS TURE (ČLAN 1) =================
 
         public void Publish()
         {
@@ -77,18 +88,64 @@ namespace Explorer.Tours.Core.Domain
         public bool HasRequiredData()
         {
             return !string.IsNullOrWhiteSpace(Name)
-                && !string.IsNullOrWhiteSpace(Description)
-                && Tags != null && Tags.Any();
+                   && !string.IsNullOrWhiteSpace(Description)
+                   && Tags != null && Tags.Any();
         }
+
+        // ================= KARTICA 3 – KLJUČNE TAČKE  =================
+
+        public void AddKeyPoint(KeyPoint keyPoint)
+        {
+            EnsureDraftStatus(); // oslanja se na status koji je modelovao član 1
+
+            if (keyPoint == null)
+                throw new ArgumentNullException(nameof(keyPoint));
+
+            KeyPoints.Add(keyPoint);
+            // TODO (Član 3 / drugi): ovde kasnije mogu da računaju dužinu ture itd.
+        }
+
+        public void UpdateKeyPoint(int index, KeyPoint keyPoint)
+        {
+            EnsureDraftStatus();
+
+            if (index < 0 || index >= KeyPoints.Count)
+                throw new ArgumentOutOfRangeException(nameof(index), "Key point index is out of range.");
+
+            if (keyPoint == null)
+                throw new ArgumentNullException(nameof(keyPoint));
+
+            KeyPoints[index] = keyPoint;
+        }
+
+        public void RemoveKeyPoint(int index)
+        {
+            EnsureDraftStatus();
+
+            if (index < 0 || index >= KeyPoints.Count)
+                throw new ArgumentOutOfRangeException(nameof(index), "Key point index is out of range.");
+
+            KeyPoints.RemoveAt(index);
+        }
+
+        // Helper – kartica 3 važi samo dok je tura u pripremi
+        private void EnsureDraftStatus()
+        {
+            if (Status != TourStatus.Draft)
+                throw new InvalidOperationException("Key points can only be modified while tour is in Draft status.");
+        }
+
+        // ================= VALIDACIJA =================
 
         public void Validate()
         {
             ValidateName();
             ValidateDescription();
             ValidateTags();
+            // Ovde se po potrebi može dodati validacija KeyPoints
         }
 
-        public void ValidateName()
+        private void ValidateName()
         {
             if (string.IsNullOrWhiteSpace(Name))
                 throw new ArgumentException("Tour name is required.");
@@ -96,7 +153,7 @@ namespace Explorer.Tours.Core.Domain
                 throw new ArgumentException("Tour name cannot exceed 100 characters.");
         }
 
-        public void ValidateDescription()
+        private void ValidateDescription()
         {
             if (string.IsNullOrWhiteSpace(Description))
                 throw new ArgumentException("Tour description is required.");
@@ -104,7 +161,7 @@ namespace Explorer.Tours.Core.Domain
                 throw new ArgumentException("Tour description cannot exceed 1000 characters.");
         }
 
-        public void ValidateTags()
+        private void ValidateTags()
         {
             if (Tags.Count > 10)
                 throw new ArgumentException("Maximum 10 tags allowed.");
