@@ -11,10 +11,17 @@ namespace Explorer.Blog.API.Public
     public interface IBlogPostService
     {
  
-        PagedResult<BlogPostDto> GetByAuthor(long authorId, int page, int pageSize);    //pregeledanje svojih blogova
+        PagedResult<BlogPostDto> GetByAuthor(long authorId, int page, int pageSize);    //pregledanje svojih blogova
 
         BlogPostDto Create(long authorId, CreateBlogPostDto dto);  //kreiranje bloga
 
-        BlogPostDto Update(long authorId, UpdateBlogPostDto dto);
+        //BlogPostDto Update(long authorId, UpdateBlogPostDto dto);
+
+        BlogPostDto UpdateDraft(long authorId, UpdateBlogPostDto dto);
+        
+        BlogPostDto UpdatePublishedDescription(long authorId, UpdatePublishedBlogDescriptionDto dto);
+
+        BlogPostDto Publish(long authorId, long blogId);
+        BlogPostDto Archive(long authorId, long blogId);
     }
 }
