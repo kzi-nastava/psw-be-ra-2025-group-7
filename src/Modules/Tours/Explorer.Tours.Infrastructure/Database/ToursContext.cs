@@ -13,11 +13,12 @@ public class ToursContext : DbContext
     public DbSet<TouristEquipment> TouristEquipment { get; set; }
     public DbSet<Quiz> Quizzes { get; set; }
     public DbSet<Question> Questions { get; set; }
-
     public DbSet<Facility> Facility { get; set; }
-
     public DbSet<TourProblem> TourProblems { get; set; }
+    public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
+    
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Postojeća konfiguracija
@@ -107,6 +108,26 @@ public class ToursContext : DbContext
              .IsRequired();
         });
 
+        // ===== TourPurchaseToken konfiguracija =====
+        modelBuilder.Entity<TourPurchaseToken>(b =>
+        {
+            b.ToTable("TourPurchaseTokens");
+
+            b.HasKey(tpt => tpt.Id);
+
+            b.Property(tpt => tpt.UserId)
+                .IsRequired();
+
+            b.Property(tpt => tpt.TourId)
+                .IsRequired();
+
+            b.Property(tpt => tpt.PurchaseDate)
+                .IsRequired();
+
+            // Create unique index to ensure one purchase per user per tour
+            b.HasIndex(tpt => new { tpt.UserId, tpt.TourId })
+                .IsUnique();
+        });
 
         modelBuilder.Entity<Tour>().HasKey(t => t.Id);
         modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),

@@ -57,6 +57,20 @@ namespace Explorer.Tours.Core.Domain
             if (Tags.Any(tag => tag.Length > 50))
                 throw new ArgumentException("Tag cannot exceed 50 characters.");
         }
+
+        public bool IsPurchasable()
+        {
+            return Status == TourStatus.Published;
+        }
+
+        public void ValidatePurchase()
+        {
+            if (!IsPurchasable())
+            {
+                throw new InvalidOperationException(
+                    $"Tour cannot be purchased. Current status: {Status}. Only Published tours can be purchased.");
+            }
+        }
     }
 
     public enum TourDifficulty

@@ -25,6 +25,14 @@ public class ToursProfile : Profile
         CreateMap<TourJournalDto, TourJournal>().ReverseMap()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
         CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
-
+        
+        CreateMap<TourPurchaseToken, TourPurchaseTokenDto>().ReverseMap();
+        
+        // Map Tour to TourPreviewDto with limited information
+        CreateMap<Tour, TourPreviewDto>()
+            .ForMember(d => d.ShortDescription, opt => opt.MapFrom(s => 
+                s.Description.Length > 200 ? s.Description.Substring(0, 200) + "..." : s.Description))
+            .ForMember(d => d.Difficulty, opt => opt.MapFrom(s => s.Difficulty.ToString()))
+            .ForMember(d => d.IsPurchasable, opt => opt.MapFrom(s => s.IsPurchasable()));
     }
 }
