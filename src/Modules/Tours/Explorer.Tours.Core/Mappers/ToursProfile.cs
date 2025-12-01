@@ -9,18 +9,23 @@ namespace Explorer.Tours.Core.Mappers
     {
         public ToursProfile()
         {
+            // Osnovni DTO-i
             CreateMap<EquipmentDto, Equipment>().ReverseMap();
             CreateMap<FacilityDto, Facility>().ReverseMap();
 
-            //Kartica 3 – mapiranje KeyPoint <-> KeyPointDto
+            // Kartica 3 – mapiranje KeyPoint <-> KeyPointDto
             CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
 
-            //Tour <-> TourDto, uključujući KeyPoints
+            // Tour <-> TourDto, uključujući KeyPoints
             CreateMap<TourDto, Tour>()
                 .ForMember(dest => dest.KeyPoints,
                            opt => opt.MapFrom(src => src.KeyPoints ?? new List<KeyPointDto>()))
                 .ReverseMap();
 
+            // Mapiranje za kreiranje ture (priča člana 1)
+            CreateMap<CreateTourDto, Tour>();
+
+            // Ostali postojeći mapovi
             CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
 
             CreateMap<TourProblemDto, TourProblem>()

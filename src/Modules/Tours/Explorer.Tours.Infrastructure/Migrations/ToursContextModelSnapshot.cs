@@ -160,6 +160,9 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<long>("AuthorId")
                         .HasColumnType("bigint");
 
@@ -176,6 +179,9 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");

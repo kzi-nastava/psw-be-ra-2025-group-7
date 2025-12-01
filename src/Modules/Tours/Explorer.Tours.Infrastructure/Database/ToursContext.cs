@@ -1,4 +1,6 @@
-﻿using Explorer.Tours.Core.Domain;
+﻿using System;
+using System.Linq;
+using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +23,7 @@ namespace Explorer.Tours.Infrastructure.Database
         {
             modelBuilder.HasDefaultSchema("tours");
 
-            // ===== Tour konfiguracija (uključuje tvoje KeyPoints) =====
+            // ===== Tour konfiguracija (životni ciklus + tvoji KeyPoints) =====
             modelBuilder.Entity<Tour>(b =>
             {
                 b.ToTable("Tours");
@@ -32,7 +34,11 @@ namespace Explorer.Tours.Infrastructure.Database
                         v => string.Join(',', v),
                         v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
 
-                //Kartica 3 – KeyPoints kao owned kolekcija
+                // datumi iz development grane
+                b.Property(t => t.PublishedAt).IsRequired(false);
+                b.Property(t => t.ArchivedAt).IsRequired(false);
+
+                // Kartica 3 – KeyPoints kao owned kolekcija
                 b.OwnsMany(t => t.KeyPoints, kp =>
                 {
                     kp.ToTable("KeyPoints");               // tabela: tours."KeyPoints"
@@ -150,8 +156,7 @@ namespace Explorer.Tours.Infrastructure.Database
                  .IsRequired();
             });
 
-            // Ostale entitete (Facility, TourProblem, ...) možete dodatno konfigurisati
-            // u svojim karticama – ovde ih ne diramo.
+            // Ostale entitete (Facility, TourProblem, ...) rade drugi u svojim karticama.
         }
     }
 }

@@ -19,6 +19,8 @@ namespace Explorer.API.Controllers.Author
             _tourService = tourService;
         }
 
+        // ====== Osnovni CRUD ======
+
         [HttpGet]
         public ActionResult<PagedResult<TourDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
         {
@@ -26,11 +28,24 @@ namespace Explorer.API.Controllers.Author
             return Ok(_tourService.GetPagedByAuthor(page, pageSize, authorId));
         }
 
+        // Kreiranje ture preko CreateTourDto (kod člana 1)
         [HttpPost]
-        public ActionResult<TourDto> Create([FromBody] TourDto tour)
+        public ActionResult<TourDto> Create([FromBody] CreateTourDto createDto)
         {
-            tour.AuthorId = User.PersonId();
-            return Ok(_tourService.Create(tour));
+            var tourDto = new TourDto
+            {
+                Name = createDto.Name,
+                Description = createDto.Description,
+                Difficulty = createDto.Difficulty,
+                Tags = createDto.Tags,
+                Price = 0,
+                AuthorId = User.PersonId(),
+                Status = 0,       // Draft
+                PublishedAt = null,
+                ArchivedAt = null
+            };
+
+            return Ok(_tourService.Create(tourDto));
         }
 
         [HttpPut("{id:long}")]
@@ -76,6 +91,69 @@ namespace Explorer.API.Controllers.Author
             var authorId = User.PersonId();
             var result = _tourService.RemoveKeyPoint(tourId, authorId, index);
             return Ok(result);
+        }
+
+        // ============== Životni ciklus ture (član 1) ==============
+
+        [HttpPut("{id:long}/publish")]
+        public ActionResult<TourDto> Publish(long id)
+        {
+            try
+            {
+                var authorId = User.PersonId();
+                var result = _tourService.Publish(id, authorId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("{id:long}/archive")]
+        public ActionResult<TourDto> Archive(long id)
+        {
+            try
+            {
+                var authorId = User.PersonId();
+                var result = _tourService.Archive(id, authorId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("{id:long}/reactivate")]
+        public ActionResult<TourDto> Reactivate(long id, [FromBody] ReactivateRequestDto request)
+        {
+            try
+            {
+                var authorId = User.PersonId();
+                var result = _tourService.Reactivate(id, authorId, request.NewStatus);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
     }
 }

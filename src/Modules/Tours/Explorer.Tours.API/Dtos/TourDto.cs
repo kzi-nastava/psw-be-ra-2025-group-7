@@ -1,4 +1,7 @@
-﻿namespace Explorer.Tours.API.Dtos
+﻿using System;
+using System.Collections.Generic;
+
+namespace Explorer.Tours.API.Dtos
 {
     public class TourDto
     {
@@ -17,7 +20,11 @@
 
         public decimal Price { get; set; }
 
-        //Kartica 3 – ključne tačke ture
+        // Kartica 3 – ključne tačke ture
         public List<KeyPointDto> KeyPoints { get; set; } = new();
+
+        // Životni ciklus ture (priča člana 1)
+        public DateTime? PublishedAt { get; set; }
+        public DateTime? ArchivedAt { get; set; }
     }
 }

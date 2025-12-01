@@ -80,6 +80,25 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TourJournals",
+                schema: "tours",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TouristId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    City = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TourJournals", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TourProblems",
                 schema: "tours",
                 columns: table => new
@@ -111,7 +130,9 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     Difficulty = table.Column<int>(type: "integer", nullable: false),
                     Tags = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false)
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    PublishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ArchivedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -195,6 +216,10 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "TouristEquipment",
+                schema: "tours");
+
+            migrationBuilder.DropTable(
+                name: "TourJournals",
                 schema: "tours");
 
             migrationBuilder.DropTable(

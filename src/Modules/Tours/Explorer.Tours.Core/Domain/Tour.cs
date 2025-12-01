@@ -13,13 +13,19 @@ namespace Explorer.Tours.Core.Domain
         public TourStatus Status { get; private set; }
         public decimal Price { get; private set; }
 
-        //Tvoja kartica 3 – kolekcija ključnih tačaka
+        // Životni ciklus ture (član 1)
+        public DateTime? PublishedAt { get; private set; }
+        public DateTime? ArchivedAt { get; private set; }
+
+        // Kartica 3 – kolekcija ključnih tačaka (tvoj deo)
         public List<KeyPoint> KeyPoints { get; private set; } = new();
 
-        // TODO (Član 3): Pri objavi ture koristiće KeyPoints
-        // - da proveri da li tura ima bar dve tačke.
-        // - da vrati samo prvu tačku turistu.
-        // Ovo je za preostale clanove, ne implementiram Publish logiku ovde.
+        // Potreban EF-u
+        public Tour()
+        {
+            Tags = new List<string>();
+            KeyPoints = new List<KeyPoint>();
+        }
 
         public Tour(long authorId, string name, string description, TourDifficulty difficulty, List<string> tags)
         {
@@ -30,22 +36,73 @@ namespace Explorer.Tours.Core.Domain
             Tags = tags ?? new List<string>();
             Status = TourStatus.Draft;
             Price = 0;
+
+            PublishedAt = null;
+            ArchivedAt = null;
             KeyPoints = new List<KeyPoint>();
 
             Validate();
         }
 
-        //Javne metode za rad sa ključnim tačkama (Kartica 3)
+        // ================= ŽIVOTNI CIKLUS TURE (ČLAN 1) =================
+
+        public void Publish()
+        {
+            if (Status == TourStatus.Archived)
+                throw new InvalidOperationException("Cannot publish archived tour. Reactivate it first.");
+
+            if (!HasRequiredData())
+                throw new InvalidOperationException("Cannot publish tour without all required data.");
+
+            Status = TourStatus.Published;
+            PublishedAt = DateTime.UtcNow;
+        }
+
+        public void Archive()
+        {
+            if (Status != TourStatus.Published)
+                throw new InvalidOperationException("Only published tours can be archived.");
+
+            if (Status == TourStatus.Archived)
+                throw new InvalidOperationException("This tour is already archived.");
+
+            Status = TourStatus.Archived;
+            ArchivedAt = DateTime.UtcNow;
+        }
+
+        public void Reactivate(TourStatus newStatus)
+        {
+            if (Status != TourStatus.Archived)
+                throw new InvalidOperationException("Only archived tours can be reactivated.");
+
+            if (newStatus != TourStatus.Draft && newStatus != TourStatus.Published)
+                throw new ArgumentException("Tour can only be reactivated as Draft or Published.");
+
+            Status = newStatus;
+            ArchivedAt = null;
+
+            if (newStatus == TourStatus.Published)
+                PublishedAt = DateTime.UtcNow;
+        }
+
+        public bool HasRequiredData()
+        {
+            return !string.IsNullOrWhiteSpace(Name)
+                   && !string.IsNullOrWhiteSpace(Description)
+                   && Tags != null && Tags.Any();
+        }
+
+        // ================= KARTICA 3 – KLJUČNE TAČKE  =================
+
         public void AddKeyPoint(KeyPoint keyPoint)
         {
-            EnsureDraftStatus(); // zavisimo od toga da je član 1 dobro modelovao status
+            EnsureDraftStatus(); // oslanja se na status koji je modelovao član 1
 
             if (keyPoint == null)
                 throw new ArgumentNullException(nameof(keyPoint));
 
             KeyPoints.Add(keyPoint);
-            // TODO (Član 3 / drugi): ovde mogu dodati logiku koja reaguje
-            // na promenu putanje (npr. ponovno računanje dužine ture u Kartici 4).
+            // TODO (Član 3 / drugi): ovde kasnije mogu da računaju dužinu ture itd.
         }
 
         public void UpdateKeyPoint(int index, KeyPoint keyPoint)
@@ -71,22 +128,21 @@ namespace Explorer.Tours.Core.Domain
             KeyPoints.RemoveAt(index);
         }
 
-        // Helper koji osigurava da kartica 3 važi samo za ture u pripremi
+        // Helper – kartica 3 važi samo dok je tura u pripremi
         private void EnsureDraftStatus()
         {
-            // Ovde zavisim od člana 1:
-            // oni su definisali TourStatus i logiku životnog ciklusa ture.
             if (Status != TourStatus.Draft)
                 throw new InvalidOperationException("Key points can only be modified while tour is in Draft status.");
         }
 
-        private void Validate()
+        // ================= VALIDACIJA =================
+
+        public void Validate()
         {
             ValidateName();
             ValidateDescription();
             ValidateTags();
-            // Ostavljen hook ako jednog dana budeš validirao i KeyPoints
-            // (trenutno specifikacija ne traži dodatna ograničenja).
+            // Ovde se po potrebi može dodati validacija KeyPoints
         }
 
         private void ValidateName()
