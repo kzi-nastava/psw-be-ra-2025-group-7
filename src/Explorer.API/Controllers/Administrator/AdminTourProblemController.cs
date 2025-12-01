@@ -22,5 +22,15 @@ namespace Explorer.API.Controllers.Administrator
         {
             return Ok(_service.GetAll());
         }
+
+        [HttpPut("{id}/resolve-due")]
+        public ActionResult<TourProblemDto> SetResolveDue(int id, [FromBody] ResolveDueDto dto)
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.ResolveDue))
+                return BadRequest("ResolveDue is required.");
+
+            return Ok(_service.SetResolveDue(id, dto.ResolveDue));
+        }
+
     }
 }
