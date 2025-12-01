@@ -155,5 +155,32 @@ namespace Explorer.API.Controllers.Author
                 return BadRequest(e.Message);
             }
         }
+
+        // POST api/author/tours/{tourId}/durations
+        [HttpPost("{tourId:long}/durations")]
+        public ActionResult<TourDto> AddTourDuration(long tourId, [FromBody] TourDurationDto durationDto)
+        {
+            var authorId = User.PersonId();
+            var result = _tourService.AddTourDuration(tourId, authorId, durationDto);
+            return Ok(result);
+        }
+
+        // PUT api/author/tours/{tourId}/durations/{index}
+        [HttpPut("{tourId:long}/durations/{index:int}")]
+        public ActionResult<TourDto> UpdateTourDuration(long tourId, int index, [FromBody] TourDurationDto durationDto)
+        {
+            var authorId = User.PersonId();
+            var result = _tourService.UpdateTourDuration(tourId, authorId, index, durationDto);
+            return Ok(result);
+        }
+
+        // DELETE api/author/tours/{tourId}/durations/{index}
+        [HttpDelete("{tourId:long}/durations/{index:int}")]
+        public ActionResult<TourDto> RemoveTourDuration(long tourId, int index)
+        {
+            var authorId = User.PersonId();
+            var result = _tourService.RemoveTourDuration(tourId, authorId, index);
+            return Ok(result);
+        }
     }
 }

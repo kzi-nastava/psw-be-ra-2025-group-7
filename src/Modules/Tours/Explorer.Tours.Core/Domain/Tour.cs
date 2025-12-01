@@ -19,7 +19,7 @@ namespace Explorer.Tours.Core.Domain
 
         // Kartica 3 – kolekcija ključnih tačaka (tvoj deo)
         public List<KeyPoint> KeyPoints { get; private set; } = new();
-
+        public List<TourDuration> TourDurations { get; private set; } = new();
         // Potreban EF-u
         public Tour()
         {
@@ -53,6 +53,12 @@ namespace Explorer.Tours.Core.Domain
 
             if (!HasRequiredData())
                 throw new InvalidOperationException("Cannot publish tour without all required data.");
+
+            if (KeyPoints.Count < 2)
+                throw new InvalidOperationException("Cannot publish tour with less than 2 key points.");
+
+            if (TourDurations == null || !TourDurations.Any())
+                throw new InvalidOperationException("Cannot publish tour without at least one duration.");
 
             Status = TourStatus.Published;
             PublishedAt = DateTime.UtcNow;
@@ -169,6 +175,39 @@ namespace Explorer.Tours.Core.Domain
                 throw new ArgumentException("Tags cannot be empty.");
             if (Tags.Any(tag => tag.Length > 50))
                 throw new ArgumentException("Tag cannot exceed 50 characters.");
+        }
+
+        public void AddDuration(TourDuration duration)
+        {
+            EnsureDraftStatus();
+
+            if (duration == null)
+                throw new ArgumentNullException(nameof(duration));
+
+            TourDurations.Add(duration);
+        }
+
+        public void UpdateDuration(int index, TourDuration duration)
+        {
+            EnsureDraftStatus();
+
+            if (index < 0 || index >= TourDurations.Count)
+                throw new ArgumentOutOfRangeException(nameof(index), "Duration index is out of range.");
+
+            if (duration == null)
+                throw new ArgumentNullException(nameof(duration));
+
+            TourDurations[index] = duration;
+        }
+
+        public void RemoveDuration(int index)
+        {
+            EnsureDraftStatus();
+
+            if (index < 0 || index >= TourDurations.Count)
+                throw new ArgumentOutOfRangeException(nameof(index), "Duration index is out of range.");
+
+            TourDurations.RemoveAt(index);
         }
     }
 
