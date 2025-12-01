@@ -27,12 +27,18 @@ public class TourPurchaseTokenDbRepository : ITourPurchaseTokenRepository
 
     public TourPurchaseToken? GetByUserAndTour(long userId, long tourId)
     {
-        return _dbSet.FirstOrDefault(t => t.UserId == userId && t.TourId == tourId);
+        return _dbSet
+            .Include(t => t.Tour)
+            .FirstOrDefault(t => t.UserId == userId && t.TourId == tourId);
     }
 
     public PagedResult<TourPurchaseToken> GetPagedByUser(int page, int pageSize, long userId)
     {
-        var query = _dbSet.Where(t => t.UserId == userId).OrderByDescending(t => t.PurchaseDate);
+        var query = _dbSet
+            .Include(t => t.Tour)
+            .Where(t => t.UserId == userId)
+            .OrderByDescending(t => t.PurchaseDate);
+
         var task = query.GetPaged(page, pageSize);
         task.Wait();
         return task.Result;

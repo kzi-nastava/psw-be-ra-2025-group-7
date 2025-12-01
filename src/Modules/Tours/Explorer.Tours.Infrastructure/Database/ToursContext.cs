@@ -124,9 +124,18 @@ public class ToursContext : DbContext
             b.Property(tpt => tpt.PurchaseDate)
                 .IsRequired();
 
+            // Configure foreign key relationship to Tour
+            b.HasOne(tpt => tpt.Tour)
+                .WithMany()
+                .HasForeignKey(tpt => tpt.TourId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Create unique index to ensure one purchase per user per tour
             b.HasIndex(tpt => new { tpt.UserId, tpt.TourId })
                 .IsUnique();
+
+            // Create index on UserId for faster queries
+            b.HasIndex(tpt => tpt.UserId);
         });
 
         modelBuilder.Entity<Tour>().HasKey(t => t.Id);

@@ -2,12 +2,16 @@
 
 namespace Explorer.Tours.Core.Domain;
 
-
 public class TourPurchaseToken : Entity
 {
     public long UserId { get; init; }
     public long TourId { get; init; }
     public DateTime PurchaseDate { get; init; }
+
+    public Tour Tour { get; init; }
+
+    // EF Core constructor
+    private TourPurchaseToken() { }
 
     public TourPurchaseToken(long userId, long tourId)
     {

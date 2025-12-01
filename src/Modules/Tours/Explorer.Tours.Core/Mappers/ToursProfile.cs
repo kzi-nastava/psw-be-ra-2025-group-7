@@ -30,8 +30,7 @@ public class ToursProfile : Profile
         
         // Map Tour to TourPreviewDto with limited information
         CreateMap<Tour, TourPreviewDto>()
-            .ForMember(d => d.ShortDescription, opt => opt.MapFrom(s => 
-                s.Description.Length > 200 ? s.Description.Substring(0, 200) + "..." : s.Description))
+            .ForMember(d => d.Description, opt => opt.MapFrom(s => s.Description))
             .ForMember(d => d.Difficulty, opt => opt.MapFrom(s => s.Difficulty.ToString()))
             .ForMember(d => d.IsPurchasable, opt => opt.MapFrom(s => s.IsPurchasable()));
     }
