@@ -80,6 +80,25 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TourJournals",
+                schema: "tours",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TouristId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    City = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TourJournals", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TourProblems",
                 schema: "tours",
                 columns: table => new
@@ -111,7 +130,9 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     Difficulty = table.Column<int>(type: "integer", nullable: false),
                     Tags = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false)
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    PublishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ArchivedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -142,6 +163,56 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "KeyPoints",
+                schema: "tours",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Latitude = table.Column<double>(type: "double precision", nullable: false),
+                    Longitude = table.Column<double>(type: "double precision", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    ImageUrl = table.Column<string>(type: "text", nullable: true),
+                    Secret = table.Column<string>(type: "text", nullable: false),
+                    TourId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KeyPoints", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KeyPoints_Tours_TourId",
+                        column: x => x.TourId,
+                        principalSchema: "tours",
+                        principalTable: "Tours",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TourPurchaseTokens",
+                schema: "tours",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    TourId = table.Column<long>(type: "bigint", nullable: false),
+                    PurchaseDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TourPurchaseTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TourPurchaseTokens_Tours_TourId",
+                        column: x => x.TourId,
+                        principalSchema: "tours",
+                        principalTable: "Tours",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Option",
                 schema: "tours",
                 columns: table => new
@@ -166,6 +237,12 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_KeyPoints_TourId",
+                schema: "tours",
+                table: "KeyPoints",
+                column: "TourId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Option_QuestionId",
                 schema: "tours",
                 table: "Option",
@@ -176,6 +253,25 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 schema: "tours",
                 table: "Questions",
                 column: "QuizId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TourPurchaseTokens_TourId",
+                schema: "tours",
+                table: "TourPurchaseTokens",
+                column: "TourId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TourPurchaseTokens_UserId",
+                schema: "tours",
+                table: "TourPurchaseTokens",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TourPurchaseTokens_UserId_TourId",
+                schema: "tours",
+                table: "TourPurchaseTokens",
+                columns: new[] { "UserId", "TourId" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -190,6 +286,10 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 schema: "tours");
 
             migrationBuilder.DropTable(
+                name: "KeyPoints",
+                schema: "tours");
+
+            migrationBuilder.DropTable(
                 name: "Option",
                 schema: "tours");
 
@@ -198,15 +298,23 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 schema: "tours");
 
             migrationBuilder.DropTable(
+                name: "TourJournals",
+                schema: "tours");
+
+            migrationBuilder.DropTable(
                 name: "TourProblems",
                 schema: "tours");
 
             migrationBuilder.DropTable(
-                name: "Tours",
+                name: "TourPurchaseTokens",
                 schema: "tours");
 
             migrationBuilder.DropTable(
                 name: "Questions",
+                schema: "tours");
+
+            migrationBuilder.DropTable(
+                name: "Tours",
                 schema: "tours");
 
             migrationBuilder.DropTable(

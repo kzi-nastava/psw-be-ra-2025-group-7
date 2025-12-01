@@ -41,25 +41,60 @@ namespace Explorer.Blog.Core.UseCases
             return _mapper.Map<BlogPostDto>(created);
         }
 
-        public BlogPostDto Update(long authorId, UpdateBlogPostDto dto)
+        public BlogPostDto UpdateDraft(long authorId, UpdateBlogPostDto dto)
         {
-            var existing = _repository.Get(dto.Id);
-            if (existing == null)
-            {
-                throw new NotFoundException("Blog post not found.");
-            }
+            var existing = LoadAndCheckOwnership(authorId, dto.Id);
 
-            if (existing.AuthorId != authorId)
-            {
-                throw new ForbiddenException("You cannot edit this blog post.");
-            }
-
-            var images = _mapper.Map<IEnumerable<BlogImage>>(dto); // UpdateBlogPostDto → IEnumerable<BlogImage>
-
-            existing.Edit(dto.Title, dto.Description, images);
+            existing.EditDraft(
+                dto.Title,
+                dto.Description,
+                _mapper.Map<IEnumerable<BlogImage>>(dto));
 
             var updated = _repository.Update(existing);
             return _mapper.Map<BlogPostDto>(updated);
+        }
+
+        public BlogPostDto UpdatePublishedDescription(long authorId, UpdatePublishedBlogDescriptionDto dto)
+        {
+            var existing = LoadAndCheckOwnership(authorId, dto.Id);
+
+            existing.UpdatePublishedDescription(dto.Description);
+
+            var updated = _repository.Update(existing);
+            return _mapper.Map<BlogPostDto>(updated);
+        }
+
+        public BlogPostDto Publish(long authorId, long blogId)
+        {
+            var existing = LoadAndCheckOwnership(authorId, blogId);
+
+            existing.Publish();
+
+            var updated = _repository.Update(existing);
+            return _mapper.Map<BlogPostDto>(updated);
+        }
+
+        public BlogPostDto Archive(long authorId, long blogId)
+        {
+            var existing = LoadAndCheckOwnership(authorId, blogId);
+
+            existing.Archive();
+
+            var updated = _repository.Update(existing);
+            return _mapper.Map<BlogPostDto>(updated);
+        }
+
+        // Helper
+        private BlogPost LoadAndCheckOwnership(long authorId, long blogId)
+        {
+            var existing = _repository.Get(blogId);
+            if (existing == null)
+                throw new NotFoundException("Blog post not found.");
+
+            if (existing.AuthorId != authorId)
+                throw new ForbiddenException("You cannot edit this blog post.");
+
+            return existing;
         }
     }
 

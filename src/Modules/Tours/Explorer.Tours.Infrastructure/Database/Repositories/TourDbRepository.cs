@@ -56,14 +56,21 @@ public class TourDbRepository : ITourRepository
     {
         try
         {
-            DbContext.Update(entity);
+            var existingEntity = _dbSet.Find(entity.Id);
+
+            if (existingEntity == null)
+                throw new NotFoundException($"Tour with id {entity.Id} not found.");
+
+            DbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
+
             DbContext.SaveChanges();
+
+            return existingEntity;
         }
         catch (DbUpdateException e)
         {
-            throw new NotFoundException(e.Message);
+            throw new NotFoundException($"An error occurred while updating: {e.InnerException?.Message ?? e.Message}");
         }
-        return entity;
     }
 
     public void Delete(long id)
