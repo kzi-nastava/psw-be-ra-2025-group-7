@@ -112,7 +112,7 @@ namespace Explorer.Tours.Core.UseCases.Administration
                 throw new ForbiddenException("You can modify only your own tours.");
 
             if (tour.Status != TourStatus.Draft)
-                throw new InvalidOperationException("Key points can only be modified while tour is in Draft status.");
+                throw new InvalidOperationException("Changes can only be made while tour is in Draft status.");
 
             return tour;
         }
@@ -156,6 +156,36 @@ namespace Explorer.Tours.Core.UseCases.Administration
             var result = _tourRepository.Update(tour);
 
             return _mapper.Map<TourDto>(result);
+        }
+        //trajanje ture
+        public TourDto AddTourDuration(long tourId, long authorId, TourDurationDto durationDto)
+        {
+            var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
+
+            tour.AddDuration(_mapper.Map<TourDuration>(durationDto));
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
+
+        public TourDto UpdateTourDuration(long tourId, long authorId, int index, TourDurationDto durationDto)
+        {
+            var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
+
+            tour.UpdateDuration(index, _mapper.Map<TourDuration>(durationDto));
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
+
+        public TourDto RemoveTourDuration(long tourId, long authorId, int index)
+        {
+            var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
+
+            tour.RemoveDuration(index);
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
         }
     }
 }

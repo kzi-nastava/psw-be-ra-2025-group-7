@@ -21,7 +21,7 @@ public class TourLifecycleTests : BaseToursIntegrationTest
         var controller = CreateController(scope);
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        var tourId = -1; // Draft tura ZA PUBLISH
+        var tourId = -500; // Draft tura ZA PUBLISH
 
         // Act
         var actionResult = controller.Publish(tourId).Result;

@@ -70,6 +70,25 @@ namespace Explorer.Tours.Infrastructure.Database
                     // TODO (drugi članovi): ovde kasnije mogu da dodaju npr. Order polje
                     // za redosled tačaka, ako im zatreba za svoje kartice.
                 });
+                b.OwnsMany(t => t.TourDurations, td =>
+                {
+                    td.ToTable("TourDurations");              // naziv tabele u bazi
+                    td.WithOwner().HasForeignKey("TourId");   // FK ka Tour.Id
+
+                    // Shadow primary key
+                    td.Property<long>("Id");
+                    td.HasKey("Id");
+
+                    // Enum TravelType mapiramo kao string
+                    td.Property(d => d.Type)
+                      .HasColumnName("TransportType")        // da se poklapa sa tvojom kolonom
+                      .HasConversion<string>()               // enum kao string u bazi
+                      .IsRequired();
+
+                    td.Property(d => d.Minutes)
+                      .HasColumnName("DurationInMinutes")    // da se poklapa sa tvojom kolonom
+                      .IsRequired();
+                });
             });
 
             // ===== TourJournal konfiguracija =====
