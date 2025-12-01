@@ -30,23 +30,24 @@ namespace Explorer.API.Controllers.Tourist
         {
             string[] possibleClaims =
             {
-                ClaimTypes.NameIdentifier,
-                "id",
-                "userId",
-                "sub"
-            };
+        "personId",                 // koristi ga BaseWebIntegrationTest
+        ClaimTypes.NameIdentifier,  // koristi ga pravi JWT token
+        "id",                       // koristi kolegin test
+        "userId",
+        "sub"
+    };
 
-            var claimValue = possibleClaims
-                .Select(type => User.FindFirstValue(type))
-                .FirstOrDefault(value => value != null);
-
-            if (claimValue == null || !long.TryParse(claimValue, out long touristId))
+            foreach (var type in possibleClaims)
             {
-                var allClaims = string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}"));
-                throw new UnauthorizedAccessException($"Invalid token. Available claims: {allClaims}");
+                var value = User.FindFirstValue(type);
+                if (value != null && long.TryParse(value, out long touristId))
+                {
+                    return touristId;
+                }
             }
 
-            return touristId;
+            var allClaims = string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}"));
+            throw new UnauthorizedAccessException($"Invalid token. Available claims: {allClaims}");
         }
 
 
