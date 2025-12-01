@@ -10,5 +10,7 @@
         public List<string> Tags { get; set; }
         public int Status { get; set; }
         public decimal Price { get; set; }
+        public DateTime? PublishedAt { get; set; }
+        public DateTime? ArchivedAt { get; set; }
     }
 }
