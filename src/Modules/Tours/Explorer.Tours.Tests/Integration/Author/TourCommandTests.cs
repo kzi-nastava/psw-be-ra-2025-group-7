@@ -7,6 +7,7 @@ using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using Xunit;
 
 namespace Explorer.Tours.Tests.Integration.Author;
 
@@ -22,15 +23,13 @@ public class TourCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
-        var newEntity = new TourDto
+
+        var newEntity = new CreateTourDto
         {
             Name = "New Test Tour",
             Description = "Test description for new tour",
             Difficulty = 1,
             Tags = new List<string> { "test", "new" },
-            Status = 0,
-            Price = 0,
-            AuthorId = -1
         };
 
         // Act
@@ -40,11 +39,16 @@ public class TourCommandTests : BaseToursIntegrationTest
         result.ShouldNotBeNull();
         result.Id.ShouldNotBe(0);
         result.Name.ShouldBe(newEntity.Name);
+        result.Status.ShouldBe(0); // Draft
+        result.Price.ShouldBe(0);
+        result.PublishedAt.ShouldBeNull();
+        result.ArchivedAt.ShouldBeNull();
 
         // Assert - Database
         var storedEntity = dbContext.Tours.FirstOrDefault(t => t.Name == newEntity.Name);
         storedEntity.ShouldNotBeNull();
         storedEntity.Id.ShouldBe(result.Id);
+        storedEntity.Status.ShouldBe(TourStatus.Draft);
     }
 
     [Fact]
@@ -53,10 +57,13 @@ public class TourCommandTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var newEntity = new TourDto
+
+        var newEntity = new CreateTourDto
         {
-            Name = "",  // Invalid - empty name
-            Description = "Test"
+            Name = "",  
+            Description = "Test",
+            Difficulty = 1,
+            Tags = new List<string>(),
         };
 
         // Act & Assert
@@ -83,7 +90,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = ((ObjectResult)controller.Update(updatedEntity).Result)?.Value as TourDto;
+        var result = ((ObjectResult)controller.Update(updatedEntity.Id, updatedEntity).Result)?.Value as TourDto;
 
         // Assert - Response
         result.ShouldNotBeNull();
@@ -119,7 +126,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         };
 
         // Act & Assert
-        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity));
+        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity.Id, updatedEntity));
     }
 
     [Fact]

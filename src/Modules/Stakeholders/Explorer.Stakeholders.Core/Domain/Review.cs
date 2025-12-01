@@ -15,6 +15,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public long PersonId { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
+        public Person Person { get; private set; }
 
         public Review(int rating, string comment, long personId)
         {

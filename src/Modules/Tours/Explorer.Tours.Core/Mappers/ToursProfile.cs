@@ -1,23 +1,45 @@
 ﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.Entities;
 
-namespace Explorer.Tours.Core.Mappers;
-
-public class ToursProfile : Profile
+namespace Explorer.Tours.Core.Mappers
 {
-    public ToursProfile()
+    public class ToursProfile : Profile
     {
-        CreateMap<EquipmentDto, Equipment>().ReverseMap();
-        CreateMap<TourProblemDto, TourProblem>()
-           .ForMember(d => d.Category, opt => opt.MapFrom(s => Enum.Parse<ProblemCategory>(s.Category, true)))
-           .ForMember(d => d.Priority, opt => opt.MapFrom(s => Enum.Parse<ProblemPriority>(s.Priority, true)));
-        CreateMap<TourProblem, TourProblemDto>()
-            .ForMember(d => d.Category, opt => opt.MapFrom(s => s.Category.ToString()))
-            .ForMember(d => d.Priority, opt => opt.MapFrom(s => s.Priority.ToString()));
-        CreateMap<FacilityDto, Facility>().ReverseMap();
-        CreateMap<TourDto, Tour>().ReverseMap();
-        CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
+        public ToursProfile()
+        {
+            // Osnovni DTO-i
+            CreateMap<EquipmentDto, Equipment>().ReverseMap();
+            CreateMap<FacilityDto, Facility>().ReverseMap();
 
+            // Kartica 3 – mapiranje KeyPoint <-> KeyPointDto
+            CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
+
+            // Tour <-> TourDto, uključujući KeyPoints
+            CreateMap<TourDto, Tour>()
+                .ForMember(dest => dest.KeyPoints,
+                           opt => opt.MapFrom(src => src.KeyPoints ?? new List<KeyPointDto>()))
+                .ReverseMap();
+
+            // Mapiranje za kreiranje ture (priča člana 1)
+            CreateMap<CreateTourDto, Tour>();
+
+            // Ostali postojeći mapovi
+            CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
+
+            CreateMap<TourProblemDto, TourProblem>()
+                .ForMember(d => d.Category, opt => opt.MapFrom(s => Enum.Parse<ProblemCategory>(s.Category, true)))
+                .ForMember(d => d.Priority, opt => opt.MapFrom(s => Enum.Parse<ProblemPriority>(s.Priority, true)));
+
+            CreateMap<TourProblem, TourProblemDto>()
+                .ForMember(d => d.Category, opt => opt.MapFrom(s => s.Category.ToString()))
+                .ForMember(d => d.Priority, opt => opt.MapFrom(s => s.Priority.ToString()));
+
+            CreateMap<TourJournalDto, TourJournal>().ReverseMap()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
+            CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
+        }
     }
 }

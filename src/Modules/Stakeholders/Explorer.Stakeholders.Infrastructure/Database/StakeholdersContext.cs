@@ -8,15 +8,14 @@ public class StakeholdersContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Person> People { get; set; }
     public DbSet<Review> Reviews { get; set; }
+
     public DbSet<Message> Messages { get; set; }
-    public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<TourPreferences> TourPreferences { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
 
-
-
-    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
+    public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
