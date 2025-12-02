@@ -25,8 +25,8 @@ public class TourQueryTests : BaseToursIntegrationTest
 
         // Assert
         result.ShouldNotBeNull();
-        result.Results.Count.ShouldBe(8);
-        result.TotalCount.ShouldBe(8);
+        result.Results.Count.ShouldBe(12); // Ažurirano: 8 originalnih + 4 za Shopping Cart (-10, -11, -100, -101)
+        result.TotalCount.ShouldBe(12);
     }
 
     private static TourAuthoringController CreateController(IServiceScope scope)

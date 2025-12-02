@@ -42,8 +42,7 @@ public class TourPurchaseTokenTests : BaseToursIntegrationTest
 
         // Act & Assert
         var exception = Should.Throw<InvalidOperationException>(() => service.Create(userId, tourId));
-        exception.Message.ShouldContain("cannot be purchased");
-        exception.Message.ShouldContain("Published");
+        exception.Message.ShouldContain("published", Case.Insensitive);
     }
 
     [Fact]

@@ -209,6 +209,17 @@ namespace Explorer.Tours.Core.Domain
 
             TourDurations.RemoveAt(index);
         }
+
+        // ================= VALIDACIJA ZA KUPOVINU (SHOPPING CART) =================
+
+        public void ValidatePurchase()
+        {
+            if (Status == TourStatus.Archived)
+                throw new InvalidOperationException("Archived tours cannot be purchased.");
+
+            if (Status != TourStatus.Published)
+                throw new InvalidOperationException("Only published tours can be purchased.");
+        }
     }
 
     public enum TourDifficulty

@@ -47,6 +47,13 @@ namespace Explorer.Tours.Core.Mappers
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (TravelType)src.Type))
                 .ReverseMap()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type));
+
+            // Shopping Cart mapovi
+            CreateMap<OrderItem, OrderItemDto>().ReverseMap();
+            CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
+            
+            // Tour Purchase Token mapovi
+            CreateMap<TourPurchaseToken, TourPurchaseTokenDto>().ReverseMap();
         }
     }
 }
