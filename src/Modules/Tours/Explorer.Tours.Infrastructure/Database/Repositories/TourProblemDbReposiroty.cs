@@ -55,6 +55,16 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             if (entity == null) throw new KeyNotFoundException("Not found: " + id);
             return entity;
         }
+        public TourProblem AddAuthorReply(int tourProblemId, int authorId, string message)
+        {
+            var entity = _dbSet.FirstOrDefault(tp => tp.Id == tourProblemId);
+            if (entity == null) throw new KeyNotFoundException("TourProblem not found");
+
+            entity.AddAuthorReply(authorId, message);
+
+            _dbContext.SaveChanges();
+            return entity;
+        }
         public TourProblem Create(TourProblem entity)
         {
             _dbSet.Add(entity);

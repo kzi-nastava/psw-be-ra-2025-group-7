@@ -42,7 +42,17 @@ public class TourProblemService : ITourProblemService
         if (dto.TimeReported == default)
             dto.TimeReported = DateTime.UtcNow;
 
-        var entity = _mapper.Map<TourProblem>(dto);
+
+        var entity = new TourProblem(
+        dto.TourId,
+        touristId,
+        Enum.Parse<ProblemCategory>(dto.Category, true),
+        Enum.Parse<ProblemPriority>(dto.Priority, true),
+        dto.Description
+    );
+        dto.Comments = new();
+        dto.Status = "Open";
+        dto.TimeReported = DateTime.UtcNow;
         var created = _repository.Create(entity);
         return _mapper.Map<TourProblemDto>(created);
     }
@@ -76,6 +86,18 @@ public class TourProblemService : ITourProblemService
         }
     }
 
+    public TourProblemDto AddAuthorReply(int tourProblemId, int authorId, string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            throw new ArgumentException("Message cannot be empty.");
+
+        var problem = _repository.Get(tourProblemId);
+
+        problem.AddAuthorReply(authorId, message);
+
+        var updated = _repository.Update(problem);
+        return _mapper.Map<TourProblemDto>(updated);
+    }
 
     public void Delete(int id, int touristId)
     {

@@ -82,7 +82,28 @@ namespace Explorer.API.Controllers.Tourist
             var result = _service.GetByAuthor(authorId, page, pageSize);
             return Ok(result);
         }
+        [Authorize(Policy = "authorPolicy")]
+        [HttpPost("{id:int}/reply")]
+        public ActionResult<TourProblemDto> AuthorReply(int id, [FromBody] string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return BadRequest("Message cannot be empty.");
 
+            var authorId = (int)User.PersonId();
+            try
+            {
+                var updated = _service.AddAuthorReply(id, authorId, message);
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
     }
 }

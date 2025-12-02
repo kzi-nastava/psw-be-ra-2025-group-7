@@ -12,6 +12,7 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
         PagedResult<TourProblem> GetByAuthor(int authorId,int pageNumber, int pageSize);
         PagedResult<TourProblem> GetByTourist(int touristId,int pageNumber, int pageSize);
         TourProblem Get(int id);
+        TourProblem AddAuthorReply(int tourProblemId, int authorId, string message);
         TourProblem Create(TourProblem tourProblem);
         TourProblem Update(TourProblem tourProblem);
         void Delete(int id);
