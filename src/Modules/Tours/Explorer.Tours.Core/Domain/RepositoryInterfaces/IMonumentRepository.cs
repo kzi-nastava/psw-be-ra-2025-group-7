@@ -1,6 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
 
-namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+namespace Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
 public interface IMonumentRepository
 {

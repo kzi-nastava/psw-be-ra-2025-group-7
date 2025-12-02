@@ -3,7 +3,7 @@ using System.Net.Mail;
 
 namespace Explorer.Tours.Core.Domain
 {
-    public class Tour : Entity
+    public class Tour : AggregateRoot
     {
         public long AuthorId { get; init; }
         public string Name { get; private set; }
@@ -20,11 +20,12 @@ namespace Explorer.Tours.Core.Domain
         // Kartica 3 – kolekcija ključnih tačaka (tvoj deo)
         public List<KeyPoint> KeyPoints { get; private set; } = new();
         public List<TourDuration> TourDurations { get; private set; } = new();
-        // Potreban EF-u
-        public Tour()
+
+        private Tour()
         {
             Tags = new List<string>();
             KeyPoints = new List<KeyPoint>();
+            TourDurations = new List<TourDuration>();
         }
 
         public Tour(long authorId, string name, string description, TourDifficulty difficulty, List<string> tags)
@@ -40,7 +41,7 @@ namespace Explorer.Tours.Core.Domain
             PublishedAt = null;
             ArchivedAt = null;
             KeyPoints = new List<KeyPoint>();
-
+            TourDurations = new List<TourDuration>();
             Validate();
         }
 
