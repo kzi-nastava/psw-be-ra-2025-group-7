@@ -16,5 +16,9 @@ namespace Explorer.Blog.Core.Domain.RepositoryInterfaces
         BlogPost Create(BlogPost blogPost);
 
         BlogPost Update(BlogPost blogPost);
+
+        (IEnumerable<BlogPost> items, int total) GetPublic(int page, int pageSize);
+
+
     }
 }
