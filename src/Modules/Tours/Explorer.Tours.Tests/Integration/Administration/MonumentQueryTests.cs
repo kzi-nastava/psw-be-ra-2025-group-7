@@ -1,17 +1,17 @@
 using Explorer.API.Controllers.Administrator.Administration;
 using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Public.Administration;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Administration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace Explorer.Stakeholders.Tests.Integration.Administration;
+namespace Explorer.Tours.Tests.Integration.Administration;
 
 [Collection("Sequential")]
-public class MonumentQueryTests : BaseStakeholdersIntegrationTest
+public class MonumentQueryTests : BaseToursIntegrationTest
 {
-    public MonumentQueryTests(StakeholdersTestFactory factory) : base(factory) { }
+    public MonumentQueryTests(ToursTestFactory factory) : base(factory) { }
 
     [Fact]
     public void Retrieves_all()

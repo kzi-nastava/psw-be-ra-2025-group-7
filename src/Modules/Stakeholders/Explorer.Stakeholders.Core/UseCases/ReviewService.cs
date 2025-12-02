@@ -69,5 +69,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             var reviews = _repo.GetAll();
             return _mapper.Map<List<ReviewDto>>(reviews);
         }
+
     }
 }

@@ -19,5 +19,8 @@ namespace Explorer.Tours.API.Public.Administration
         TourDto Publish(long id, long authorId);
         TourDto Archive(long id, long authorId);
         TourDto Reactivate(long id, long authorId, int newStatus);
+        TourDto RemoveTourDuration(long tourId, long authorId, int index);
+        TourDto AddTourDuration(long tourId, long authorId, TourDurationDto durationDto);
+        TourDto UpdateTourDuration(long tourId, long authorId, int index, TourDurationDto durationDto);
     }
 }

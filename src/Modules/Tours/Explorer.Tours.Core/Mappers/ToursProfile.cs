@@ -20,6 +20,8 @@ namespace Explorer.Tours.Core.Mappers
             CreateMap<TourDto, Tour>()
                 .ForMember(dest => dest.KeyPoints,
                            opt => opt.MapFrom(src => src.KeyPoints ?? new List<KeyPointDto>()))
+                .ForMember(dest => dest.TourDurations,
+                           opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDurationDto>()))
                 .ReverseMap();
 
             // Mapiranje za kreiranje ture (priča člana 1)
@@ -41,13 +43,10 @@ namespace Explorer.Tours.Core.Mappers
 
             CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
 
-            CreateMap<TourPurchaseToken, TourPurchaseTokenDto>().ReverseMap();
-
-            // Map Tour to TourPreviewDto with limited information
-            CreateMap<Tour, TourPreviewDto>()
-                .ForMember(d => d.Description, opt => opt.MapFrom(s => s.Description))
-                .ForMember(d => d.Difficulty, opt => opt.MapFrom(s => s.Difficulty.ToString()))
-                .ForMember(d => d.IsPurchasable, opt => opt.MapFrom(s => s.IsPurchasable()));
+            CreateMap<TourDurationDto, TourDuration>()
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (TravelType)src.Type))
+                .ReverseMap()
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type));
         }
     }
 }
