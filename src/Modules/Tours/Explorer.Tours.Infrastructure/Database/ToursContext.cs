@@ -10,6 +10,8 @@ namespace Explorer.Tours.Infrastructure.Database
     {
         public DbSet<Equipment> Equipment { get; set; }
         public DbSet<Tour> Tours { get; set; }
+        public DbSet<PublicPointRequest> PublicPointRequests { get; set; }
+
         public DbSet<TourJournal> TourJournals { get; set; }
         public DbSet<TouristEquipment> TouristEquipment { get; set; }
         public DbSet<Quiz> Quizzes { get; set; }
