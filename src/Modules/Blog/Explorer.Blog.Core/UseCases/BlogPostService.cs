@@ -31,6 +31,16 @@ namespace Explorer.Blog.Core.UseCases
             return new PagedResult<BlogPostDto>(resultDtos, total);
         }
 
+
+        public PagedResult<BlogPostDto> GetPublic(int page, int pageSize)
+        {
+            var (items, total) = _repository.GetPublic(page, pageSize);
+
+            var resultDtos = _mapper.Map<List<BlogPostDto>>(items);
+            return new PagedResult<BlogPostDto>(resultDtos, total);
+        }
+
+
         public BlogPostDto Create(long authorId, CreateBlogPostDto dto)
         {
             var images = _mapper.Map<IEnumerable<BlogImage>>(dto); // koristi mapu CreateBlogPostDto → IEnumerable<BlogImage>
