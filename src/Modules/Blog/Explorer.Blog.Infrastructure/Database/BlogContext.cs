@@ -9,6 +9,7 @@ public class BlogContext : DbContext
 
 
     public DbSet<BlogPost> BlogPosts { get; set; } = null!;  //DbSet za BlogPost entitet
+    public DbSet<BlogVote> BlogVotes { get; set; } = null!; 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("blog");
@@ -36,6 +37,23 @@ public class BlogContext : DbContext
                 img.Property(i => i.Url).IsRequired();
                 img.Property(i => i.Order).IsRequired();
             });
+        });
+
+        // Konfiguracija za BlogVote
+        modelBuilder.Entity<BlogVote>(bv =>
+        {
+            bv.ToTable("BlogVotes");
+            bv.HasKey(x => x.Id);
+
+            bv.Property(x => x.UserId).IsRequired();
+            bv.Property(x => x.Value).IsRequired();
+            bv.Property(x => x.VotedAt).IsRequired();
+
+            // Relacija: BlogPost 1 -> N BlogVotes
+            bv.HasOne<BlogPost>()
+             .WithMany(b => b.Votes)
+             .HasForeignKey("BlogPostId")
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

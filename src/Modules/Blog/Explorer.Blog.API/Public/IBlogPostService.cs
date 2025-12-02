@@ -16,5 +16,8 @@ namespace Explorer.Blog.API.Public
         BlogPostDto Create(long authorId, CreateBlogPostDto dto);  //kreiranje bloga
 
         BlogPostDto Update(long authorId, UpdateBlogPostDto dto);
+
+        BlogVoteDto Vote(long blogPostId, long userId, int value);
+
     }
 }

@@ -60,6 +60,16 @@ namespace Explorer.API.Controllers.Tourist.Blog
             return Ok(created);
         }
 
+        [HttpPost("{blogPostId}/vote")]
+        public ActionResult<BlogVoteDto> Vote(long blogPostId, [FromQuery] int value)
+        {
+            var userId = GetCurrentUserId();
+
+            var vote = _blogPostService.Vote(blogPostId, userId, value);
+
+            return Ok(vote);
+        }
+
         /// <summary>
         /// Izmenjuje postojeći blog post (naslov, opis, slike) ako pripada trenutnom korisniku.
         /// </summary>
