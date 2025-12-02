@@ -9,9 +9,9 @@ namespace Explorer.Blog.Core.Domain
 {
     public class BlogVote : Entity
     {
-        public long UserId { get; private set; }
-        public int Value { get; private set; } // +1 ili -1
-        public DateTime VotedAt { get; private set; }
+        public long UserId { get;  set; }
+        public int Value { get;  set; } // +1 ili -1
+        public DateTime VotedAt { get;  set; }
         public BlogVote() { }
         public BlogVote(long userId, int value)
         {
