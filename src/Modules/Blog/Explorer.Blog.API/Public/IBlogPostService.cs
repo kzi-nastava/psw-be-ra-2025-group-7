@@ -26,5 +26,8 @@ namespace Explorer.Blog.API.Public
 
         PagedResult<BlogPostDto> GetPublic(int page, int pageSize);
 
+
+        BlogVoteDto Vote(long blogPostId, long userId, int value);
+
     }
 }

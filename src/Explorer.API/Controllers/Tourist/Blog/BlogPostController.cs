@@ -56,6 +56,17 @@ namespace Explorer.API.Controllers.Tourist.Blog
             return Ok(created);
         }
 
+        [HttpPost("{blogPostId}/vote")]
+        public ActionResult<BlogVoteDto> Vote(long blogPostId, [FromQuery] int value)
+        {
+            var userId = GetCurrentUserId();
+
+            var vote = _blogPostService.Vote(blogPostId, userId, value);
+
+            return Ok(vote);
+        }
+
+        
         
         // Izmena bloga dok je u pripremi (naslov, opis, slike).
         [HttpPut("draft")]
