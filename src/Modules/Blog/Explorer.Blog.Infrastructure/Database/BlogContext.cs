@@ -55,7 +55,7 @@ public class BlogContext : DbContext
                 comment.Property(c => c.AuthorId).IsRequired();
                 comment.Property(c => c.Text).IsRequired().HasMaxLength(1000);
                 comment.Property(c => c.CreatedAt).IsRequired();
-                comment.Property(c => c.LastEditedAt);
+                comment.Property(c => c.LastModifiedAt);
             });
         });
     }

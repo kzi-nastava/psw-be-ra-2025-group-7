@@ -9,15 +9,15 @@ namespace Explorer.Blog.Core.Domain
         public long AuthorId { get; private set; }
         public string Text { get; private set; }
         public DateTime CreatedAt { get; private set; }
-        public DateTime? LastEditedAt { get; private set; }
+        public DateTime? LastModifiedAt { get; private set; }
         protected BlogComment() { }
 
         public BlogComment(long blogId, long authorId, string text)
         {
-            if (blogId <= 0)
+            if (blogId == 0)
                 throw new ArgumentException("BlogId must be a positive number.", nameof(blogId));
 
-            if (authorId <= 0)
+            if (authorId == 0)
                 throw new ArgumentException("AuthorId must be a positive number.", nameof(authorId));
 
             BlogId = blogId;
@@ -30,7 +30,7 @@ namespace Explorer.Blog.Core.Domain
         public void EditText(string newText)
         {
             SetText(newText);
-            LastEditedAt = DateTime.UtcNow;
+            LastModifiedAt = DateTime.UtcNow;
         }
 
         private void SetText(string text)

@@ -29,7 +29,7 @@ namespace Explorer.Blog.Core.Domain
 
         public BlogPost(long authorId, string title, string description, IEnumerable<BlogImage>? images = null)
         {
-            if (authorId <= 0)
+            if (authorId == 0)
                 throw new ArgumentException("AuthorId must be a positive number.", nameof(authorId));
 
 
@@ -127,7 +127,7 @@ namespace Explorer.Blog.Core.Domain
 
         public void AddComment(BlogComment comment)
         {
-            if (Status != BlogStatus.Published)
+            if (Status == BlogStatus.Draft)
                 throw new InvalidOperationException("Comments can only be added to published blogs.");
 
             Comments.Add(comment);
@@ -137,13 +137,13 @@ namespace Explorer.Blog.Core.Domain
         private void RecalculatePopularityStatus()
         {
             // Logika za automatsko promovisanje bloga na osnovu broja komentara
-            if (Status == BlogStatus.Published)
+            if (Status != BlogStatus.Draft)
             {
                 if (Comments.Count >= 10)
                 {
                     Status = BlogStatus.Famous;
                 }
-                else if (Comments.Count >= 5)
+                else if (Comments.Count >= 5 && Comments.Count < 10)
                 {
                     Status = BlogStatus.Active;
                 }
