@@ -24,6 +24,10 @@ namespace Explorer.Blog.Core.Domain
         public List<BlogImage> Images { get; private set; } = new();
 
         public List<BlogComment> Comments { get; private set; } = new();
+        public List<BlogVote> Votes { get; private set; } = new();
+        public int Score => Votes.Sum(v => v.Value);
+
+
 
         protected BlogPost() { }  
 
@@ -148,6 +152,33 @@ namespace Explorer.Blog.Core.Domain
                     Status = BlogStatus.Active;
                 }
             }
+        }
+        
+        public void Vote(long userId, int value)
+        {
+            if (value != 1 && value != -1)
+                throw new ArgumentException("Vote must be +1 or -1");
+
+            var existingVote = Votes.FirstOrDefault(v => v.UserId == userId);
+
+
+            if (existingVote != null )
+            {
+                if (existingVote.Value == value) // alo je kliknuo isto onda povuci glas
+                {
+                    Votes.Remove(existingVote);
+                    return;
+                }
+
+                existingVote.ChangeVote(value); //menja se glas
+            }
+            else
+            {
+                var newVote = new BlogVote(userId, value);  //prvi put se glasa
+                Votes.Add(newVote);
+            }
+
+
         }
     }
 }

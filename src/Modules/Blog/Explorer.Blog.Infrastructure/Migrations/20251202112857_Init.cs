@@ -25,7 +25,9 @@ namespace Explorer.Blog.Infrastructure.Migrations
                     AuthorId = table.Column<long>(type: "bigint", nullable: false),
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -55,10 +57,40 @@ namespace Explorer.Blog.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "BlogVotes",
+                schema: "blog",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    Value = table.Column<int>(type: "integer", nullable: false),
+                    VotedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    BlogPostId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlogVotes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BlogVotes_BlogPosts_BlogPostId",
+                        column: x => x.BlogPostId,
+                        principalSchema: "blog",
+                        principalTable: "BlogPosts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_BlogPostImages_BlogPostId",
                 schema: "blog",
                 table: "BlogPostImages",
+                column: "BlogPostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BlogVotes_BlogPostId",
+                schema: "blog",
+                table: "BlogVotes",
                 column: "BlogPostId");
         }
 
@@ -67,6 +99,10 @@ namespace Explorer.Blog.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "BlogPostImages",
+                schema: "blog");
+
+            migrationBuilder.DropTable(
+                name: "BlogVotes",
                 schema: "blog");
 
             migrationBuilder.DropTable(

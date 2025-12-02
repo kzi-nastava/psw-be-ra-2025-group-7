@@ -9,6 +9,7 @@ namespace Explorer.Tours.Infrastructure.Database
     public class ToursContext : DbContext
     {
         public DbSet<Equipment> Equipment { get; set; }
+        public DbSet<Monument> Monuments { get; set; }
         public DbSet<Tour> Tours { get; set; }
         public DbSet<TourJournal> TourJournals { get; set; }
         public DbSet<TouristEquipment> TouristEquipment { get; set; }
@@ -22,6 +23,31 @@ namespace Explorer.Tours.Infrastructure.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("tours");
+
+            // ===== Monument konfiguracija =====
+            modelBuilder.Entity<Monument>(b =>
+            {
+                b.ToTable("Monuments");
+                b.HasKey(m => m.Id);
+
+                b.Property(m => m.Name)
+                    .IsRequired();
+
+                b.Property(m => m.Description)
+                    .IsRequired();
+
+                b.Property(m => m.YearOfCreation)
+                    .IsRequired();
+
+                b.Property(m => m.Status)
+                    .IsRequired();
+
+                b.Property(m => m.Latitude)
+                    .IsRequired();
+
+                b.Property(m => m.Longitude)
+                    .IsRequired();
+            });
 
             // ===== Tour konfiguracija (životni ciklus + tvoji KeyPoints) =====
             modelBuilder.Entity<Tour>(b =>
@@ -69,6 +95,25 @@ namespace Explorer.Tours.Infrastructure.Database
 
                     // TODO (drugi članovi): ovde kasnije mogu da dodaju npr. Order polje
                     // za redosled tačaka, ako im zatreba za svoje kartice.
+                });
+                b.OwnsMany(t => t.TourDurations, td =>
+                {
+                    td.ToTable("TourDurations");              // naziv tabele u bazi
+                    td.WithOwner().HasForeignKey("TourId");   // FK ka Tour.Id
+
+                    // Shadow primary key
+                    td.Property<long>("Id");
+                    td.HasKey("Id");
+
+                    // Enum TravelType mapiramo kao string
+                    td.Property(d => d.Type)
+                      .HasColumnName("TransportType")        // da se poklapa sa tvojom kolonom
+                      .HasConversion<string>()               // enum kao string u bazi
+                      .IsRequired();
+
+                    td.Property(d => d.Minutes)
+                      .HasColumnName("DurationInMinutes")    // da se poklapa sa tvojom kolonom
+                      .IsRequired();
                 });
             });
 

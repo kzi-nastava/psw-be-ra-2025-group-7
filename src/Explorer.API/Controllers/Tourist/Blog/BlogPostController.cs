@@ -56,6 +56,17 @@ namespace Explorer.API.Controllers.Tourist.Blog
             return Ok(created);
         }
 
+        [HttpPost("{blogPostId}/vote")]
+        public ActionResult<BlogVoteDto> Vote(long blogPostId, [FromQuery] int value)
+        {
+            var userId = GetCurrentUserId();
+
+            var vote = _blogPostService.Vote(blogPostId, userId, value);
+
+            return Ok(vote);
+        }
+
+        
         
         // Izmena bloga dok je u pripremi (naslov, opis, slike).
         [HttpPut("draft")]
@@ -92,5 +103,15 @@ namespace Explorer.API.Controllers.Tourist.Blog
             var updated = _blogPostService.Archive(authorId, id);
             return Ok(updated);
         }
+
+
+        [HttpGet("public")]
+        public ActionResult<PagedResult<BlogPostDto>> GetPublic([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = _blogPostService.GetPublic(page, pageSize);
+            return Ok(result);
+        }
+
+
     }
 }

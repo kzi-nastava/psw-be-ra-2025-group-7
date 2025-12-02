@@ -31,6 +31,16 @@ namespace Explorer.Blog.Core.UseCases
             return new PagedResult<BlogPostDto>(resultDtos, total);
         }
 
+
+        public PagedResult<BlogPostDto> GetPublic(int page, int pageSize)
+        {
+            var (items, total) = _repository.GetPublic(page, pageSize);
+
+            var resultDtos = _mapper.Map<List<BlogPostDto>>(items);
+            return new PagedResult<BlogPostDto>(resultDtos, total);
+        }
+
+
         public BlogPostDto Create(long authorId, CreateBlogPostDto dto)
         {
             var images = _mapper.Map<IEnumerable<BlogImage>>(dto); // koristi mapu CreateBlogPostDto → IEnumerable<BlogImage>
@@ -82,6 +92,27 @@ namespace Explorer.Blog.Core.UseCases
 
             var updated = _repository.Update(existing);
             return _mapper.Map<BlogPostDto>(updated);
+        }
+
+        public BlogVoteDto Vote(long blogPostId, long userId, int value)
+        {
+            if (value != 1 && value != -1)
+                throw new ArgumentException("Vote value must be +1 or -1.");
+
+
+            var blogPost = _repository.Get(blogPostId);
+            if (blogPost == null)
+            {
+                throw new NotFoundException("Blog post not found.");
+            }
+
+            blogPost.Vote(userId, value);
+            _repository.Update(blogPost);
+
+            var vote = blogPost.Votes.FirstOrDefault(v => v.UserId == userId); // trenutni glas korisnika
+            return vote == null ? null : _mapper.Map<BlogVoteDto>(vote);
+            // korisnik je povukao glas, vrati null
+            // inace vrati njegov glas mapiran u DTO
         }
 
         // Helper
