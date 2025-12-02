@@ -42,6 +42,7 @@ public class BlogPostRepository : IBlogPostRepository
     {
         return _context.BlogPosts
             .Include(b => b.Images)
+            .Include(b => b.Votes)
             .FirstOrDefault(b => b.Id == id);
     }
 

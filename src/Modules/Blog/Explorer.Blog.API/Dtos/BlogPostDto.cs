@@ -21,5 +21,6 @@ namespace Explorer.Blog.API.Dtos
         public DateTime CreatedAt { get; set; }
 
         public List<BlogImageDto> Images { get; set; } = new();
+        public int Score { get; set; }
     }
 }

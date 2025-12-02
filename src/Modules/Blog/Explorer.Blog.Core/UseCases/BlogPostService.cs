@@ -94,6 +94,27 @@ namespace Explorer.Blog.Core.UseCases
             return _mapper.Map<BlogPostDto>(updated);
         }
 
+        public BlogVoteDto Vote(long blogPostId, long userId, int value)
+        {
+            if (value != 1 && value != -1)
+                throw new ArgumentException("Vote value must be +1 or -1.");
+
+
+            var blogPost = _repository.Get(blogPostId);
+            if (blogPost == null)
+            {
+                throw new NotFoundException("Blog post not found.");
+            }
+
+            blogPost.Vote(userId, value);
+            _repository.Update(blogPost);
+
+            var vote = blogPost.Votes.FirstOrDefault(v => v.UserId == userId); // trenutni glas korisnika
+            return vote == null ? null : _mapper.Map<BlogVoteDto>(vote);
+            // korisnik je povukao glas, vrati null
+            // inace vrati njegov glas mapiran u DTO
+        }
+
         // Helper
         private BlogPost LoadAndCheckOwnership(long authorId, long blogId)
         {
