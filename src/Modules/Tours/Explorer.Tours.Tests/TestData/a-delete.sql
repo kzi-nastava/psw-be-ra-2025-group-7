@@ -2,6 +2,7 @@ DELETE FROM tours."Equipment";
 DELETE FROM tours."TourProblems";
 DELETE FROM tours."TourJournals";
 DELETE FROM tours."Facility";
+DELETE FROM tours."Monuments";
 DELETE FROM tours."Tours";
 
 DELETE FROM tours."Quizzes";

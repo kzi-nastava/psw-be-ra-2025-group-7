@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Explorer.Blog.Core.Domain
 {
-    public class BlogPost : Entity
+    public class BlogPost : AggregateRoot
     {
         public long AuthorId { get; private set; }
 
@@ -17,7 +17,16 @@ namespace Explorer.Blog.Core.Domain
 
         public DateTime CreatedAt { get; private set; }
 
+        public DateTime? LastModifiedAt { get; private set; }
+
+        public BlogStatus Status { get; private set; }
+
         public List<BlogImage> Images { get; private set; } = new();
+
+        public List<BlogVote> Votes { get; private set; } = new();
+        public int Score => Votes.Sum(v => v.Value);
+
+
 
         protected BlogPost() { }  
 
@@ -26,11 +35,13 @@ namespace Explorer.Blog.Core.Domain
             if (authorId <= 0)
                 throw new ArgumentException("AuthorId must be a positive number.", nameof(authorId));
 
-            SetTitle(title);
-            SetDescription(description);
 
             AuthorId = authorId;
             CreatedAt = DateTime.UtcNow;
+            Status = BlogStatus.Draft;
+
+            SetTitle(title);
+            SetDescription(description);
 
             if (images != null)
             {
@@ -38,8 +49,12 @@ namespace Explorer.Blog.Core.Domain
             }
         }
 
-        public void Edit(string title, string description, IEnumerable<BlogImage>? images)
+        
+        // Izmena bloga dok je u pripremi-naslov, opis, slike
+        public void EditDraft(string title, string description, IEnumerable<BlogImage>? images)
         {
+            EnsureDraft();  
+
             SetTitle(title);
             SetDescription(description);
 
@@ -48,6 +63,41 @@ namespace Explorer.Blog.Core.Domain
             {
                 Images.AddRange(images);
             }
+
+            LastModifiedAt = DateTime.UtcNow;
+        }
+
+       //izmena samo opisa-kad je blog objavljen
+        public void UpdatePublishedDescription(string description)
+        {
+            EnsurePublished();      
+
+            SetDescription(description);
+            LastModifiedAt = DateTime.UtcNow;
+        }
+
+      
+        public void Publish()
+        {
+            EnsureDraft();
+            Status = BlogStatus.Published;
+        }
+
+     
+        public void Archive()
+        {
+            if (Status == BlogStatus.Archived || Status == BlogStatus.Closed)
+                throw new InvalidOperationException("Blog is already read-only.");
+
+          
+            if (Status != BlogStatus.Published &&
+                Status != BlogStatus.Active &&
+                Status != BlogStatus.Famous)
+            {
+                throw new InvalidOperationException("Only published or promoted blogs can be archived.");
+            }
+
+            Status = BlogStatus.Archived;
         }
 
         private void SetTitle(string title)
@@ -58,14 +108,51 @@ namespace Explorer.Blog.Core.Domain
             if (title.Length > 200)
                 throw new ArgumentException("Title cannot exceed 200 characters.", nameof(title));
 
-            Title = title;
+            Title = title.Trim();
         }
 
         private void SetDescription(string description)
         {
             Description = description ?? string.Empty;
-            // Renderovanje Markdown -> HTML radi API ili frontend.
+        }
+
+        private void EnsureDraft()
+        {
+            if (Status != BlogStatus.Draft)
+                throw new InvalidOperationException("Blog can be modified as draft only while in Draft status.");
+        }
+
+        private void EnsurePublished()
+        {
+            if (Status != BlogStatus.Published)
+                throw new InvalidOperationException("Operation allowed only for published blogs.");
+        }
+
+        public void Vote(long userId, int value)
+        {
+            if (value != 1 && value != -1)
+                throw new ArgumentException("Vote must be +1 or -1");
+
+            var existingVote = Votes.FirstOrDefault(v => v.UserId == userId);
+
+
+            if (existingVote != null )
+            {
+                if (existingVote.Value == value) // alo je kliknuo isto onda povuci glas
+                {
+                    Votes.Remove(existingVote);
+                    return;
+                }
+
+                existingVote.ChangeVote(value); //menja se glas
+            }
+            else
+            {
+                var newVote = new BlogVote(userId, value);  //prvi put se glasa
+                Votes.Add(newVote);
+            }
+
+
         }
     }
-
 }

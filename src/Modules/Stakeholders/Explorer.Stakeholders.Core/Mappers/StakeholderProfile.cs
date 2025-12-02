@@ -22,6 +22,5 @@ public class StakeholderProfile : Profile
                 src.Longitude
             ))
             .ReverseMap();
-
     }
 }

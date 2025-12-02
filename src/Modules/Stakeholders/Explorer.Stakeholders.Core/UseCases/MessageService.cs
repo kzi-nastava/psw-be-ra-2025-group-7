@@ -45,7 +45,7 @@ namespace Explorer.Stakeholders.Core.UseCases
         public MessageDto SendMessage(MessageDto messageDto)
         {
             messageDto.SentAt = DateTime.UtcNow;
-            messageDto.EditedAt = DateTime.MinValue;
+            messageDto.EditedAt = null;
             var message = _mapper.Map<Message>(messageDto);
             var createdMessage = _repository.Create(message);
             return _mapper.Map<MessageDto>(createdMessage);

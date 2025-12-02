@@ -67,7 +67,7 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("EditedAt")
+                    b.Property<DateTime?>("EditedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("SentAt")
