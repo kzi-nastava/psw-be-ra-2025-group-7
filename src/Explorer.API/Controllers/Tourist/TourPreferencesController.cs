@@ -15,7 +15,7 @@ using System.Security.Claims;
 namespace Explorer.API.Controllers.Tourist
 {
     [Authorize(Policy = "touristPolicy")]
-    [Route("api/tourist/preferences")]
+    [Route("api/tourist/tour-preferences")]
     [ApiController]
     public class TourPreferencesController : ControllerBase
     {
@@ -28,26 +28,19 @@ namespace Explorer.API.Controllers.Tourist
 
         private long GetAuthTouristId()
         {
-            string[] possibleClaims =
-            {
-        "personId",                 // koristi ga BaseWebIntegrationTest
-        ClaimTypes.NameIdentifier,  // koristi ga pravi JWT token
-        "id",                       // koristi kolegin test
-        "userId",
-        "sub"
-    };
+            var claim = User.Claims.FirstOrDefault(c =>
+                c.Type == ClaimTypes.NameIdentifier ||
+                c.Type == "id" ||
+                c.Type == "userId" ||
+                c.Type == "sub");
 
-            foreach (var type in possibleClaims)
+            if (claim == null || !long.TryParse(claim.Value, out long touristId))
             {
-                var value = User.FindFirstValue(type);
-                if (value != null && long.TryParse(value, out long touristId))
-                {
-                    return touristId;
-                }
+                var allClaims = string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}"));
+                throw new UnauthorizedAccessException($"Invalid token. Available claims: {allClaims}");
             }
 
-            var allClaims = string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}"));
-            throw new UnauthorizedAccessException($"Invalid token. Available claims: {allClaims}");
+            return touristId;
         }
 
 
