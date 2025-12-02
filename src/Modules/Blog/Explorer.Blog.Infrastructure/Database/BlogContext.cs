@@ -25,6 +25,12 @@ public class BlogContext : DbContext
             b.Property(x => x.Description).IsRequired();
             b.Property(x => x.CreatedAt).IsRequired();
 
+            b.Property(x => x.Status)
+            .IsRequired()
+            .HasConversion<int>();  
+
+            b.Property(x => x.LastModifiedAt);
+
             // Images kao owned kolekcija (BlogImage)
             b.OwnsMany(x => x.Images, img =>
             {

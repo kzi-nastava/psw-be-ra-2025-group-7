@@ -67,5 +67,23 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             _dbSet.Remove(entity);
             _dbContext.SaveChanges();
         }
+
+        public List<TourProblem> GetAll()
+        {
+         return _dbSet.AsNoTracking().ToList();
+        }
+
+        public TourProblem UpdateResolveDue(int id, DateTime resolveDue)
+        {
+            var entity = _dbSet.FirstOrDefault(e => e.Id == id);
+            if (entity == null)
+                throw new KeyNotFoundException($"Problem {id} not found.");
+
+            entity.ResolveDue = DateTime.SpecifyKind(resolveDue, DateTimeKind.Utc);
+
+            _dbContext.SaveChanges();
+            return entity;
+        }
+
     }
 }

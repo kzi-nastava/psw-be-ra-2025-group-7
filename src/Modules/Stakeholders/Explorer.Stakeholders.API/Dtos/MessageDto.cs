@@ -13,6 +13,6 @@ namespace Explorer.Stakeholders.API.Dtos
         public long SentToUserId { get; set; }
         public string Content { get; set; }
         public DateTime SentAt { get; set; }
-        public DateTime EditedAt { get; set; }
+        public DateTime? EditedAt { get; set; }
     }
 }

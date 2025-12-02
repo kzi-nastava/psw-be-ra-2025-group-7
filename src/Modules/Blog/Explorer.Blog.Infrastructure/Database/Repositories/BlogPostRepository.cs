@@ -59,6 +59,27 @@ public class BlogPostRepository : IBlogPostRepository
         _context.SaveChanges();
         return blogPost;
     }
+
+
+    public (IEnumerable<BlogPost> items, int total) GetPublic(int page, int pageSize)
+    {
+        var query = _context.BlogPosts
+            .Include(b => b.Images)
+            .Where(b => b.Status == BlogStatus.Published
+                     || b.Status == BlogStatus.Archived);
+
+        var total = query.Count();
+
+        var items = query
+            .OrderByDescending(b => b.LastModifiedAt ?? b.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (items, total);
+    }
+
+
 }
 
 
