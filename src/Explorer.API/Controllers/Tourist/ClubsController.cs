@@ -28,14 +28,28 @@ public class ClubsController : ControllerBase
     [HttpPost]
     public ActionResult<ClubDto> Create([FromBody] ClubDto dto)
     {
+        var userId = long.Parse(User.FindFirst("id")!.Value);
+        dto.CreatedBy = userId;
+        dto.CreatedAt = DateTime.UtcNow;
         var created = _clubService.Create(dto);
         return Ok(created);
     }
+
 
     [HttpPut("{id:long}")]
     public ActionResult<ClubDto> Update(long id, [FromBody] ClubDto dto)
     {
         dto.Id = id;
+
+        var userId = long.Parse(User.FindFirst("id")!.Value);
+
+        var existing = _clubService.GetAll().FirstOrDefault(c => c.Id == id);
+        if (existing == null)
+            return NotFound();
+
+        if (existing.CreatedBy != userId)
+            return Forbid();   
+
         var updated = _clubService.Update(dto);
         return Ok(updated);
     }
@@ -43,6 +57,15 @@ public class ClubsController : ControllerBase
     [HttpDelete("{id:long}")]
     public ActionResult Delete(long id) 
     {
+        var userId = long.Parse(User.FindFirst("id")!.Value);
+
+        var existing = _clubService.GetAll().FirstOrDefault(c => c.Id == id);
+        if (existing == null)
+            return NotFound();
+
+        if (existing.CreatedBy != userId)
+            return Forbid();  // ❌ nije vlasnik → no access
+
         _clubService.Delete(id);
         return Ok();
     }
