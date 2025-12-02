@@ -1,7 +1,7 @@
 ﻿-- Seed skripta za testne komentare
 -- Dodaje komentare na postojeće blog postove
 
--- Komentari na blog post sa ID = -1 (Draft blog od autora -21)
+-- Komentari na blog post sa ID = -1 (Draft blog od autora -11)
 -- NEĆE RADITI jer blog mora biti Published - ovo je namerno za testiranje validacije
 
 -- Komentari na blog post sa ID = -2 (Published blog)

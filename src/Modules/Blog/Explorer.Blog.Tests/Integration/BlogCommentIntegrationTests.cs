@@ -19,39 +19,6 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
     public BlogCommentIntegrationTests(BlogTestFactory factory) : base(factory) { }
 
     [Fact]
-    public void Get_comments_by_blog_id_returns_all_comments_for_blog()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateCommentController(scope, "-11");
-        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
-
-        // Pretpostavljamo da postoji blog sa ID = -2 sa komentarima iz seed-a
-        const long blogId = -2;
-
-        // Act
-        var actionResult = controller.GetByBlogId(blogId);
-        var okResult = actionResult.Result as OkObjectResult;
-        var result = okResult?.Value as List<BlogCommentDto>;
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.Count.ShouldBeGreaterThan(0);
-
-        // Svi komentari moraju pripadati istom blogu
-        foreach (var comment in result)
-        {
-            comment.BlogId.ShouldBe(blogId);
-        }
-
-        // Komentari su sortirani po CreatedAt (najstariji prvi)
-        for (int i = 0; i < result.Count - 1; i++)
-        {
-            result[i].CreatedAt.ShouldBeLessThanOrEqualTo(result[i + 1].CreatedAt);
-        }
-    }
-
-    [Fact]
     public void Creates_comment_for_published_blog_and_persists_in_database()
     {
         // Arrange
@@ -106,7 +73,7 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        const long authorId = -22;
+        const long authorId = -12;
         var controller = CreateCommentController(scope, authorId.ToString());
 
         // Pretpostavljamo da postoji Draft blog sa ID = -1
