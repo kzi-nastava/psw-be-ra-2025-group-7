@@ -44,6 +44,11 @@ namespace Explorer.Tours.Core.Mappers
 
             CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
 
+            CreateMap<TourDurationDto, TourDuration>()
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (TravelType)src.Type))
+                .ReverseMap()
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type));
+
             CreateMap<AnnualAward, AnnualAwardDto>()
                 .ForMember(d => d.Status, opt => opt.MapFrom(s => s.Status.ToString()));
             CreateMap<AnnualAwardDto, AnnualAward>()
@@ -52,11 +57,6 @@ namespace Explorer.Tours.Core.Mappers
                 .ForMember(d => d.Status, opt => opt.Ignore());
             CreateMap<UpdateAnnualAwardDto, AnnualAward>()
                 .ForMember(d => d.Status, opt => opt.Ignore());
-
-            CreateMap<TourDurationDto, TourDuration>()
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (TravelType)src.Type))
-                .ReverseMap()
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type));
         }
     }
 }
