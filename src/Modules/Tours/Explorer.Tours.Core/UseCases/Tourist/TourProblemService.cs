@@ -48,7 +48,7 @@ public class TourProblemService : ITourProblemService
         touristId,
         Enum.Parse<ProblemCategory>(dto.Category, true),
         Enum.Parse<ProblemPriority>(dto.Priority, true),
-        dto.Description
+        dto.Description,dto.IsSolved
     );
         dto.Comments = new();
         dto.Status = "Open";

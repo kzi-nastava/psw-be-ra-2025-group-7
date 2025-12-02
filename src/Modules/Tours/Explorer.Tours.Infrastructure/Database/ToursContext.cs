@@ -203,53 +203,54 @@ namespace Explorer.Tours.Infrastructure.Database
             });
 
             // Ostale entitete (Facility, TourProblem, ...) rade drugi u svojim karticama.
+
+
+            modelBuilder.Entity<Tour>().HasKey(t => t.Id);
+            modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
+
+
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+
+            modelBuilder.Entity<TourProblem>(b =>
+            {
+                b.ToTable("TourProblems");
+
+                b.HasKey(tp => tp.Id);
+
+                b.Property(tp => tp.TourId).IsRequired();
+                b.Property(tp => tp.TouristId).IsRequired();
+
+                b.Property(tp => tp.Category)
+                 .HasConversion<int>()
+                 .IsRequired();
+
+                b.Property(tp => tp.Priority)
+                 .HasConversion<int>()
+                 .IsRequired();
+
+                b.Property(tp => tp.Description)
+                 .IsRequired()
+                 .HasMaxLength(2000);
+
+                b.Property(tp => tp.TimeReported)
+                 .IsRequired();
+
+                b.Property(tp => tp.Status)
+                 .HasConversion<int>()
+                 .IsRequired();
+
+                // Ignoriše javni immutable getter
+                b.Ignore(tp => tp.Comments);
+
+                // Mapa za private field _comments -> JSONB u Postgresu
+                b.Property<List<TourProblemMessage>>("_comments")
+                 .HasColumnName("_comments")
+                 .HasColumnType("jsonb")
+                 .HasConversion(
+                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                     v => JsonSerializer.Deserialize<List<TourProblemMessage>>(v, (JsonSerializerOptions?)null)
+                 );
+            });
         }
-
-        modelBuilder.Entity<Tour>().HasKey(t => t.Id);
-        modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
-          
-            
-            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
-
-        modelBuilder.Entity<TourProblem>(b =>
-        {
-            b.ToTable("TourProblems");
-
-            b.HasKey(tp => tp.Id);
-
-            b.Property(tp => tp.TourId).IsRequired();
-            b.Property(tp => tp.TouristId).IsRequired();
-
-            b.Property(tp => tp.Category)
-             .HasConversion<int>()
-             .IsRequired();
-
-            b.Property(tp => tp.Priority)
-             .HasConversion<int>()
-             .IsRequired();
-
-            b.Property(tp => tp.Description)
-             .IsRequired()
-             .HasMaxLength(2000);
-
-            b.Property(tp => tp.TimeReported)
-             .IsRequired();
-
-            b.Property(tp => tp.Status)
-             .HasConversion<int>()
-             .IsRequired();
-
-            // Ignoriše javni immutable getter
-            b.Ignore(tp => tp.Comments);
-
-            // Mapa za private field _comments -> JSONB u Postgresu
-            b.Property<List<TourProblemMessage>>("_comments")
-             .HasColumnName("_comments")
-             .HasColumnType("jsonb")
-             .HasConversion(
-                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                 v => JsonSerializer.Deserialize<List<TourProblemMessage>>(v, (JsonSerializerOptions?)null)
-             );
-        });
     }
 }

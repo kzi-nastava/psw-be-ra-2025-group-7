@@ -21,13 +21,6 @@ namespace Explorer.Tours.Core.Domain
         public DateTime TimeReported { get; set; }
         public DateTime? ResolveDue { get; set; }
         public bool IsSolved { get; set; }
-
-        public int TourId { get; private set; }
-        public int TouristId { get; private set; }
-        public ProblemCategory Category { get; private set; }
-        public ProblemPriority Priority { get; private set; }
-        public string Description { get; private set; }
-        public DateTime TimeReported { get; private set; }
         public ProblemStatus Status { get; private set; } = ProblemStatus.Open;
 
         private readonly List<TourProblemMessage> _comments = new();
