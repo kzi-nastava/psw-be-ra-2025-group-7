@@ -3,6 +3,7 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Explorer.BuildingBlocks.Core.Exceptions;
 
 namespace Explorer.API.Controllers.Tourist;
 
@@ -28,46 +29,68 @@ public class ClubsController : ControllerBase
     [HttpPost]
     public ActionResult<ClubDto> Create([FromBody] ClubDto dto)
     {
-        var userId = long.Parse(User.FindFirst("id")!.Value);
-        dto.CreatedBy = userId;
+        var userId = TryGetUserId();
+        if (userId.HasValue)
+        {
+            dto.CreatedBy = userId.Value;
+        }
+
         dto.CreatedAt = DateTime.UtcNow;
+
         var created = _clubService.Create(dto);
         return Ok(created);
     }
-
 
     [HttpPut("{id:long}")]
     public ActionResult<ClubDto> Update(long id, [FromBody] ClubDto dto)
     {
         dto.Id = id;
 
-        var userId = long.Parse(User.FindFirst("id")!.Value);
+        var userId = TryGetUserId();
 
         var existing = _clubService.GetAll().FirstOrDefault(c => c.Id == id);
         if (existing == null)
-            return NotFound();
+            throw new NotFoundException("Club not found.");
 
-        if (existing.CreatedBy != userId)
-            return Forbid();   
+        if (userId.HasValue && existing.CreatedBy != userId.Value)
+            return Forbid();
 
         var updated = _clubService.Update(dto);
         return Ok(updated);
     }
 
+
+
     [HttpDelete("{id:long}")]
-    public ActionResult Delete(long id) 
+    public ActionResult Delete(long id)
     {
-        var userId = long.Parse(User.FindFirst("id")!.Value);
+        var userId = TryGetUserId();
 
         var existing = _clubService.GetAll().FirstOrDefault(c => c.Id == id);
         if (existing == null)
-            return NotFound();
+            throw new NotFoundException("Club not found.");
 
-        if (existing.CreatedBy != userId)
-            return Forbid();  // ❌ nije vlasnik → no access
+        if (userId.HasValue && existing.CreatedBy != userId.Value)
+            return Forbid();
 
         _clubService.Delete(id);
         return Ok();
     }
+
+
+
+    private long? TryGetUserId()
+    {
+        var claim = User?.FindFirst("id");
+        if (claim == null) return null;
+
+        if (long.TryParse(claim.Value, out var id))
+        {
+            return id;
+        }
+
+        return null;
+    }
+
 }
 
