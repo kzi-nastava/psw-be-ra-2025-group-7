@@ -12,6 +12,15 @@ namespace Explorer.Tours.Core.Domain
     public enum ProblemStatus { Open,  Resolved, Unresolved }
     public class TourProblem:AggregateRoot
     {
+        public int Id { get; init; }
+        public int TourId { get; init; }
+        public int TouristId { get; init; }
+        public ProblemCategory Category { get; init; }
+        public ProblemPriority Priority { get; init; }
+        public string Description { get; init; }
+        public DateTime TimeReported { get; set; }
+        public DateTime? ResolveDue { get; set; }
+        public bool IsSolved { get; set; }
 
         public int TourId { get; private set; }
         public int TouristId { get; private set; }
@@ -23,9 +32,8 @@ namespace Explorer.Tours.Core.Domain
 
         private readonly List<TourProblemMessage> _comments = new();
         public IReadOnlyCollection<TourProblemMessage> Comments => _comments;
-
         private TourProblem() { }
-        public TourProblem(int tourId, int touristId, ProblemCategory category, ProblemPriority priority, string description)
+        public TourProblem(int tourId, int touristId, ProblemCategory category, ProblemPriority priority, string description, bool isSolved)
         {
             if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Invalid Description.");
             TourId = tourId;
@@ -34,6 +42,8 @@ namespace Explorer.Tours.Core.Domain
             Priority = priority;
             Description = description;
             TimeReported = DateTime.UtcNow;
+            ResolveDue = null;
+            IsSolved = isSolved;
             Status = ProblemStatus.Open;
 
             _comments.Add(new TourProblemMessage(TouristId, Description, TimeReported));

@@ -21,12 +21,12 @@ public class TourQueryTests : BaseToursIntegrationTest
         var controller = CreateController(scope);
 
         // Act
-        var result = ((ObjectResult)controller.GetAll(0, 0).Result)?.Value as PagedResult<TourDto>;
+        var result = ((ObjectResult)controller.GetAll(1, 10).Result)?.Value as PagedResult<TourDto>;
 
         // Assert
         result.ShouldNotBeNull();
-        result.Results.Count.ShouldBe(3);
-        result.TotalCount.ShouldBe(3);
+        result.Results.Count.ShouldBe(8);  
+        result.TotalCount.ShouldBe(8);     
     }
 
     private static TourAuthoringController CreateController(IServiceScope scope)

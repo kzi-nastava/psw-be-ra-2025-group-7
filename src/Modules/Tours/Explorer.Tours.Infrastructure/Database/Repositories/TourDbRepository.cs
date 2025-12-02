@@ -20,17 +20,28 @@ public class TourDbRepository : ITourRepository
 
     public PagedResult<Tour> GetPagedByAuthor(int page, int pageSize, long authorId)
     {
-        var task = _dbSet
-            .Where(t => t.AuthorId == authorId)
-            .GetPagedById(page, pageSize);
+        var query = _dbSet
+            .Include(t => t.KeyPoints)      
+            .Include(t => t.TourDurations)  
+            .Where(t => t.AuthorId == authorId);
 
-        task.Wait();
-        return task.Result;
+        var totalCount = query.Count();
+
+        var items = query
+            .OrderBy(t => t.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return new PagedResult<Tour>(items, totalCount);
     }
 
     public Tour Get(long id)
     {
-        var entity = _dbSet.Find(id);
+        var entity = _dbSet
+            .Include(t => t.KeyPoints)      
+            .Include(t => t.TourDurations) 
+            .FirstOrDefault(t => t.Id == id);
         if (entity == null) throw new NotFoundException("Not found: " + id);
         return entity;
     }
@@ -46,14 +57,21 @@ public class TourDbRepository : ITourRepository
     {
         try
         {
-            DbContext.Update(entity);
+            var existingEntity = _dbSet.Find(entity.Id);
+
+            if (existingEntity == null)
+                throw new NotFoundException($"Tour with id {entity.Id} not found.");
+
+            DbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
+
             DbContext.SaveChanges();
+
+            return existingEntity;
         }
         catch (DbUpdateException e)
         {
-            throw new NotFoundException(e.Message);
+            throw new NotFoundException($"An error occurred while updating: {e.InnerException?.Message ?? e.Message}");
         }
-        return entity;
     }
 
     public void Delete(long id)

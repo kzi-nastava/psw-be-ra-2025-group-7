@@ -25,9 +25,9 @@ namespace Explorer.API.Controllers.Tourist.Blog
         {
             var idClaim = User?.FindFirst("id") ?? User?.FindFirst(ClaimTypes.NameIdentifier);
 
-            // Ako nema tokena (Swagger scenario), ne crashuj
+          
             if (idClaim == null)
-                return 0; // SWAGGER MODE
+                return 0; 
 
             if (!long.TryParse(idClaim.Value, out var userId))
                 return 0;
@@ -36,9 +36,7 @@ namespace Explorer.API.Controllers.Tourist.Blog
         }
 
 
-        /// <summary>
-        /// Vraća moje blog postove (paginirano).
-        /// </summary>
+        //vraca blog postove
         [HttpGet]
         public ActionResult<PagedResult<BlogPostDto>> GetMyBlogPosts(
             [FromQuery] int page = 1,
@@ -49,9 +47,7 @@ namespace Explorer.API.Controllers.Tourist.Blog
             return Ok(result);
         }
 
-        /// <summary>
-        /// Kreira novi blog post za trenutno ulogovanog korisnika.
-        /// </summary>
+       
         [HttpPost]
         public ActionResult<BlogPostDto> Create([FromBody] CreateBlogPostDto dto)
         {
@@ -60,15 +56,62 @@ namespace Explorer.API.Controllers.Tourist.Blog
             return Ok(created);
         }
 
-        /// <summary>
-        /// Izmenjuje postojeći blog post (naslov, opis, slike) ako pripada trenutnom korisniku.
-        /// </summary>
-        [HttpPut]
-        public ActionResult<BlogPostDto> Update([FromBody] UpdateBlogPostDto dto)
+        [HttpPost("{blogPostId}/vote")]
+        public ActionResult<BlogVoteDto> Vote(long blogPostId, [FromQuery] int value)
+        {
+            var userId = GetCurrentUserId();
+
+            var vote = _blogPostService.Vote(blogPostId, userId, value);
+
+            return Ok(vote);
+        }
+
+        
+        
+        // Izmena bloga dok je u pripremi (naslov, opis, slike).
+        [HttpPut("draft")]
+        public ActionResult<BlogPostDto> UpdateDraft([FromBody] UpdateBlogPostDto dto)
         {
             var authorId = GetCurrentUserId();
-            var updated = _blogPostService.Update(authorId, dto);
+            var updated = _blogPostService.UpdateDraft(authorId, dto);
             return Ok(updated);
         }
+
+       
+        // Izmena samo opisa objavljenog bloga.
+        [HttpPut("published/description")]
+        public ActionResult<BlogPostDto> UpdatePublishedDescription(
+            [FromBody] UpdatePublishedBlogDescriptionDto dto)
+        {
+            var authorId = GetCurrentUserId();
+            var updated = _blogPostService.UpdatePublishedDescription(authorId, dto);
+            return Ok(updated);
+        }
+
+        [HttpPost("{id:long}/publish")]
+        public ActionResult<BlogPostDto> Publish(long id)
+        {
+            var authorId = GetCurrentUserId();
+            var updated = _blogPostService.Publish(authorId, id);
+            return Ok(updated);
+        }
+
+        [HttpPost("{id:long}/archive")]
+        public ActionResult<BlogPostDto> Archive(long id)
+        {
+            var authorId = GetCurrentUserId();
+            var updated = _blogPostService.Archive(authorId, id);
+            return Ok(updated);
+        }
+
+
+        [HttpGet("public")]
+        public ActionResult<PagedResult<BlogPostDto>> GetPublic([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = _blogPostService.GetPublic(page, pageSize);
+            return Ok(result);
+        }
+
+
     }
 }
