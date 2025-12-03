@@ -57,17 +57,27 @@ namespace Explorer.API.Controllers.Tourist.Blog
         }
 
         [HttpPost("{blogPostId}/vote")]
-        public ActionResult<BlogVoteDto> Vote(long blogPostId, [FromQuery] int value)
+        public ActionResult<BlogVoteDto> Vote(long blogPostId, [FromBody] BlogVoteDto dto)
         {
             var userId = GetCurrentUserId();
+            _blogPostService.Vote(blogPostId, userId, dto.Value);
 
-            var vote = _blogPostService.Vote(blogPostId, userId, value);
+            var updatetPost = _blogPostService.Get(blogPostId);
 
-            return Ok(vote);
+            return Ok(updatetPost);
         }
 
-        
-        
+        [HttpDelete("{blogPostId}/vote")]
+        public ActionResult<BlogVoteDto> RemoveVote(long blogPostId)
+        {
+            var userId = GetCurrentUserId();
+            _blogPostService.Vote(blogPostId, userId, 0); // 0 znači povlačenje glasa
+            var updatetPost = _blogPostService.Get(blogPostId);
+
+            return Ok(updatetPost);
+        }
+
+
         // Izmena bloga dok je u pripremi (naslov, opis, slike).
         [HttpPut("draft")]
         public ActionResult<BlogPostDto> UpdateDraft([FromBody] UpdateBlogPostDto dto)

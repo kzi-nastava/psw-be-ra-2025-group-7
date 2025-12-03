@@ -13,6 +13,6 @@ namespace Explorer.Blog.API.Dtos
         public int Value { get; set; }
         public DateTime VotedAt { get; set; }
 
-       // public int Score { get; set; }
+        public int Score { get; set; }
     }
 }
