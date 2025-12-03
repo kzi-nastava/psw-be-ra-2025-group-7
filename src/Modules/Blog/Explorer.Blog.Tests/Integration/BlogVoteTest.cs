@@ -38,34 +38,41 @@ namespace Explorer.Blog.Tests.Integration
 
             var blogPost = createdResult.Value as BlogPostDto;
             blogPost.ShouldNotBeNull();
-            blogPost.Score.ShouldBe(0); // inicijalno score = 0
+            blogPost.Score.ShouldBe(0);
 
             // 2) Glasaj +1
-            var voteDto = controller.Vote(blogPost.Id, 1).Result as OkObjectResult;
-            voteDto.ShouldNotBeNull();
-            var vote1 = voteDto.Value as BlogVoteDto;
-            vote1.ShouldNotBeNull();
-            vote1.Value.ShouldBe(1);
+            var vote = new BlogVoteDto { Value = 1 };
+            var result = controller.Vote(blogPost.Id, vote).Result as OkObjectResult;
+            result.ShouldNotBeNull();
 
-            // Reload post iz baze i proveri score
+            var updatedPost = result.Value as BlogPostDto;
+            updatedPost.ShouldNotBeNull();
+            updatedPost.Score.ShouldBe(1);
+
+            // Provera u bazi
             var storedPost = dbContext.BlogPosts.First(p => p.Id == blogPost.Id);
             storedPost.Score.ShouldBe(1);
 
             // 3) Promeni glas na -1
-            var vote2Dto = controller.Vote(blogPost.Id, -1).Result as OkObjectResult;
-            vote2Dto.ShouldNotBeNull();
-            var vote2 = vote2Dto.Value as BlogVoteDto;
-            vote2.ShouldNotBeNull();
-            vote2.Value.ShouldBe(-1);
+            var vote2 = new BlogVoteDto { Value = -1 };
+            var result2 = controller.Vote(blogPost.Id, vote2).Result as OkObjectResult;
+            result2.ShouldNotBeNull();
+
+            var updatedPost2 = result2.Value as BlogPostDto;
+            updatedPost2.ShouldNotBeNull();
+            updatedPost2.Score.ShouldBe(-1);
 
             storedPost = dbContext.BlogPosts.First(p => p.Id == blogPost.Id);
             storedPost.Score.ShouldBe(-1);
 
-            // 4) Povuci glas (-1)
-            var vote3Dto = controller.Vote(blogPost.Id, -1).Result as OkObjectResult;
-            vote3Dto.ShouldNotBeNull();
-            var vote3 = vote3Dto.Value as BlogVoteDto;
-            vote3.ShouldBeNull(); // glas je uklonjen
+            // 4) Povuci glas
+            var vote3 = new BlogVoteDto { Value = -1 };
+            var result3 = controller.Vote(blogPost.Id, vote3).Result as OkObjectResult;
+            result3.ShouldNotBeNull();
+
+            var updatedPost3 = result3.Value as BlogPostDto;
+            updatedPost3.ShouldNotBeNull();
+            updatedPost3.Score.ShouldBe(0);
 
             storedPost = dbContext.BlogPosts.First(p => p.Id == blogPost.Id);
             storedPost.Score.ShouldBe(0);
@@ -76,7 +83,10 @@ namespace Explorer.Blog.Tests.Integration
             var controller = new BlogPostController(
                 scope.ServiceProvider.GetRequiredService<IBlogPostService>());
 
-            var ctx = BuildContext(userId);
+            var ctx = new ControllerContext
+            {
+                HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext()
+            };
 
             var identity = new ClaimsIdentity(new[]
             {
@@ -90,22 +100,12 @@ namespace Explorer.Blog.Tests.Integration
             return controller;
         }
 
-        private static ControllerContext BuildContext(string userId)
-        {
-            return new ControllerContext
-            {
-                HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext()
-            };
-        }
-
-
         [Fact]
         public void MultipleUsersVoting_Should_AggregateScoreCorrectly()
         {
             using var scope = Factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
 
-            // User 1
             var controllerUser1 = CreateController(scope, "1");
 
             // 1) User 1 kreira blog
@@ -122,35 +122,32 @@ namespace Explorer.Blog.Tests.Integration
             post.ShouldNotBeNull();
             post.Score.ShouldBe(0);
 
-            // 2) User 1 glasa +1
-            var v1 = controllerUser1.Vote(post.Id, 1).Result as OkObjectResult;
-            v1.ShouldNotBeNull();
+            // User 1 glasa +1
+            var v11 = new BlogVoteDto { Value = 1 };
+            controllerUser1.Vote(post.Id, v11).Result.ShouldBeOfType<OkObjectResult>();
 
             // User 2 glasa -1
             var controllerUser2 = CreateController(scope, "2");
-            var v2 = controllerUser2.Vote(post.Id, -1).Result as OkObjectResult;
-            v2.ShouldNotBeNull();
+            var v22 = new BlogVoteDto { Value = -1 };
+            controllerUser2.Vote(post.Id, v22).Result.ShouldBeOfType<OkObjectResult>();
 
             // User 3 glasa +1
             var controllerUser3 = CreateController(scope, "3");
-            var v3 = controllerUser3.Vote(post.Id, 1).Result as OkObjectResult;
-            v3.ShouldNotBeNull();
+            var v33 = new BlogVoteDto { Value = 1 };
+            controllerUser3.Vote(post.Id, v33).Result.ShouldBeOfType<OkObjectResult>();
 
-            // Reload
+            // Score = +1 -1 +1 = +1
             var stored = dbContext.BlogPosts.First(x => x.Id == post.Id);
-
-            // Score: user1(+1) + user2(-1) + user3(+1) = +1
             stored.Score.ShouldBe(1);
 
             // User 2 promeni glas na +1
-            var v2Changed = controllerUser2.Vote(post.Id, 1).Result as OkObjectResult;
-            v2Changed.ShouldNotBeNull();
+            var vt = new BlogVoteDto { Value = 1 };
+            controllerUser2.Vote(post.Id, vt).Result.ShouldBeOfType<OkObjectResult>();
 
             stored = dbContext.BlogPosts.First(x => x.Id == post.Id);
 
-            // Novi score: user1(+1) + user2(+1) + user3(+1) = 3
+            // Novi score = +1 +1 +1 = 3
             stored.Score.ShouldBe(3);
         }
-
     }
 }

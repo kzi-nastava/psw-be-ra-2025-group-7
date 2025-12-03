@@ -2,6 +2,7 @@
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.Entities;
+using System.Security.Cryptography;
 
 namespace Explorer.Tours.Core.Mappers
 {
@@ -47,6 +48,15 @@ namespace Explorer.Tours.Core.Mappers
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (TravelType)src.Type))
                 .ReverseMap()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type));
+
+            CreateMap<AnnualAward, AnnualAwardDto>()
+                .ForMember(d => d.Status, opt => opt.MapFrom(s => s.Status.ToString()));
+            CreateMap<AnnualAwardDto, AnnualAward>()
+                .ForMember(d => d.Status, opt => opt.MapFrom(s => Enum.Parse<AwardStatus>(s.Status, true)));
+            CreateMap<CreateAnnualAwardDto, AnnualAward>()
+                .ForMember(d => d.Status, opt => opt.Ignore());
+            CreateMap<UpdateAnnualAwardDto, AnnualAward>()
+                .ForMember(d => d.Status, opt => opt.Ignore());
         }
     }
 }
