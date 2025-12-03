@@ -1,4 +1,4 @@
-﻿-- Blog seed podaci za testove
+-- Blog seed podaci za testove
 
 -- Draft blog (za autora -11)
 INSERT INTO blog."BlogPosts" ("Id", "AuthorId", "Title", "Description", "CreatedAt", "Status", "LastModifiedAt")
@@ -12,8 +12,12 @@ VALUES (-2, -11, 'Published Blog Post', 'Ovo je objavljen blog.', NOW(), 1, NULL
 INSERT INTO blog."BlogPosts" ("Id", "AuthorId", "Title", "Description", "CreatedAt", "Status", "LastModifiedAt")
 VALUES (-3, -12, 'Another Published Blog', 'Jos jedan objavljen blog od drugog autora.', NOW(), 1, NULL);
 
---INSERT INTO blog."BlogVote" ("Id", "UserId", "Value", "VotedAt", "BlogPostsId")
---VALUES
-   -- (-1, -11, 1, NOW(), -1),
-    --(-2, -12, -1, NOW(), -1);
+INSERT INTO blog."BlogPosts"
+    ("Id", "AuthorId", "Title", "Description", "CreatedAt", "Status", "LastModifiedAt")
+VALUES
+    (-1, -21, 'Test blog', 'Ovo je test blog post iz TestData skripte.', '2024-01-25 16:00:00', 0, NULL);
 
+INSERT INTO blog."BlogVotes" ("Id", "UserId", "Value", "VotedAt", "BlogPostsId")
+VALUES
+    (-1, -21, 1, NOW(), -1),
+    (-2, -22, -1, NOW(), -1);

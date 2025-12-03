@@ -17,7 +17,7 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Question> Questions { get; set; }
         public DbSet<Facility> Facility { get; set; }
         public DbSet<TourProblem> TourProblems { get; set; }
-
+        public DbSet<AnnualAward> AnnualAwards { get; set; }
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
