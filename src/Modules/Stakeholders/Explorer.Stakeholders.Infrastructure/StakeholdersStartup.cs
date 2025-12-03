@@ -32,6 +32,7 @@ public static class StakeholdersStartup
         services.AddScoped<ITokenGenerator, JwtGenerator>();
         services.AddScoped<IUserProfileService, UserProfileService>();
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IClubService, ClubService>();
         services.AddScoped<ITourPreferencesService, TourPreferencesService>();
         services.AddScoped<ILocationService, LocationService>();
         services.AddScoped<IReviewService, ReviewService>();
@@ -45,7 +46,7 @@ public static class StakeholdersStartup
         services.AddScoped<IMessageRepository, MessageDbRepository>();
         services.AddScoped<ITourPreferencesRepository, TourPreferencesDbRepository>();
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
-        
+        services.AddScoped<IClubRepository, ClubDbRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
