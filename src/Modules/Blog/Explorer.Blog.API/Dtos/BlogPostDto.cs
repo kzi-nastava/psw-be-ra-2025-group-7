@@ -22,5 +22,6 @@ namespace Explorer.Blog.API.Dtos
 
         public List<BlogImageDto> Images { get; set; } = new();
         public int Score { get; set; }
+        public int Value { get; set; }
     }
 }
