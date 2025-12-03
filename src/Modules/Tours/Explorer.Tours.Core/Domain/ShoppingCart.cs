@@ -63,6 +63,11 @@ namespace Explorer.Tours.Core.Domain
             RecalculateTotalPrice();
         }
 
+        public void UpdateTotalPrice()
+        {
+            RecalculateTotalPrice();
+        }
+
         private void RecalculateTotalPrice()
         {
             TotalPrice = Items.Sum(item => item.Price);

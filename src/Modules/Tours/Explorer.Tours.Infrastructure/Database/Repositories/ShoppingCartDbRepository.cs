@@ -35,45 +35,45 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
         {
             _dbContext.ChangeTracker.Clear();
 
+            // 1. Ucitaj postojeci cart iz baze (BEZ AsNoTracking, jer želimo da EF Core prati izmene)
             var existingCart = _dbSet
                 .Include(sc => sc.Items)
-                .AsNoTracking()
                 .FirstOrDefault(sc => sc.Id == cart.Id);
 
             if (existingCart == null)
                 throw new NotFoundException($"Shopping cart with id {cart.Id} not found.");
 
+            // 2. Identifikuj stavke koje treba obrisati
             var existingItemIds = existingCart.Items.Select(i => i.Id).ToHashSet();
-            var newItemIds = cart.Items.Where(i => i.Id > 0).Select(i => i.Id).ToHashSet();
-
+            var newItemIds = cart.Items.Where(i => i.Id != 0).Select(i => i.Id).ToHashSet();
             var itemIdsToDelete = existingItemIds.Except(newItemIds).ToList();
-            
+
+            // 3. Eksplicitno obrisi stavke iz DbContext PRE nego što ih ukloniš iz kolekcije
             if (itemIdsToDelete.Any())
             {
-                _dbContext.Database.ExecuteSqlRaw(
-                    "DELETE FROM tours.\"OrderItems\" WHERE \"Id\" = ANY(@p0)",
-                    itemIdsToDelete.ToArray()
-                );
+                var itemsToRemove = existingCart.Items.Where(i => itemIdsToDelete.Contains(i.Id)).ToList();
+                foreach (var item in itemsToRemove)
+                {
+                    _dbContext.Remove(item);  // Eksplicitno oznaci za brisanje
+                    existingCart.Items.Remove(item);
+                }
             }
 
-            _dbContext.Entry(cart).State = EntityState.Modified;
-            _dbContext.Entry(cart).Property(c => c.Id).IsModified = false;
-
-            foreach (var item in cart.Items)
+            // 4. Dodaj nove stavke (one sa Id == 0)
+            var newItems = cart.Items.Where(i => i.Id == 0).ToList();
+            foreach (var newItem in newItems)
             {
-                if (item.Id == 0)
-                {
-                    _dbContext.Entry(item).State = EntityState.Added;
-                }
-                else if (newItemIds.Contains(item.Id) && existingItemIds.Contains(item.Id))
-                {
-                    _dbContext.Entry(item).State = EntityState.Modified;
-                }
+                existingCart.Items.Add(newItem);
             }
 
+            // 5. Rekalkuši TotalPrice pozivom domain metode
+            existingCart.UpdateTotalPrice();
+
+            // 6. Sa?uvaj izmene
             _dbContext.SaveChanges();
             _dbContext.ChangeTracker.Clear();
 
+            // 7. Vrati osveženi cart iz baze
             return _dbSet
                 .Include(sc => sc.Items)
                 .FirstOrDefault(sc => sc.Id == cart.Id);
