@@ -43,7 +43,7 @@ namespace Explorer.API.Controllers.Tourist.Blog
         [Authorize]
         public ActionResult<BlogCommentDto> Create([FromBody] CreateCommentDto dto)
         {
-            var authorId = GetCurrentUserId();
+            var authorId = dto.UserId;
 
             if (authorId == 0)
                 return Unauthorized("You must be logged in to comment.");

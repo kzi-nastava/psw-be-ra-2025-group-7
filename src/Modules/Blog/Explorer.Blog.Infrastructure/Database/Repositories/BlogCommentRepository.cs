@@ -29,10 +29,10 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
             // Učitaj blog post sa komentarima
             var blogPost = _context.BlogPosts
                 .Include(b => b.Comments)
-                .FirstOrDefault(b => b.Id == comment.BlogId);
+                .FirstOrDefault(b => b.Id == comment.BlogPostId);
 
             if (blogPost == null)
-                throw new KeyNotFoundException($"Blog post with ID {comment.BlogId} not found.");
+                throw new KeyNotFoundException($"Blog post with ID {comment.BlogPostId} not found.");
 
             _context.SaveChanges();
         }

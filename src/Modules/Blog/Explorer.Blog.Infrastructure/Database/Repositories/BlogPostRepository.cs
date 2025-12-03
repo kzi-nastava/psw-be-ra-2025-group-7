@@ -66,7 +66,9 @@ public class BlogPostRepository : IBlogPostRepository
         var query = _context.BlogPosts
             .Include(b => b.Images)
             .Where(b => b.Status == BlogStatus.Published
-                     || b.Status == BlogStatus.Archived);
+                     || b.Status == BlogStatus.Archived 
+                     || b.Status == BlogStatus.Active
+                     || b.Status == BlogStatus.Famous);
 
         var total = query.Count();
 

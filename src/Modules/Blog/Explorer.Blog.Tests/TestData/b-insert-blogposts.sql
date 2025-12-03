@@ -15,9 +15,9 @@ VALUES (-3, -12, 'Another Published Blog', 'Jos jedan objavljen blog od drugog a
 INSERT INTO blog."BlogPosts"
     ("Id", "AuthorId", "Title", "Description", "CreatedAt", "Status", "LastModifiedAt")
 VALUES
-    (-1, -21, 'Test blog', 'Ovo je test blog post iz TestData skripte.', '2024-01-25 16:00:00', 0, NULL);
+    (-4, -21, 'Test blog', 'Ovo je test blog post iz TestData skripte.', '2024-01-25 16:00:00', 0, NULL);
 
-INSERT INTO blog."BlogVotes" ("Id", "UserId", "Value", "VotedAt", "BlogPostsId")
+INSERT INTO blog."BlogVotes" ("Id", "UserId", "Value", "VotedAt", "BlogPostId")
 VALUES
     (-1, -21, 1, NOW(), -1),
     (-2, -22, -1, NOW(), -1);

@@ -27,7 +27,6 @@ namespace Explorer.Blog.Infrastructure.Migrations
                     Description = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

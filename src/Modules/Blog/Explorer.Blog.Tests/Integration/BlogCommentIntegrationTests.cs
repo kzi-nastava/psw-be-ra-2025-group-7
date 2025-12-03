@@ -38,7 +38,8 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
         var dto = new CreateCommentDto
         {
             BlogId = -2,
-            Text = "Ovo je testni komentar iz integration testa."
+            Text = "Ovo je testni komentar iz integration testa.",
+            UserId = -12
         };
 
         // Act
@@ -49,8 +50,8 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
         // Assert - Response
         result.ShouldNotBeNull();
         result.Id.ShouldNotBe(0);
-        result.BlogId.ShouldBe(dto.BlogId);
-        result.AuthorId.ShouldBe(authorId);
+        result.BlogPostId.ShouldBe(dto.BlogId);
+        result.UserId.ShouldBe(authorId);
         result.Text.ShouldBe(dto.Text);
         result.CreatedAt.ShouldNotBe(default);
         result.LastModifiedAt.ShouldBeNull();
@@ -65,7 +66,7 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
         var storedComment = updatedBlog.Comments.FirstOrDefault(c => c.Id == result.Id);
         storedComment.ShouldNotBeNull();
         storedComment.Text.ShouldBe(dto.Text);
-        storedComment.AuthorId.ShouldBe(authorId);
+        storedComment.UserId.ShouldBe(authorId);
     }
 
     [Fact]
@@ -80,7 +81,8 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
         var dto = new CreateCommentDto
         {
             BlogId = -1,  // Draft blog
-            Text = "Pokušaj komentarisanja Draft bloga."
+            Text = "Pokušaj komentarisanja Draft bloga.",
+            UserId = -12
         };
 
         // Act & Assert
@@ -111,7 +113,8 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
             var dto = new CreateCommentDto
             {
                 BlogId = newBlog.Id,
-                Text = $"Komentar broj {i}"
+                Text = $"Komentar broj {i}",
+                UserId = -11
             };
             controller.Create(dto);
         }
@@ -147,7 +150,8 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
             var dto = new CreateCommentDto
             {
                 BlogId = newBlog.Id,
-                Text = $"Komentar {i}"
+                Text = $"Komentar {i}",
+                UserId = -12
             };
             controller.Create(dto);
         }

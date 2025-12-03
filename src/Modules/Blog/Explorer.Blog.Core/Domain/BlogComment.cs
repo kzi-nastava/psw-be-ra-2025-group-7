@@ -5,8 +5,8 @@ namespace Explorer.Blog.Core.Domain
 {
     public class BlogComment : Entity
     {
-        public long BlogId { get; private set; }
-        public long AuthorId { get; private set; }
+        public long BlogPostId { get; private set; }
+        public long UserId { get; private set; }
         public string Text { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? LastModifiedAt { get; private set; }
@@ -20,8 +20,8 @@ namespace Explorer.Blog.Core.Domain
             if (authorId == 0)
                 throw new ArgumentException("AuthorId must be a positive number.", nameof(authorId));
 
-            BlogId = blogId;
-            AuthorId = authorId;
+            BlogPostId = blogId;
+            UserId = authorId;
             CreatedAt = DateTime.UtcNow;
 
             SetText(text);

@@ -4,9 +4,6 @@ DELETE FROM blog."BlogComments";
 -- Briši sve BlogPostImages (owned entity)
 DELETE FROM blog."BlogPostImages";
 
--- Briši Tours Equipment (ako je potrebno)
-DELETE FROM tours."Equipment";
-
 -- Briši sve BlogPosts
 DELETE FROM blog."BlogVotes";
 DELETE FROM blog."BlogPosts";
