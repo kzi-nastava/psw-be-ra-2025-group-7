@@ -24,7 +24,7 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
             return blogPost?.Comments.OrderBy(c => c.CreatedAt).ToList() ?? new List<BlogComment>();
         }
 
-        public BlogComment Create(BlogComment comment)
+        public void Create(BlogComment comment)
         {
             // Učitaj blog post sa komentarima
             var blogPost = _context.BlogPosts
@@ -34,11 +34,7 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
             if (blogPost == null)
                 throw new KeyNotFoundException($"Blog post with ID {comment.BlogId} not found.");
 
-            // Dodaj komentar kroz agregat (poziva AddComment koja validira i ažurira status)
-            blogPost.AddComment(comment);
-
             _context.SaveChanges();
-            return comment;
         }
 
         public BlogComment? Get(long id)

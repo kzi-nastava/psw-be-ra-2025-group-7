@@ -134,6 +134,9 @@ namespace Explorer.Blog.Core.Domain
             if (Status == BlogStatus.Draft)
                 throw new InvalidOperationException("Comments can only be added to published blogs.");
 
+            if (Status == BlogStatus.Archived || Status == BlogStatus.Closed)
+                throw new InvalidOperationException("Comments cannot be added to archived nor closed blogs.");
+
             Comments.Add(comment);
             RecalculatePopularityStatus();
         }

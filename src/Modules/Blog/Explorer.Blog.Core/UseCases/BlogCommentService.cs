@@ -41,9 +41,10 @@ namespace Explorer.Blog.Core.UseCases
             var comment = new BlogComment(dto.BlogId, authorId, dto.Text);
 
             // Sačuvaj komentar (AddComment metoda validira status i ažurira popularnost)
-            var created = _commentRepository.Create(comment);
+            blogPost.AddComment(comment);
+            _commentRepository.Create(comment);
 
-            return _mapper.Map<BlogCommentDto>(created);
+            return _mapper.Map<BlogCommentDto>(comment);
         }
     }
 }

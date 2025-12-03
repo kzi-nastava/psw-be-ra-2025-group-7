@@ -8,7 +8,7 @@ namespace Explorer.Blog.Core.Domain.RepositoryInterfaces
         List<BlogComment> GetByBlogId(long blogId);
 
         // Kreira novi komentar
-        BlogComment Create(BlogComment comment);
+        void Create(BlogComment comment);
 
         // Vraća jedan komentar po ID-u 
         BlogComment? Get(long id);
