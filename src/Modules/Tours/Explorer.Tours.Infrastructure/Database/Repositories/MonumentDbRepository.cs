@@ -1,18 +1,18 @@
 ﻿using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Infrastructure.Database;
-using Explorer.Stakeholders.Core.Domain;
-using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Explorer.Stakeholders.Infrastructure.Database.Repositories;
+namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
 public class MonumentDbRepository : IMonumentRepository
 {
-    protected readonly StakeholdersContext DbContext;
+    protected readonly ToursContext DbContext;
     private readonly DbSet<Monument> _dbSet;
 
-    public MonumentDbRepository(StakeholdersContext dbContext)
+    public MonumentDbRepository(ToursContext dbContext)
     {
         DbContext = dbContext;
         _dbSet = DbContext.Set<Monument>();

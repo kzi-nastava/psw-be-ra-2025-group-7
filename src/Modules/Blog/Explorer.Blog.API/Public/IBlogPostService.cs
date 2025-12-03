@@ -23,5 +23,11 @@ namespace Explorer.Blog.API.Public
 
         BlogPostDto Publish(long authorId, long blogId);
         BlogPostDto Archive(long authorId, long blogId);
+
+        PagedResult<BlogPostDto> GetPublic(int page, int pageSize);
+
+        BlogPostDto Get(long id);
+        BlogVoteDto Vote(long blogPostId, long userId, int value);
+
     }
 }

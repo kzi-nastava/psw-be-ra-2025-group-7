@@ -13,14 +13,6 @@ public class StakeholderProfile : Profile
         CreateMap<Account, AccountDto>();
         CreateMap<AccountCreateDto, Account>();
         CreateMap<TourPreferences, TourPreferencesDto>().ReverseMap();
-        CreateMap<MonumentDto, Monument>()
-            .ConstructUsing(src => new Monument(
-                src.Name,
-                src.Description,
-                src.YearOfCreation,
-                src.Latitude,
-                src.Longitude
-            ))
-            .ReverseMap();
+
     }
 }

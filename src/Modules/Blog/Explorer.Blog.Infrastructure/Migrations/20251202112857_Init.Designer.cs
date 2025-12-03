@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Blog.Infrastructure.Migrations
 {
     [DbContext(typeof(BlogContext))]
-    [Migration("20251127192644_Init")]
+    [Migration("20251202112857_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -44,6 +44,12 @@ namespace Explorer.Blog.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -52,6 +58,33 @@ namespace Explorer.Blog.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BlogPosts", "blog");
+                });
+
+            modelBuilder.Entity("Explorer.Blog.Core.Domain.BlogVote", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("BlogPostId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("VotedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogPostId");
+
+                    b.ToTable("BlogVotes", "blog");
                 });
 
             modelBuilder.Entity("Explorer.Blog.Core.Domain.BlogPost", b =>
@@ -85,6 +118,19 @@ namespace Explorer.Blog.Infrastructure.Migrations
                         });
 
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("Explorer.Blog.Core.Domain.BlogVote", b =>
+                {
+                    b.HasOne("Explorer.Blog.Core.Domain.BlogPost", null)
+                        .WithMany("Votes")
+                        .HasForeignKey("BlogPostId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Explorer.Blog.Core.Domain.BlogPost", b =>
+                {
+                    b.Navigation("Votes");
                 });
 #pragma warning restore 612, 618
         }

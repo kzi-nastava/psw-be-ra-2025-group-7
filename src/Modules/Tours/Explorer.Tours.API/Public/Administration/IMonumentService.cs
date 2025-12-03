@@ -1,7 +1,7 @@
 using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Stakeholders.API.Dtos;
+using Explorer.Tours.API.Dtos;
 
-namespace Explorer.Stakeholders.API.Public.Administration;
+namespace Explorer.Tours.API.Public.Administration;
 
 public interface IMonumentService
 {
