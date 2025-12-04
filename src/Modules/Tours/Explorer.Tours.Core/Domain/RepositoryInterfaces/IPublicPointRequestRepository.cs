@@ -1,8 +1,10 @@
-﻿using Explorer.BuildingBlocks.Core.UseCases;
+﻿using Explorer.Tours.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
 {
-    public interface IPublicPointRequestRepository 
+    public interface IPublicPointRequestRepository
     {
+        PublicPointRequest Create(PublicPointRequest entity);
+        // Po potrebi kasnije dodaš Get/Update/Delete itd.
     }
 }

@@ -26,10 +26,7 @@ namespace Explorer.Tours.Core.Domain
 
         public PublicPointRequest(long tourId, int keyPointIndex, long authorId)
         {
-            if (tourId <= 0) throw new ArgumentException("Invalid tour id.", nameof(tourId));
-            if (keyPointIndex < 0) throw new ArgumentException("Invalid key point index.", nameof(keyPointIndex));
-            if (authorId <= 0) throw new ArgumentException("Invalid author id.", nameof(authorId));
-
+            
             TourId = tourId;
             KeyPointIndex = keyPointIndex;
             AuthorId = authorId;

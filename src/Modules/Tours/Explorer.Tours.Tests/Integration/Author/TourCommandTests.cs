@@ -148,6 +148,54 @@ public class TourCommandTests : BaseToursIntegrationTest
         var storedEntity = dbContext.Tours.FirstOrDefault(t => t.Id == -2);
         storedEntity.ShouldBeNull();
     }
+    [Fact]
+    public void AddKeyPoint_with_make_public_creates_public_point_request()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        // prvo kreiramo novu turu za ovog autora (-1), da smo sigurni da je Draft
+        var newTour = new CreateTourDto
+        {
+            Name = "Tour with public keypoint",
+            Description = "Desc",
+            Difficulty = 1,
+            Tags = new List<string> { "public-test" }
+        };
+
+        var createdResult = ((ObjectResult)controller.Create(newTour).Result)?.Value as TourDto;
+        createdResult.ShouldNotBeNull();
+        var tourId = createdResult!.Id;
+
+        var keyPointDto = new KeyPointDto
+        {
+            Latitude = 45.20,
+            Longitude = 19.80,
+            Name = "Public KP",
+            Description = "Some description",
+            ImageUrl = null,
+            Secret = "Secret data",
+            MakePublic = true      // 🔥 bitno!
+        };
+
+        // Act
+        var addResult = ((ObjectResult)controller.AddKeyPoint(tourId, keyPointDto).Result);
+
+        // Assert - response
+        addResult.ShouldNotBeNull();
+        addResult.StatusCode.ShouldBe(200);
+
+        // Assert - PublicPointRequest u bazi
+        var request = dbContext.PublicPointRequests
+            .FirstOrDefault(r => r.TourId == tourId && r.AuthorId == -1);
+
+        request.ShouldNotBeNull();
+        request!.Status.ShouldBe(PublicPointRequestStatus.Pending);
+        request.KeyPointIndex.ShouldBe(0); // prva (i jedina) tačka na toj turi
+    }
+
 
     [Fact]
     public void Delete_fails_invalid_id()
