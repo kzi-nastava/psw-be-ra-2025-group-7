@@ -93,28 +93,28 @@ namespace Explorer.Tours.Infrastructure.Database
                     kp.Property(k => k.Secret)
                       .IsRequired();
 
-                    // TODO (drugi članovi): ovde kasnije mogu da dodaju npr. Order polje
-                    // za redosled tačaka, ako im zatreba za svoje kartice.
                 });
                 b.OwnsMany(t => t.TourDurations, td =>
                 {
-                    td.ToTable("TourDurations");              // naziv tabele u bazi
-                    td.WithOwner().HasForeignKey("TourId");   // FK ka Tour.Id
+                    td.ToTable("TourDurations");
+                    td.WithOwner().HasForeignKey("TourId");
 
-                    // Shadow primary key
-                    td.Property<long>("Id");
+                    td.Property<long>("Id").ValueGeneratedOnAdd();
                     td.HasKey("Id");
 
-                    // Enum TravelType mapiramo kao string
                     td.Property(d => d.Type)
-                      .HasColumnName("TransportType")        // da se poklapa sa tvojom kolonom
-                      .HasConversion<string>()               // enum kao string u bazi
+                      .HasColumnName("TransportType")
+                      .HasConversion<string>()
+                      .HasMaxLength(50)
                       .IsRequired();
 
                     td.Property(d => d.Minutes)
-                      .HasColumnName("DurationInMinutes")    // da se poklapa sa tvojom kolonom
+                      .HasColumnName("DurationInMinutes")
                       .IsRequired();
+
+                    td.HasCheckConstraint("CK_TourDuration_Minutes_Positive", "\"DurationInMinutes\" > 0");
                 });
+
             });
 
             // ===== TourJournal konfiguracija =====
