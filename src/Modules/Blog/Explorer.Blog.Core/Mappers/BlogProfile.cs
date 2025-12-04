@@ -15,7 +15,7 @@ public class BlogProfile : Profile
         CreateMap<BlogPost, BlogPostDto>()
             .ForMember(d => d.Images, opt => opt.MapFrom(src => src.Images))
             .ForMember(d => d.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-            .ForMember(d => d.Score, opt => opt.MapFrom(src => src.Score));
+            .ForMember(d => d.Score, opt => opt.MapFrom(src => src.Votes.Sum(v => v.Value)));
 
 
         CreateMap<CreateBlogPostDto, IEnumerable<BlogImage>>()
@@ -30,6 +30,9 @@ public class BlogProfile : Profile
 
 
        
+
+        CreateMap<BlogComment, BlogCommentDto>();
+        CreateMap<BlogCommentDto, BlogComment>();
 
     }
 }

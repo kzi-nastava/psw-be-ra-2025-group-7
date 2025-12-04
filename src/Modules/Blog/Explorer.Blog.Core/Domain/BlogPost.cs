@@ -23,6 +23,7 @@ namespace Explorer.Blog.Core.Domain
 
         public List<BlogImage> Images { get; private set; } = new();
 
+        public List<BlogComment> Comments { get; private set; } = new();
         public List<BlogVote> Votes { get; private set; } = new();
         public int Score => Votes.Sum(v => v.Value);
 
@@ -32,7 +33,7 @@ namespace Explorer.Blog.Core.Domain
 
         public BlogPost(long authorId, string title, string description, IEnumerable<BlogImage>? images = null)
         {
-            if (authorId <= 0)
+            if (authorId == 0)
                 throw new ArgumentException("AuthorId must be a positive number.", nameof(authorId));
 
 
@@ -128,6 +129,34 @@ namespace Explorer.Blog.Core.Domain
                 throw new InvalidOperationException("Operation allowed only for published blogs.");
         }
 
+        public void AddComment(BlogComment comment)
+        {
+            if (Status == BlogStatus.Draft)
+                throw new InvalidOperationException("Comments can only be added to published blogs.");
+
+            if (Status == BlogStatus.Archived || Status == BlogStatus.Closed)
+                throw new InvalidOperationException("Comments cannot be added to archived nor closed blogs.");
+
+            Comments.Add(comment);
+            RecalculatePopularityStatus();
+        }
+
+        private void RecalculatePopularityStatus()
+        {
+            // Logika za automatsko promovisanje bloga na osnovu broja komentara
+            if (Status != BlogStatus.Draft)
+            {
+                if (Comments.Count >= 10)
+                {
+                    Status = BlogStatus.Famous;
+                }
+                else if (Comments.Count >= 5 && Comments.Count < 10)
+                {
+                    Status = BlogStatus.Active;
+                }
+            }
+        }
+        
         public void Vote(long userId, int value)
         {
             if (value != 1 && value != -1)

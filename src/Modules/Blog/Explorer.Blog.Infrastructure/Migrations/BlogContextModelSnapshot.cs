@@ -86,6 +86,44 @@ namespace Explorer.Blog.Infrastructure.Migrations
 
             modelBuilder.Entity("Explorer.Blog.Core.Domain.BlogPost", b =>
                 {
+                    b.OwnsMany("Explorer.Blog.Core.Domain.BlogComment", "Comments", b1 =>
+                        {
+                            b1.Property<long>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bigint");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
+
+                            b1.Property<long>("AuthorId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("BlogId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("BlogPostId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<DateTime?>("LastModifiedAt")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<string>("Text")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("character varying(1000)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("BlogPostId");
+
+                            b1.ToTable("BlogComments", "blog");
+
+                            b1.WithOwner()
+                                .HasForeignKey("BlogPostId");
+                        });
+
                     b.OwnsMany("Explorer.Blog.Core.Domain.BlogImage", "Images", b1 =>
                         {
                             b1.Property<int>("Id")
@@ -113,6 +151,8 @@ namespace Explorer.Blog.Infrastructure.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("BlogPostId");
                         });
+
+                    b.Navigation("Comments");
 
                     b.Navigation("Images");
                 });
