@@ -30,7 +30,7 @@ public class BlogPostIntegrationTests : BaseBlogIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
        
-        var controller = CreateController(scope, "-21");
+        var controller = CreateController(scope, "-11");
 
         // Act
         var actionResult = controller.GetMyBlogPosts(1, 10);
@@ -45,7 +45,7 @@ public class BlogPostIntegrationTests : BaseBlogIntegrationTest
         
         foreach (var post in result.Results)
         {
-            post.AuthorId.ShouldBe(-21);  // svi vraćeni postovi moraju da pripadaju ulogovanom autoru
+            post.AuthorId.ShouldBe(-11);  // svi vraćeni postovi moraju da pripadaju ulogovanom autoru
         }
     }
 
@@ -102,11 +102,11 @@ public class BlogPostIntegrationTests : BaseBlogIntegrationTest
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "1");
+        var controller = CreateController(scope, "-11");
         var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
 
-        // Uzimamo postojeći blog (iz seed-a) – pretpostavljamo da je njegov autor 1
-        var existing = dbContext.BlogPosts.First(p => p.Id == 1);
+        // Uzimamo postojeći blog (iz seed-a) – pretpostavljamo da je njegov autor -11
+        var existing = dbContext.BlogPosts.First(p => p.Id == -1);
 
         var updateDto = new UpdateBlogPostDto
         {
@@ -130,7 +130,7 @@ public class BlogPostIntegrationTests : BaseBlogIntegrationTest
         updated.Id.ShouldBe(existing.Id);
         updated.Title.ShouldBe(updateDto.Title);
         updated.Description.ShouldBe(updateDto.Description);
-        updated.AuthorId.ShouldBe(1);
+        updated.AuthorId.ShouldBe(-11);
         updated.Images.Count.ShouldBe(2);
 
         // Assert - Database

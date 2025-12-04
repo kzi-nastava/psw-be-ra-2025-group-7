@@ -31,5 +31,8 @@ public class BlogProfile : Profile
 
        
 
+        CreateMap<BlogComment, BlogCommentDto>();
+        CreateMap<BlogCommentDto, BlogComment>();
+
     }
 }
