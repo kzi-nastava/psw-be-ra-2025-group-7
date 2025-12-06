@@ -14,6 +14,8 @@ public class StakeholderProfile : Profile
         CreateMap<AccountCreateDto, Account>();
         CreateMap<Club, ClubDto>().ReverseMap();
         CreateMap<TourPreferences, TourPreferencesDto>().ReverseMap();
+        CreateMap<Notification, NotificationDto>();
+
 
     }
 }

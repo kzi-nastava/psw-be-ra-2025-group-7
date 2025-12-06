@@ -15,6 +15,8 @@ namespace Explorer.Stakeholders.API.Dtos
         public long CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public int Status { get; set; }
+
 
     }
 }
