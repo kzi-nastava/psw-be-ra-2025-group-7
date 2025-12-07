@@ -18,5 +18,9 @@ namespace Explorer.Tours.API.Dtos
         public DateTime TimeReported { get; set; }
         public DateTime? ResolveDue { get; set; }
         public bool IsSolved { get; set; }
+        public string Status { get; set; } = "";
+        public List<TourProblemMessageDto> Comments { get; set; } = new();
+
+
     }
 }
