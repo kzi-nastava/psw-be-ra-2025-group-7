@@ -182,5 +182,45 @@ namespace Explorer.API.Controllers.Author
             var result = _tourService.RemoveTourDuration(tourId, authorId, index);
             return Ok(result);
         }
+
+
+        //EQUIPMENT
+        [HttpPost("{tourId:long}/equipment/{equipmentId:long}")]
+        public ActionResult<TourDto> AddEquipment(long tourId, long equipmentId)
+        {
+            try
+            {
+                var authorId = User.PersonId();
+                var result = _tourService.AddEquipment(tourId, authorId, equipmentId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpDelete("{tourId:long}/equipment/{equipmentId:long}")]
+        public ActionResult<TourDto> RemoveEquipment(long tourId, long equipmentId)
+        {
+            try
+            {
+                var authorId = User.PersonId();
+                var result = _tourService.RemoveEquipment(tourId, authorId, equipmentId);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

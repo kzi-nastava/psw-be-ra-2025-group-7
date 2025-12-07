@@ -13,19 +13,21 @@ namespace Explorer.Tours.Core.Domain
         public TourStatus Status { get; private set; }
         public decimal Price { get; private set; }
 
-        // Životni ciklus ture (član 1)
         public DateTime? PublishedAt { get; private set; }
         public DateTime? ArchivedAt { get; private set; }
 
-        // Kartica 3 – kolekcija ključnih tačaka (tvoj deo)
+
         public List<KeyPoint> KeyPoints { get; private set; } = new();
         public List<TourDuration> TourDurations { get; private set; } = new();
+
+        public List<Equipment> RequiredEquipment { get; private set; } = new();
 
         private Tour()
         {
             Tags = new List<string>();
             KeyPoints = new List<KeyPoint>();
             TourDurations = new List<TourDuration>();
+            RequiredEquipment = new List<Equipment>();
         }
 
         public Tour(long authorId, string name, string description, TourDifficulty difficulty, List<string> tags)
@@ -42,10 +44,9 @@ namespace Explorer.Tours.Core.Domain
             ArchivedAt = null;
             KeyPoints = new List<KeyPoint>();
             TourDurations = new List<TourDuration>();
+            RequiredEquipment = new List<Equipment>();
             Validate();
         }
-
-        // ================= ŽIVOTNI CIKLUS TURE (ČLAN 1) =================
 
         public void Publish()
         {
@@ -134,6 +135,38 @@ namespace Explorer.Tours.Core.Domain
 
             KeyPoints.RemoveAt(index);
         }
+
+        public void AddEquipment(Equipment equipment)
+        {
+            EnsureNotArchived();
+
+            if (equipment == null)
+                throw new ArgumentNullException(nameof(equipment));
+
+            if (RequiredEquipment.Any(e => e.Id == equipment.Id))
+                throw new InvalidOperationException("Equipment is already added to this tour.");
+
+            RequiredEquipment.Add(equipment);
+        }
+
+        public void RemoveEquipment(long equipmentId)
+        {
+            EnsureNotArchived();
+
+            var equipment = RequiredEquipment.FirstOrDefault(e => e.Id == equipmentId);
+
+            if (equipment == null)
+                throw new InvalidOperationException("Equipment is not part of this tour.");
+
+            RequiredEquipment.Remove(equipment);
+        }
+
+        private void EnsureNotArchived()
+        {
+            if (Status == TourStatus.Archived)
+                throw new InvalidOperationException("You cannot modify equipment for archived tours. Please reactivate the tour first.");
+        }
+
 
         // Helper – kartica 3 važi samo dok je tura u pripremi
         private void EnsureDraftStatus()

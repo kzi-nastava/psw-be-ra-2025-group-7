@@ -21,8 +21,9 @@ public class TourDbRepository : ITourRepository
     public PagedResult<Tour> GetPagedByAuthor(int page, int pageSize, long authorId)
     {
         var query = _dbSet
-            .Include(t => t.KeyPoints)      
-            .Include(t => t.TourDurations)  
+            .Include(t => t.KeyPoints)
+            .Include(t => t.TourDurations)
+            .Include(t => t.RequiredEquipment)
             .Where(t => t.AuthorId == authorId);
 
         var totalCount = query.Count();
@@ -39,8 +40,9 @@ public class TourDbRepository : ITourRepository
     public Tour Get(long id)
     {
         var entity = _dbSet
-            .Include(t => t.KeyPoints)      
-            .Include(t => t.TourDurations) 
+            .Include(t => t.KeyPoints)
+            .Include(t => t.TourDurations)
+            .Include(t => t.RequiredEquipment)
             .FirstOrDefault(t => t.Id == id);
         if (entity == null) throw new NotFoundException("Not found: " + id);
         return entity;
@@ -57,16 +59,48 @@ public class TourDbRepository : ITourRepository
     {
         try
         {
-            var existingEntity = _dbSet.Find(entity.Id);
+            // Učitaj postojeći entitet iz baze SA tracking-om
+            var existingTour = _dbSet
+                .Include(t => t.RequiredEquipment)
+                .Include(t => t.KeyPoints)
+                .Include(t => t.TourDurations)
+                .FirstOrDefault(t => t.Id == entity.Id);
 
-            if (existingEntity == null)
+            if (existingTour == null)
                 throw new NotFoundException($"Tour with id {entity.Id} not found.");
 
-            DbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
+            // Ažuriraj sva svojstva osim kolekcija
+            DbContext.Entry(existingTour).CurrentValues.SetValues(entity);
+
+            // Sinhronizuj RequiredEquipment kolekciju
+            var existingEquipmentIds = existingTour.RequiredEquipment.Select(e => e.Id).ToHashSet();
+            var newEquipmentIds = entity.RequiredEquipment.Select(e => e.Id).ToHashSet();
+
+            // Ukloni opremu koja više ne treba
+            var toRemove = existingTour.RequiredEquipment
+                .Where(e => !newEquipmentIds.Contains(e.Id))
+                .ToList();
+            foreach (var equipment in toRemove)
+            {
+                existingTour.RequiredEquipment.Remove(equipment);
+            }
+
+            // Dodaj novu opremu
+            var toAdd = newEquipmentIds.Except(existingEquipmentIds).ToList();
+            foreach (var equipmentId in toAdd)
+            {
+                var equipment = DbContext.Equipment.Find(equipmentId);
+                if (equipment != null)
+                {
+                    existingTour.RequiredEquipment.Add(equipment);
+                }
+            }
 
             DbContext.SaveChanges();
 
-            return existingEntity;
+            // Ponovo učitaj da bi bili sigurni da imamo sve Include-ove
+            DbContext.Entry(existingTour).State = EntityState.Detached;
+            return Get(entity.Id);
         }
         catch (DbUpdateException e)
         {

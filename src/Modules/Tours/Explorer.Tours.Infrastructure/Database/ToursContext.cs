@@ -115,6 +115,23 @@ namespace Explorer.Tours.Infrastructure.Database
                     td.HasCheckConstraint("CK_TourDuration_Minutes_Positive", "\"DurationInMinutes\" > 0");
                 });
 
+                b.HasMany(t => t.RequiredEquipment)
+                 .WithMany()
+                 .UsingEntity<Dictionary<string, object>>(
+                     "TourEquipment",
+                     j => j.HasOne<Equipment>()
+                           .WithMany()
+                           .HasForeignKey("EquipmentId")
+                           .OnDelete(DeleteBehavior.Cascade),
+                     j => j.HasOne<Tour>()
+                           .WithMany()
+                           .HasForeignKey("TourId")
+                           .OnDelete(DeleteBehavior.Cascade),
+                     j =>
+                     {
+                         j.ToTable("TourEquipment");
+                         j.HasKey("TourId", "EquipmentId");
+                     });
             });
 
             // ===== TourJournal konfiguracija =====

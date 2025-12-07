@@ -22,5 +22,8 @@ namespace Explorer.Tours.API.Public.Administration
         TourDto RemoveTourDuration(long tourId, long authorId, int index);
         TourDto AddTourDuration(long tourId, long authorId, TourDurationDto durationDto);
         TourDto UpdateTourDuration(long tourId, long authorId, int index, TourDurationDto durationDto);
+
+        TourDto AddEquipment(long tourId, long authorId, long equipmentId);
+        TourDto RemoveEquipment(long tourId, long authorId, long equipmentId);
     }
 }
