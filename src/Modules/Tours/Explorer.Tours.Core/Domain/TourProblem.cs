@@ -67,7 +67,7 @@ namespace Explorer.Tours.Core.Domain
                 throw new InvalidOperationException("Only the reporting tourist can respond.");
             if(string.IsNullOrWhiteSpace(comment))
                 throw new ArgumentException("Comment cannot be empty when marking as not resolved.");
-            if (Status != ProblemStatus.Resolved)
+            if (Status == ProblemStatus.Resolved)
                 throw new InvalidOperationException("Response cannot be changed.");
 
             _comments.Add(new TourProblemMessage(touristId, comment));

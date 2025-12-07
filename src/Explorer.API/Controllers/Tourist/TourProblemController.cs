@@ -73,6 +73,45 @@ namespace Explorer.API.Controllers.Tourist
                 return Forbid();
             }
         }
+        [Authorize(Policy = "touristPolicy")]
+        [HttpPatch("{id:int}/resolve")]
+        public ActionResult<TourProblemDto> Resolve(int id)
+        {
+            var touristId = (int)User.PersonId();
+            try
+            {
+                var updated = _service.MarkAsResolved(id, touristId);
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+        [Authorize(Policy = "touristPolicy")]
+        [HttpPatch("{id:int}/unresolve")]
+        public ActionResult<TourProblemDto> Unresolve(int id, [FromBody] string comment)
+        {
+            var touristId = (int)User.PersonId();
+            try
+            {
+                var updated = _service.MarkAsUnresolved(id, touristId, comment);
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [Authorize(Policy = "authorPolicy")]
         [HttpGet("author")]
         public ActionResult<PagedResult<TourProblemDto>> GetByAuthor(
