@@ -52,5 +52,19 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
             _context.SaveChanges();
             return comment;
         }
+
+        public void Delete(BlogComment comment)
+        {
+            var blogPost = _context.BlogPosts
+                .Include(b => b.Comments)
+                .FirstOrDefault(b => b.Id == comment.BlogPostId);
+
+            if (blogPost == null)
+                throw new KeyNotFoundException($"Blog post with ID {comment.BlogPostId} not found.");
+
+            blogPost.Comments.Remove(comment);
+
+            _context.SaveChanges();
+        }
     }
 }

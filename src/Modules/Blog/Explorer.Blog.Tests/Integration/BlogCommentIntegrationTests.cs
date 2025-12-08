@@ -183,4 +183,6 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
         controller.ControllerContext = ctx;
         return controller;
     }
+
+
 }

@@ -15,5 +15,8 @@ namespace Explorer.Blog.Core.Domain.RepositoryInterfaces
 
         // Ažurira komentar
         BlogComment Update(BlogComment comment);
+
+        // Briše komentar
+        void Delete(BlogComment comment);
     }
 }

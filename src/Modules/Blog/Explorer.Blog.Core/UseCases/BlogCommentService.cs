@@ -46,5 +46,37 @@ namespace Explorer.Blog.Core.UseCases
 
             return _mapper.Map<BlogCommentDto>(comment);
         }
+
+        public BlogCommentDto Edit(EditCommentDto dto)
+        {
+            var comment = _commentRepository.Get(dto.CommentId);
+            if (comment == null)
+                throw new NotFoundException($"Comment with ID {dto.CommentId} not found.");
+
+            var blogPost = _blogPostRepository.Get(comment.BlogPostId);
+            if (blogPost == null)
+                throw new NotFoundException($"Blog post with ID {comment.BlogPostId} not found.");
+
+            blogPost.EditComment(dto.CommentId, dto.UserId, dto.NewText);
+
+            var updated = _commentRepository.Update(comment);
+
+            return _mapper.Map<BlogCommentDto>(updated);
+        }
+
+        public void Delete(long commentId, long userId)
+        {
+            var comment = _commentRepository.Get(commentId);
+            if (comment == null)
+                throw new NotFoundException($"Comment with ID {commentId} not found.");
+
+            var blogPost = _blogPostRepository.Get(comment.BlogPostId);
+            if (blogPost == null)
+                throw new NotFoundException($"Blog post with ID {comment.BlogPostId} not found.");
+
+            blogPost.DeleteComment(commentId, userId);
+
+            _commentRepository.Delete(comment);
+        }
     }
 }

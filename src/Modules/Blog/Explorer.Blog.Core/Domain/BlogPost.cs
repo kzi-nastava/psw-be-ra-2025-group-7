@@ -156,7 +156,47 @@ namespace Explorer.Blog.Core.Domain
                 }
             }
         }
-        
+        //Helper metoda
+        private BlogComment GetCommentOrThrow(long commentId)
+        {
+            var comment = Comments.FirstOrDefault(c => c.Id == commentId);
+            if (comment == null)
+                throw new InvalidOperationException("Comment does not exist.");
+
+            return comment;
+        }
+
+        public void DeleteComment(long commentId, long userId)
+        {
+            var comment = GetCommentOrThrow(commentId);
+
+            if (comment.UserId != userId)
+                throw new InvalidOperationException("Only the author of the comment can delete it.");
+
+            var timePassed = DateTime.UtcNow - comment.CreatedAt;
+            if (timePassed > TimeSpan.FromMinutes(15))
+                throw new InvalidOperationException("Comment can only be deleted within 15 minutes of creation.");
+
+            Comments.Remove(comment);
+
+            RecalculatePopularityStatus();
+        }
+
+        public void EditComment(long commentId, long userId, string newText)
+        {
+            var comment = GetCommentOrThrow(commentId);
+
+            if (comment.UserId != userId)
+                throw new InvalidOperationException("Only the author of the comment can edit it.");
+
+            var timePassed = DateTime.UtcNow - comment.CreatedAt;
+            if (timePassed > TimeSpan.FromMinutes(15))
+                throw new InvalidOperationException("Comment can only be edited within 15 minutes of creation.");
+
+            comment.EditText(newText);
+        }
+
+
         public void Vote(long userId, int value)
         {
             if (value != 1 && value != -1)
