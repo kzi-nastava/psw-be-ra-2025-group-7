@@ -99,7 +99,13 @@ namespace Explorer.Stakeholders.Core.UseCases
             club.AcceptRequest(touristId);
             _clubRepository.Update(club);
 
-            var notification = new Notification(touristId, clubId, NotificationType.JoinRequestAccepted);
+            // UPDATED: Using new unified Notification constructor
+            var notification = new Notification(
+                userId: touristId,
+                clubId: clubId,
+                type: NotificationType.JoinRequestAccepted,
+                content: $"Your join request to club '{club.Name}' has been accepted"
+            );
             _notificationRepository.Create(notification);
         }
 
@@ -111,7 +117,13 @@ namespace Explorer.Stakeholders.Core.UseCases
             club.RejectRequest(touristId);
             _clubRepository.Update(club);
 
-            var notification = new Notification(touristId, clubId, NotificationType.JoinRequestRejected);
+            // UPDATED: Using new unified Notification constructor
+            var notification = new Notification(
+                userId: touristId,
+                clubId: clubId,
+                type: NotificationType.JoinRequestRejected,
+                content: $"Your join request to club '{club.Name}' has been rejected"
+            );
             _notificationRepository.Create(notification);
         }
 
@@ -213,6 +225,5 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             return dto;
         }
-
     }
 }

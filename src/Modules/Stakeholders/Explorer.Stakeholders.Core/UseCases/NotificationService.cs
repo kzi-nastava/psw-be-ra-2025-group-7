@@ -28,7 +28,7 @@ namespace Explorer.Stakeholders.Core.UseCases
         {
             var notification = _repository.Get(notificationId);
 
-            if (notification == null || notification.TouristId != touristId)
+            if (notification == null || notification.UserId != touristId)
             {
                 throw new NotFoundException("Notification not found.");
             }
