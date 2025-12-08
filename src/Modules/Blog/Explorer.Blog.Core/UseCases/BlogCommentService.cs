@@ -49,34 +49,42 @@ namespace Explorer.Blog.Core.UseCases
 
         public BlogCommentDto Edit(EditCommentDto dto)
         {
-            var comment = _commentRepository.Get(dto.CommentId);
-            if (comment == null)
-                throw new NotFoundException($"Comment with ID {dto.CommentId} not found.");
-
-            var blogPost = _blogPostRepository.Get(comment.BlogPostId);
+            var blogPost = _blogPostRepository.GetByCommentId(dto.CommentId);
             if (blogPost == null)
-                throw new NotFoundException($"Blog post with ID {comment.BlogPostId} not found.");
+                throw new NotFoundException($"Comment with ID {dto.CommentId} not found");
 
-            blogPost.EditComment(dto.CommentId, dto.UserId, dto.NewText);
+            var comment = blogPost.Comments.First(c => c.Id == dto.CommentId);
 
-            var updated = _commentRepository.Update(comment);
+            if (comment.UserId != dto.UserId)
+                throw new UnauthorizedAccessException("Only the author can edit this comment");
 
-            return _mapper.Map<BlogCommentDto>(updated);
+            if ((DateTime.UtcNow - comment.CreatedAt).TotalMinutes > 15)
+                throw new InvalidOperationException("Cannot edit comment after 15 minutes");
+
+            comment.EditText(dto.NewText);
+
+            _blogPostRepository.Update(blogPost);
+
+            return _mapper.Map<BlogCommentDto>(comment);
         }
+
 
         public void Delete(long commentId, long userId)
         {
-            var comment = _commentRepository.Get(commentId);
-            if (comment == null)
-                throw new NotFoundException($"Comment with ID {commentId} not found.");
-
-            var blogPost = _blogPostRepository.Get(comment.BlogPostId);
+            var blogPost = _blogPostRepository.GetByCommentId(commentId);
             if (blogPost == null)
-                throw new NotFoundException($"Blog post with ID {comment.BlogPostId} not found.");
+                throw new NotFoundException($"Comment with ID {commentId} not found");
+
+            var comment = blogPost.Comments.First(c => c.Id == commentId);
+
+            if (comment.UserId != userId)
+                throw new UnauthorizedAccessException("Only the author can delete this comment");
+
+            if ((DateTime.UtcNow - comment.CreatedAt).TotalMinutes > 15)
+                throw new InvalidOperationException("Cannot delete comment after 15 minutes");
 
             blogPost.DeleteComment(commentId, userId);
-
-            _commentRepository.Delete(comment);
+            _blogPostRepository.Update(blogPost);
         }
     }
 }

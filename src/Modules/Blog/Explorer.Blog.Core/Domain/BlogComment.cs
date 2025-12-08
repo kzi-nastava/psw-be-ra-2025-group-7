@@ -8,7 +8,7 @@ namespace Explorer.Blog.Core.Domain
         public long BlogPostId { get; private set; }
         public long UserId { get; private set; }
         public string Text { get; private set; }
-        public DateTime CreatedAt { get; private set; }
+        public DateTime CreatedAt { get; set; }
         public DateTime? LastModifiedAt { get; private set; }
         protected BlogComment() { }
 
