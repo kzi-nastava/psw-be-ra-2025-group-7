@@ -10,5 +10,11 @@ namespace Explorer.Blog.API.Public
 
         // Kreira novi komentar
         BlogCommentDto Create(long authorId, CreateCommentDto dto);
+
+        // Izmena komentara (samo autor + u roku 15 minuta)
+        BlogCommentDto Edit(EditCommentDto dto);
+
+        // Brisanje komentara (samo autor + u roku 15 minuta)
+        void Delete(long commentId, long userId);
     }
 }

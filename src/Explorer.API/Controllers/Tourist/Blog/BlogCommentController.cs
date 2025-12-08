@@ -51,5 +51,32 @@ namespace Explorer.API.Controllers.Tourist.Blog
             var created = _blogCommentService.Create(authorId, dto);
             return Ok(created);
         }
+
+        [HttpPut("edit")]
+        [Authorize]
+        public ActionResult<BlogCommentDto> Edit([FromBody] EditCommentDto dto)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized("You must be logged in to edit comments.");
+
+            dto.UserId = userId; // osiguravamo da korisnik menja samo svoj komentar
+
+            var updated = _blogCommentService.Edit(dto);
+            return Ok(updated);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public IActionResult Delete([FromQuery] long commentId)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized("You must be logged in to delete comments.");
+
+            _blogCommentService.Delete(commentId, userId);
+            return Ok(new { message = "Comment deleted successfully." });
+        }
+
     }
 }
