@@ -5,7 +5,7 @@ using Explorer.Stakeholders.Core.Domain;
 using Shouldly;
 using Xunit;
 
-namespace Explorer.Stakeholders.Tests.Unit.Clubs
+namespace Explorer.Stakeholders.Tests.Integration.Clubs
 {
     public class ClubAggregateTest
     {
@@ -18,9 +18,9 @@ namespace Explorer.Stakeholders.Tests.Unit.Clubs
                 imageUrls: new List<string> { "img.jpg" });
         }
 
-        // ------------------------------
-        // JOIN REQUEST – uspeh
-        // ------------------------------
+        // ---------------------------------------------------------
+        // JOIN REQUEST – success
+        // ---------------------------------------------------------
         [Fact]
         public void RequestMembership_creates_pending_request()
         {
@@ -36,17 +36,17 @@ namespace Explorer.Stakeholders.Tests.Unit.Clubs
             club.JoinRequests.Single().TouristId.ShouldBe(touristId);
         }
 
-        // ------------------------------
-        // JOIN REQUEST – različiti fail slučajevi
-        // ------------------------------
+        // ---------------------------------------------------------
+        // JOIN REQUEST – failure cases
+        // ---------------------------------------------------------
         [Theory]
         [InlineData(false, false, false)] // club closed
         [InlineData(true, true, false)] // already member
-        [InlineData(true, false, true)]  // already has pending request
+        [InlineData(true, false, true)]  // pending request already exists
         public void RequestMembership_fails_in_invalid_states(
-    bool active,
-    bool alreadyMember,
-    bool hasPendingRequest)
+            bool active,
+            bool alreadyMember,
+            bool hasPendingRequest)
         {
             // Arrange
             var club = CreateClub();
@@ -68,9 +68,9 @@ namespace Explorer.Stakeholders.Tests.Unit.Clubs
             Should.Throw<InvalidOperationException>(() => club.RequestMembership(touristId));
         }
 
-        // ------------------------------
-        // INVITATION – unify test
-        // ------------------------------
+        // ---------------------------------------------------------
+        // INVITATION – success path
+        // ---------------------------------------------------------
         [Fact]
         public void Invite_and_accept_invitation_adds_member()
         {
@@ -78,25 +78,25 @@ namespace Explorer.Stakeholders.Tests.Unit.Clubs
             var club = CreateClub();
             long touristId = 15;
 
-            // Act
+            // Act 1: invite
             club.InviteTourist(touristId);
 
-            // Assert 1
+            // Assert
             club.Invitations.Count.ShouldBe(1);
             club.Members.Count.ShouldBe(0);
 
-            // Act 2
+            // Act 2: accept
             club.AcceptInvitation(touristId);
 
-            // Assert 2
+            // Assert
             club.Invitations.Count.ShouldBe(0);
             club.Members.Count.ShouldBe(1);
             club.Members.Single().TouristId.ShouldBe(touristId);
         }
 
-        // ------------------------------
-        // REMOVE MEMBER – fails & success
-        // ------------------------------
+        // ---------------------------------------------------------
+        // REMOVE MEMBER – success
+        // ---------------------------------------------------------
         [Fact]
         public void RemoveMember_succeeds()
         {
@@ -114,6 +114,9 @@ namespace Explorer.Stakeholders.Tests.Unit.Clubs
             club.Members.Count.ShouldBe(0);
         }
 
+        // ---------------------------------------------------------
+        // REMOVE MEMBER – fail
+        // ---------------------------------------------------------
         [Fact]
         public void RemoveMember_fails_when_member_not_exists()
         {

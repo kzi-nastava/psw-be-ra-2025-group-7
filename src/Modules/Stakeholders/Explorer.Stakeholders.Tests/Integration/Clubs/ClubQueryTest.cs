@@ -8,72 +8,73 @@ using Shouldly;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Explorer.Stakeholders.Tests.Integration.Clubs;
-
-[Collection("Sequential")]
-public class ClubQueryTests : BaseStakeholdersIntegrationTest
+namespace Explorer.Stakeholders.Tests.Integration.Clubs
 {
-    public ClubQueryTests(StakeholdersTestFactory factory) : base(factory) { }
-
-    [Fact]
-    public void Retrieves_all()
+    [Collection("Sequential")]
+    public class ClubQueryTests : BaseStakeholdersIntegrationTest
     {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        public ClubQueryTests(StakeholdersTestFactory factory) : base(factory) { }
 
-        var newEntity = new ClubDto
+        [Fact]
+        public void Retrieves_all()
         {
-            Name = "Klub za pretragu",
-            Description = "Opis za Retrieves_all",
-            CreatedBy = -21,
-            ImageUrls = new List<string> { "retrieves-all.jpg" }
-        };
+            // Arrange
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateController(scope);
+            var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
 
-        // ---- Act 1: Create ----
-        var createdResult = controller.Create(newEntity);
-        var created = (createdResult.Result as OkObjectResult)?.Value as ClubDto;
+            var newEntity = new ClubDto
+            {
+                Name = "Klub za pretragu",
+                Description = "Opis za Retrieves_all",
+                CreatedBy = -21,
+                ImageUrls = new List<string> { "retrieves-all.jpg" }
+            };
 
-        // ---- Assert – Response (CREATE) ----
-        created.ShouldNotBeNull();
-        created.Id.ShouldNotBe(0);
-        created.Name.ShouldBe(newEntity.Name);
-        created.Description.ShouldBe(newEntity.Description);
-        created.CreatedBy.ShouldBe(newEntity.CreatedBy);
-        created.ImageUrls.ShouldBeEquivalentTo(newEntity.ImageUrls);
-        created.CreatedAt.ShouldNotBe(default);
-        created.UpdatedAt.ShouldBe(default);  
+            // ---- Act 1: Create ----
+            var createdResult = controller.Create(newEntity);
+            var created = (createdResult.Result as OkObjectResult)?.Value as ClubDto;
 
-        // ---- Assert – Database (CREATE) ----
-        var stored = dbContext.Clubs.First(c => c.Id == created.Id);
+            // ---- Assert – Response (CREATE) ----
+            created.ShouldNotBeNull();
+            created.Id.ShouldNotBe(0);
+            created.Name.ShouldBe(newEntity.Name);
+            created.Description.ShouldBe(newEntity.Description);
+            created.CreatedBy.ShouldBe(newEntity.CreatedBy);
+            created.ImageUrls.ShouldBeEquivalentTo(newEntity.ImageUrls);
+            created.CreatedAt.ShouldNotBe(default);
+            created.UpdatedAt.ShouldNotBe(default);
+            created.UpdatedAt.ShouldBeGreaterThanOrEqualTo(created.CreatedAt);
 
-        stored.ShouldNotBeNull();
-        stored.Name.ShouldBe(newEntity.Name);
-        stored.Description.ShouldBe(newEntity.Description);
-        stored.CreatedBy.ShouldBe(newEntity.CreatedBy);
-        stored.ImageUrls.ShouldBeEquivalentTo(newEntity.ImageUrls);
-        stored.CreatedAt.ShouldNotBe(default);
-        stored.UpdatedAt.ShouldBe(default);
+            // ---- Assert – Database (CREATE) ----
+            var stored = dbContext.Clubs.First(c => c.Id == created.Id);
 
+            stored.ShouldNotBeNull();
+            stored.Name.ShouldBe(newEntity.Name);
+            stored.Description.ShouldBe(newEntity.Description);
+            stored.CreatedBy.ShouldBe(newEntity.CreatedBy);
+            stored.ImageUrls.ShouldBeEquivalentTo(newEntity.ImageUrls);
+            stored.CreatedAt.ShouldNotBe(default);
+            stored.UpdatedAt.ShouldNotBe(default);
+            stored.UpdatedAt.ShouldBeGreaterThanOrEqualTo(stored.CreatedAt);
 
-        // ---- Act 2: GetAll ----
-        var actionResult = controller.GetAll();
-        var okResult = actionResult.Result as OkObjectResult;
-        var result = okResult?.Value as List<ClubDto>;
+            // ---- Act 2: GetAll ----
+            var actionResult = controller.GetAll();
+            var okResult = actionResult.Result as OkObjectResult;
+            var result = okResult?.Value as List<ClubDto>;
 
-        // ---- Assert – GET ALL ----
-        result.ShouldNotBeNull();
-        result.Count.ShouldBeGreaterThan(0);
-        result.Any(c => c.Id == created.Id && c.Name == created.Name).ShouldBeTrue();
-    }
+            // ---- Assert – GET ALL ----
+            result.ShouldNotBeNull();
+            result.Count.ShouldBeGreaterThan(0);
+            result.Any(c => c.Id == created.Id && c.Name == created.Name).ShouldBeTrue();
+        }
 
-    private static ClubsController CreateController(IServiceScope scope)
-    {
-        return new ClubsController(scope.ServiceProvider.GetRequiredService<IClubService>())
+        private static ClubsController CreateController(IServiceScope scope)
         {
-            ControllerContext = BuildContext("-21")
-        };
+            return new ClubsController(scope.ServiceProvider.GetRequiredService<IClubService>())
+            {
+                ControllerContext = BuildContext("-21")
+            };
+        }
     }
-
 }
