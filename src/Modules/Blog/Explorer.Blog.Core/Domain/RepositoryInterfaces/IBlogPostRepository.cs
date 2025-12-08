@@ -19,6 +19,7 @@ namespace Explorer.Blog.Core.Domain.RepositoryInterfaces
 
         (IEnumerable<BlogPost> items, int total) GetPublic(int page, int pageSize);
 
+        BlogPost? GetByCommentId(long commentId);
 
     }
 }

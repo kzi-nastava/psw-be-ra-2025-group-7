@@ -47,10 +47,33 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
 
         public BlogComment Update(BlogComment comment)
         {
-            // Ažuriranje owned entity-ja
-            _context.Entry(comment).State = EntityState.Modified;
+            var blogPost = _context.BlogPosts
+                .Include(b => b.Comments)
+                .FirstOrDefault(b => b.Comments.Any(c => c.Id == comment.Id));
+
+            if (blogPost == null)
+                throw new KeyNotFoundException("Blog post not found");
+
+            var trackedComment = blogPost.Comments.First(c => c.Id == comment.Id);
+
+            trackedComment.EditText(comment.Text);
+
             _context.SaveChanges();
-            return comment;
+            return trackedComment;
+        }
+
+        public void Delete(BlogComment comment)
+        {
+            var blogPost = _context.BlogPosts
+                .Include(b => b.Comments)
+                .FirstOrDefault(b => b.Id == comment.BlogPostId);
+
+            if (blogPost == null)
+                throw new KeyNotFoundException($"Blog post with ID {comment.BlogPostId} not found.");
+
+            blogPost.Comments.Remove(comment);
+
+            _context.SaveChanges();
         }
     }
 }

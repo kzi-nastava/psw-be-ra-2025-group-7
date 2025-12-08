@@ -4,6 +4,7 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public.Tourist;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +24,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Tourist
             // Arrange
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope, "-21"); // Tourist with location (Belgrade center)
-            var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
             // Act
             var actionResult = controller.GetNearbyMonuments();
