@@ -158,6 +158,37 @@ namespace Explorer.Tours.Infrastructure.Database
                  .IsRequired();
             });
 
+            // ===== PublicPointRequest konfiguracija =====
+            modelBuilder.Entity<PublicPointRequest>(b =>
+            {
+                b.ToTable("PublicPointRequests");
+
+                b.HasKey(p => p.Id);
+
+                b.Property(p => p.TourId)
+                    .IsRequired();
+
+                b.Property(p => p.KeyPointIndex)
+                    .IsRequired();
+
+                b.Property(p => p.AuthorId)
+                    .IsRequired();
+
+                // enum kao int (0 = Pending, 1 = Approved, 2 = Rejected)
+                b.Property(p => p.Status)
+                    .IsRequired();
+
+                b.Property(p => p.AdminComment)
+                    .HasMaxLength(500);
+
+                b.Property(p => p.CreatedAt)
+                    .IsRequired();
+
+                b.Property(p => p.ProcessedAt)
+                    .IsRequired(false);
+            });
+
+
             // Ostale entitete (Facility, TourProblem, ...) rade drugi u svojim karticama.
         }
     }
