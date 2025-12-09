@@ -1,4 +1,4 @@
-using Explorer.Tours.Core.Domain;
+﻿using Explorer.Tours.Core.Domain;
 using Shouldly;
 using Xunit;
 
@@ -143,6 +143,129 @@ namespace Explorer.Tours.Tests.Unit
             // Assert
             cart.Items.Count.ShouldBe(2);
             cart.TotalPrice.ShouldBe(0m);
+        }
+
+        // ================= PURCHASE FUNCTIONALITY =================
+
+        [Fact]
+        public void Prepares_purchase_with_valid_items()
+        {
+            // Arrange
+            var cart = new ShoppingCart(1);
+            cart.AddItem(1, "Tour A", 50.00m);
+            cart.AddItem(2, "Tour B", 75.50m);
+            cart.AddItem(3, "Tour C", 100.00m);
+
+            // Act
+            var tourIds = cart.PreparePurchase();
+
+            // Assert
+            tourIds.ShouldNotBeNull();
+            tourIds.Count.ShouldBe(3);
+            tourIds.ShouldContain(1L);
+            tourIds.ShouldContain(2L);
+            tourIds.ShouldContain(3L);
+        }
+
+        [Fact]
+        public void Prepares_purchase_returns_readonly_list()
+        {
+            // Arrange
+            var cart = new ShoppingCart(1);
+            cart.AddItem(1, "Tour A", 50.00m);
+
+            // Act
+            var tourIds = cart.PreparePurchase();
+
+            // Assert
+            tourIds.ShouldBeAssignableTo<IReadOnlyList<long>>();
+        }
+
+        [Fact]
+        public void Prepare_purchase_throws_exception_for_empty_cart()
+        {
+            // Arrange
+            var cart = new ShoppingCart(1);
+
+            // Act & Assert
+            Should.Throw<InvalidOperationException>(() => cart.PreparePurchase())
+                .Message.ShouldBe("Cannot purchase an empty cart.");
+        }
+
+        [Fact]
+        public void Clears_cart_after_purchase()
+        {
+            // Arrange
+            var cart = new ShoppingCart(1);
+            cart.AddItem(1, "Tour A", 50.00m);
+            cart.AddItem(2, "Tour B", 75.50m);
+
+            // Act
+            cart.ClearAfterPurchase();
+
+            // Assert
+            cart.Items.ShouldBeEmpty();
+            cart.TotalPrice.ShouldBe(0m);
+        }
+
+        [Fact]
+        public void Clear_after_purchase_throws_exception_for_empty_cart()
+        {
+            // Arrange
+            var cart = new ShoppingCart(1);
+
+            // Act & Assert
+            Should.Throw<InvalidOperationException>(() => cart.ClearAfterPurchase())
+                .Message.ShouldBe("Cart is already empty.");
+        }
+
+        [Fact]
+        public void Purchase_workflow_prepares_then_clears()
+        {
+            // Arrange
+            var cart = new ShoppingCart(1);
+            cart.AddItem(1, "Tour A", 50.00m);
+            cart.AddItem(2, "Tour B", 75.50m);
+
+            // Act - Simulate purchase workflow
+            var tourIds = cart.PreparePurchase();
+            cart.ClearAfterPurchase();
+
+            // Assert
+            tourIds.Count.ShouldBe(2);
+            cart.Items.ShouldBeEmpty();
+            cart.TotalPrice.ShouldBe(0m);
+        }
+
+        [Fact]
+        public void Prepares_purchase_with_single_item()
+        {
+            // Arrange
+            var cart = new ShoppingCart(1);
+            cart.AddItem(1, "Solo Tour", 99.99m);
+
+            // Act
+            var tourIds = cart.PreparePurchase();
+
+            // Assert
+            tourIds.Count.ShouldBe(1);
+            tourIds[0].ShouldBe(1L);
+        }
+
+        [Fact]
+        public void Prepare_purchase_preserves_cart_state()
+        {
+            // Arrange
+            var cart = new ShoppingCart(1);
+            cart.AddItem(1, "Tour A", 50.00m);
+            cart.AddItem(2, "Tour B", 75.50m);
+
+            // Act
+            var tourIds = cart.PreparePurchase();
+
+            // Assert - Cart state unchanged after PreparePurchase
+            cart.Items.Count.ShouldBe(2);
+            cart.TotalPrice.ShouldBe(125.50m);
         }
     }
 }
