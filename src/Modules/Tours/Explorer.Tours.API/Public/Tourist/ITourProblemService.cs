@@ -15,5 +15,6 @@ namespace Explorer.Tours.API.Public.Tourist
         void Delete(int id, int touristId);
         List<TourProblemDto> GetAll();
         TourProblemDto SetResolveDue(int id, string date);
+        TourProblemDto SetPenalty(int id);
     }
 }

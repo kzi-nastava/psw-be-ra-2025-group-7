@@ -115,5 +115,16 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             return entity;
         }
 
+        public TourProblem SetPenalty(int id)
+        {
+            var entity = _dbSet.FirstOrDefault(e => e.Id == id);
+            if (entity == null)
+                throw new KeyNotFoundException($"Problem {id} not found.");
+            entity.IsSolved = true;
+            entity.Status = ProblemStatus.Unresolved;
+            _dbContext.SaveChanges();
+            return entity;
+        }
+
     }
 }
