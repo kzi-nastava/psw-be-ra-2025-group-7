@@ -120,5 +120,33 @@ namespace Explorer.Tours.Tests.Integration.Administration
             nowProblem.IsSolved.ShouldBeFalse();
             (DateTime.UtcNow - nowProblem.TimeReported).TotalDays.ShouldBeGreaterThan(5);
         }
+
+        [Fact]
+        public void Can_set_penalty_on_problem()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateController(scope);
+            var repo = scope.ServiceProvider.GetRequiredService<ITourProblemRepository>();
+
+            // Uzimamo prvi problem koji nije rešen
+            var problem = repo.GetAll().First(r => !r.IsSolved);
+            problem.IsSolved.ShouldBeFalse();
+            problem.Status.ShouldNotBe(ProblemStatus.Unresolved);
+
+            // Pozivamo novu funkciju iz kontrolera
+            var result = controller.SetPenalty(problem.Id).Result; // pretpostavljamo da je async ili ObjectResult
+            var dto = ((ObjectResult)result).Value as TourProblemDto;
+
+            // Proveravamo rezultat
+            dto.ShouldNotBeNull();
+            dto.IsSolved.ShouldBeTrue();
+            dto.Status.ShouldBe(ProblemStatus.Unresolved.ToString());
+
+            // Proveravamo i u bazi
+            var updated = repo.Get(problem.Id);
+            updated.IsSolved.ShouldBeTrue();
+            updated.Status.ShouldBe(ProblemStatus.Unresolved);
+        }
+
     }
 }

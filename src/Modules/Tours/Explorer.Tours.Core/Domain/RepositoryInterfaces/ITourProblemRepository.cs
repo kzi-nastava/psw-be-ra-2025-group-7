@@ -17,7 +17,7 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
         TourProblem Update(TourProblem tourProblem);
         void Delete(int id);
         List<TourProblem> GetAll();
-
         TourProblem UpdateResolveDue(int id, DateTime resolveDue);
+        TourProblem SetPenalty(int id);
     }
 }
