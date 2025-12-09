@@ -1,6 +1,7 @@
 ﻿using Explorer.API.Controllers.Tourist.Blog;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
+using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.Blog.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -183,4 +184,156 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
         controller.ControllerContext = ctx;
         return controller;
     }
+
+    [Fact]
+    public void Created_comment_has_valid_timestamp()
+    {
+        using var scope = Factory.Services.CreateScope();
+        const long authorId = -12;
+        var controller = CreateCommentController(scope, authorId.ToString());
+
+        var dto = new CreateCommentDto
+        {
+            BlogId = -2,
+            Text = "Test timestamp",
+            UserId = authorId
+        };
+
+        var before = DateTime.UtcNow;
+        var result = (controller.Create(dto).Result as OkObjectResult)?.Value as BlogCommentDto;
+        var after = DateTime.UtcNow;
+
+        result.ShouldNotBeNull();
+        result.CreatedAt.ShouldNotBe(default);
+
+        // CreatedAt treba da bude između trenutka pre poziva i posle poziva
+        result.CreatedAt.ShouldBeGreaterThanOrEqualTo(before);
+        result.CreatedAt.ShouldBeLessThanOrEqualTo(after);
+    }
+
+    [Fact]
+    public void Updating_comment_sets_last_modified_timestamp()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BlogContext>();
+        const long authorId = -12;
+
+        var controller = CreateCommentController(scope, authorId.ToString());
+
+        // 1. Kreiraj komentar
+        var createDto = new CreateCommentDto
+        {
+            BlogId = -2,
+            Text = "Originalni tekst",
+            UserId = authorId
+        };
+
+        var created = (controller.Create(createDto).Result as OkObjectResult)?.Value as BlogCommentDto;
+        created.ShouldNotBeNull();
+
+        // 2. Izmeni komentar
+        var updateDto = new EditCommentDto
+        {
+            CommentId = created.Id,
+            NewText = "Izmenjen tekst"
+        };
+
+        var before = DateTime.UtcNow;
+        var updated = (controller.Edit(updateDto).Result as OkObjectResult)?.Value as BlogCommentDto;
+        var after = DateTime.UtcNow;
+
+        updated.ShouldNotBeNull();
+        updated.LastModifiedAt.ShouldNotBeNull();
+        updated.LastModifiedAt.Value.ShouldBeGreaterThanOrEqualTo(before);
+        updated.LastModifiedAt.Value.ShouldBeLessThanOrEqualTo(after);
+    }
+
+    [Fact]
+    public void Cannot_update_comment_from_other_user()
+    {
+        using var scope = Factory.Services.CreateScope();
+        const long ownerId = -12;
+        const long otherUserId = -13;
+
+        var controllerOwner = CreateCommentController(scope, ownerId.ToString());
+        var controllerOther = CreateCommentController(scope, otherUserId.ToString());
+
+        // Kreira vlasnik
+        var dto = new CreateCommentDto
+        {
+            BlogId = -2,
+            Text = "komentar",
+            UserId = ownerId
+        };
+
+        var created = (controllerOwner.Create(dto).Result as OkObjectResult)?.Value as BlogCommentDto;
+        created.ShouldNotBeNull();
+
+        // Pokušaj izmene od strane drugog korisnika
+        var updateDto = new EditCommentDto
+        {
+            CommentId = created.Id,
+            UserId = otherUserId,
+            NewText = "hakovana izmena"
+        };
+
+        Should.Throw<UnauthorizedAccessException>(() =>
+        {
+            controllerOther.Edit(updateDto);
+        });
+    }
+
+    [Fact]
+    public void Author_can_delete_comment_within_15_minutes()
+    {
+        using var scope = Factory.Services.CreateScope();
+        const long authorId = -12;
+
+        var controller = CreateCommentController(scope, authorId.ToString());
+
+        // Kreiraj komentar
+        var createDto = new CreateCommentDto
+        {
+            BlogId = -2,
+            Text = "Komentar za brisanje",
+            UserId = authorId
+        };
+        var created = (controller.Create(createDto).Result as OkObjectResult)?.Value as BlogCommentDto;
+        created.ShouldNotBeNull();
+
+        // Delete
+        controller.Delete(created.Id);
+
+        // Proveri da više ne postoji u bazi
+        var commentRepo = scope.ServiceProvider.GetRequiredService<IBlogCommentRepository>();
+        var deleted = commentRepo.GetByBlogId(-2).FirstOrDefault(c => c.Id == created.Id);
+        deleted.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Other_user_cannot_delete_comment()
+    {
+        using var scope = Factory.Services.CreateScope();
+        const long authorId = -12;
+        const long otherUserId = -13;
+
+        var controllerOwner = CreateCommentController(scope, authorId.ToString());
+        var controllerOther = CreateCommentController(scope, otherUserId.ToString());
+
+        // Kreiraj komentar
+        var createDto = new CreateCommentDto
+        {
+            BlogId = -2,
+            Text = "Komentar za brisanje",
+            UserId = authorId
+        };
+        var created = (controllerOwner.Create(createDto).Result as OkObjectResult)?.Value as BlogCommentDto;
+        created.ShouldNotBeNull();
+
+        Should.Throw<UnauthorizedAccessException>(() =>
+        {
+            controllerOther.Delete(created.Id);
+        });
+    }
+
 }
