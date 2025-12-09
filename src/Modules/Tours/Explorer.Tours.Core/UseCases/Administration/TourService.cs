@@ -13,10 +13,12 @@ namespace Explorer.Tours.Core.UseCases.Administration
         private readonly ITourRepository _tourRepository;
         private readonly IEquipmentRepository _equipmentRepository;
         private readonly IMapper _mapper;
+        private readonly IPublicPointRequestRepository _publicPointRequestRepository;
 
-        public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper)
+        public TourService(ITourRepository repository, IPublicPointRequestRepository publicPointRequestRepository,IEquipmentRepository equipmentRepository, IMapper mapper)
         {
             _tourRepository = repository;
+            _publicPointRequestRepository = publicPointRequestRepository;
             _equipmentRepository = equipmentRepository;
             _mapper = mapper;
         }
@@ -78,8 +80,25 @@ namespace Explorer.Tours.Core.UseCases.Administration
             tour.AddKeyPoint(keyPoint); // domen čuva pravilo "samo Draft"
 
             var updated = _tourRepository.Update(tour);
+
+            // ➕ NOVO: ako je označeno kao javno, kreiramo zahtev
+            if (keyPointDto.MakePublic)
+            {
+                // nova tačka je na kraju liste
+                var newIndex = updated.KeyPoints.Count - 1;
+
+                var request = new PublicPointRequest(
+                    updated.Id,   // TourId
+                    newIndex,     // pozicija keypointa u listi
+                    authorId      // autor ture
+                );
+
+                _publicPointRequestRepository.Create(request);
+            }
+
             return _mapper.Map<TourDto>(updated);
         }
+
 
         public TourDto UpdateKeyPoint(long tourId, long authorId, int index, KeyPointDto keyPointDto)
         {
