@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Explorer.Tours.Core.Domain
@@ -18,17 +19,20 @@ namespace Explorer.Tours.Core.Domain
         public TravelType Type { get; }
         public int Minutes { get; }
 
-        protected TourDuration() { }
+        private TourDuration() { }
 
+        [JsonConstructor]
         public TourDuration(TravelType type, int minutes)
         {
-            Type = type;
-            Minutes = minutes;
             if (minutes <= 0)
                 throw new ArgumentException("Duration must be positive.");
+
+            Type = type;
+            Minutes = minutes;
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
+
+        protected override IEnumerable<object?> GetEqualityComponents()
         {
             yield return Type;
             yield return Minutes;

@@ -11,11 +11,13 @@ namespace Explorer.Tours.Core.UseCases.Administration
     public class TourService : ITourService
     {
         private readonly ITourRepository _tourRepository;
+        private readonly IEquipmentRepository _equipmentRepository;
         private readonly IMapper _mapper;
 
-        public TourService(ITourRepository repository, IMapper mapper)
+        public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper)
         {
             _tourRepository = repository;
+            _equipmentRepository = equipmentRepository;
             _mapper = mapper;
         }
 
@@ -29,7 +31,6 @@ namespace Explorer.Tours.Core.UseCases.Administration
 
         public TourDto Create(TourDto entity)
         {
-            // Životni ciklus – inicijalne vrednosti
             entity.PublishedAt = null;
             entity.ArchivedAt = null;
             entity.Status = (int)TourStatus.Draft;
@@ -183,6 +184,34 @@ namespace Explorer.Tours.Core.UseCases.Administration
             var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
 
             tour.RemoveDuration(index);
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
+
+        public TourDto AddEquipment(long tourId, long authorId, long equipmentId)
+        {
+            var tour = _tourRepository.Get(tourId);
+
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can only modify your own tours.");
+
+            var equipment = _equipmentRepository.Get(equipmentId);
+
+            tour.AddEquipment(equipment);
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
+
+        public TourDto RemoveEquipment(long tourId, long authorId, long equipmentId)
+        {
+            var tour = _tourRepository.Get(tourId);
+
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can only modify your own tours.");
+
+            tour.RemoveEquipment(equipmentId);
 
             var updated = _tourRepository.Update(tour);
             return _mapper.Map<TourDto>(updated);
