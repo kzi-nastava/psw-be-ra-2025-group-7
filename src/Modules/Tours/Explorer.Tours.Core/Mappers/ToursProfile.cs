@@ -15,6 +15,9 @@ namespace Explorer.Tours.Core.Mappers
 
             // Kartica 3 – mapiranje KeyPoint <-> KeyPointDto
             CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
+            
+            // KeyPoint to KeyPointWithoutSecretDto (excludes secret)
+            CreateMap<KeyPoint, KeyPointWithoutSecretDto>();
 
             // Tour <-> TourDto, uključujući KeyPoints
             CreateMap<TourDto, Tour>()
@@ -23,6 +26,26 @@ namespace Explorer.Tours.Core.Mappers
                 .ForMember(dest => dest.TourDurations,
                            opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDurationDto>()))
                 .ReverseMap();
+            
+            // Tour to PurchasedTourInfoDto (for purchased tours without secrets)
+            CreateMap<Tour, PurchasedTourInfoDto>()
+                .ForMember(dest => dest.KeyPoints,
+                           opt => opt.MapFrom(src => src.KeyPoints))
+                .ForMember(dest => dest.TourDurations,
+                           opt => opt.MapFrom(src => src.TourDurations));
+            
+            // Tour to TourPreviewDto (for browsing - limited info before purchase)
+            CreateMap<Tour, TourPreviewDto>()
+                .ForMember(dest => dest.Difficulty,
+                           opt => opt.MapFrom(src => src.Difficulty.ToString()))
+                .ForMember(dest => dest.IsPurchasable,
+                           opt => opt.MapFrom(src => src.Status == TourStatus.Published))
+                .ForMember(dest => dest.StartingPoint,
+                           opt => opt.MapFrom(src => src.KeyPoints != null && src.KeyPoints.Any() 
+                               ? src.KeyPoints.First() 
+                               : null))
+                .ForMember(dest => dest.TourDurations,
+                           opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDuration>()));
 
             // Mapiranje za kreiranje ture (priča člana 1)
             CreateMap<CreateTourDto, Tour>();
@@ -52,8 +75,10 @@ namespace Explorer.Tours.Core.Mappers
             CreateMap<OrderItem, OrderItemDto>().ReverseMap();
             CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
             
-            // Tour Purchase Token mapovi
-            CreateMap<TourPurchaseToken, TourPurchaseTokenDto>().ReverseMap();
+            // Tour Purchase Token mapovi - includes purchased tour info
+            CreateMap<TourPurchaseToken, TourPurchaseTokenDto>()
+                .ForMember(dest => dest.Tour, 
+                           opt => opt.MapFrom(src => src.Tour));
         }
     }
 }

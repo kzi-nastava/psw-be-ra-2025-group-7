@@ -75,12 +75,7 @@ namespace Explorer.Tours.Core.UseCases.Shopping
         /// </summary>
         public List<TourPurchaseTokenDto> PurchaseCart(long touristId)
         {
-            // Get the cart
-            var cart = _cartRepository.GetByTouristId(touristId);
-            if (cart == null)
-            {
-                throw new InvalidOperationException("Shopping cart not found.");
-            }
+            var cart = GetOrCreateCart(touristId);
 
             // Validates that cart can be purchased and returns tour IDs
             var tourIds = cart.PreparePurchase();
