@@ -81,6 +81,14 @@ public class BlogPostRepository : IBlogPostRepository
         return (items, total);
     }
 
+    public BlogPost? GetByCommentId(long commentId)
+    {
+        return _context.BlogPosts
+            .Include(b => b.Comments)
+            .FirstOrDefault(b => b.Comments.Any(c => c.Id == commentId));
+    }
+
+
 
 }
 

@@ -28,7 +28,8 @@ namespace Explorer.Tours.Tests.Integration
                 Category = "Equipment",
                 Priority = "Medium",
                 Description = "Lost item",
-                TimeReported = DateTime.UtcNow
+                TimeReported = DateTime.UtcNow,
+                IsSolved = false
             };
 
             // Act
@@ -80,7 +81,8 @@ namespace Explorer.Tours.Tests.Integration
                         Category = "Equipment",
                         Priority = "Medium",
                         Description = "Initial equipment issue to be updated.",
-                        TimeReported = DateTime.UtcNow
+                        TimeReported = DateTime.UtcNow,
+                        IsSolved = false
                     };
 
                     var created = ((ObjectResult)controller.Create(seedDto).Result)?.Value as TourProblemDto;
@@ -103,7 +105,8 @@ namespace Explorer.Tours.Tests.Integration
                     Category = "Other",
                     Priority = "High",
                     Description = "Updated description",
-                    TimeReported = DateTime.UtcNow
+                    TimeReported = DateTime.UtcNow,
+                    IsSolved = false
                 };
 
                 updated = ((ObjectResult)controller.Update(id, dto).Result)?.Value as TourProblemDto;
@@ -160,7 +163,8 @@ namespace Explorer.Tours.Tests.Integration
                         Category = "Safety",
                         Priority = "Low",
                         Description = "Safety related problem to be deleted.",
-                        TimeReported = DateTime.UtcNow
+                        TimeReported = DateTime.UtcNow,
+                        IsSolved = false
                     };
 
                     var created = ((ObjectResult)controller.Create(dto).Result)?.Value as TourProblemDto;
