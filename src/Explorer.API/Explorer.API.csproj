@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\Author\" />
     <Folder Include="Controllers\Message\" />
   </ItemGroup>
 
