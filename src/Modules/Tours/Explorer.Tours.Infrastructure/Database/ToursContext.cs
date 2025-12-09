@@ -291,6 +291,8 @@ namespace Explorer.Tours.Infrastructure.Database
                 b.Property(oi => oi.Price)
                     .IsRequired()
                     .HasColumnType("decimal(18,2)");
+            });
+
             // ===== PublicPointRequest konfiguracija =====
             modelBuilder.Entity<PublicPointRequest>(b =>
             {
@@ -327,8 +329,6 @@ namespace Explorer.Tours.Infrastructure.Database
 
             modelBuilder.Entity<Tour>().HasKey(t => t.Id);
             modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
-
-
                 v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
 
             modelBuilder.Entity<TourProblem>(b =>
@@ -371,6 +371,7 @@ namespace Explorer.Tours.Infrastructure.Database
                      v => JsonSerializer.Deserialize<List<TourProblemMessage>>(v, (JsonSerializerOptions?)null)
                  );
             });
+
         }
     }
 }
