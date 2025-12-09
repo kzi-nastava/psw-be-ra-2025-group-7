@@ -121,6 +121,12 @@ public class TourProblemService : ITourProblemService
 
         return _mapper.Map<TourProblemDto>(updated);
     }
+
+    public TourProblemDto SetPenalty(int id)
+    {
+        var updated = _repository.SetPenalty(id);
+        return _mapper.Map<TourProblemDto>(updated);
+    }
     public TourProblemDto MarkAsResolved(int id, int touristId)
     {
         var problem = _repository.Get(id);
@@ -138,4 +144,5 @@ public class TourProblemService : ITourProblemService
         return _mapper.Map<TourProblemDto>(updated);
     }
 
+     
 }

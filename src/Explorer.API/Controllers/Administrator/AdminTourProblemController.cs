@@ -53,5 +53,13 @@ namespace Explorer.API.Controllers.Administrator
             }
         }
 
+        [HttpPut("{id}/penalty")]
+        public ActionResult<TourProblemDto> SetPenalty(int id)
+        {
+            var result = _service.SetPenalty(id);
+            return Ok(result);
+        }
+
+
     }
 }
