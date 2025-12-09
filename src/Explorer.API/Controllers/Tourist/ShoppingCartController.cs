@@ -1,4 +1,4 @@
-using Explorer.Stakeholders.Infrastructure.Authentication;
+﻿using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Shopping;
 using Microsoft.AspNetCore.Authorization;
@@ -62,6 +62,31 @@ namespace Explorer.API.Controllers.Tourist
             var touristId = GetTouristIdFromToken();
             _shoppingCartService.ClearCart(touristId);
             return Ok();
+        }
+
+        /// <summary>
+        /// Purchases all items in the cart by creating TourPurchaseTokens.
+        /// This endpoint implements the DDD approach where the ShoppingCart aggregate
+        /// validates the purchase and the service orchestrates token creation.
+        /// All items are converted to purchase tokens and the cart is cleared.
+        /// </summary>
+        [HttpPost("purchase")]
+        public ActionResult<List<TourPurchaseTokenDto>> PurchaseCart()
+        {
+            try
+            {
+                var touristId = GetTouristIdFromToken();
+                var tokens = _shoppingCartService.PurchaseCart(touristId);
+                return Ok(tokens);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         private long GetTouristIdFromToken()

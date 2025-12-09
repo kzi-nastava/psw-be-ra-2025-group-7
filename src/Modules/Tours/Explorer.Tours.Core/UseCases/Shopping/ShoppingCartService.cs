@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Shopping;
 using Explorer.Tours.Core.Domain;
@@ -10,15 +10,18 @@ namespace Explorer.Tours.Core.UseCases.Shopping
     {
         private readonly IShoppingCartRepository _cartRepository;
         private readonly ITourRepository _tourRepository;
+        private readonly ITourPurchaseTokenRepository _tokenRepository;
         private readonly IMapper _mapper;
 
         public ShoppingCartService(
             IShoppingCartRepository cartRepository,
             ITourRepository tourRepository,
+            ITourPurchaseTokenRepository tokenRepository,
             IMapper mapper)
         {
             _cartRepository = cartRepository;
             _tourRepository = tourRepository;
+            _tokenRepository = tokenRepository;
             _mapper = mapper;
         }
 
@@ -63,6 +66,53 @@ namespace Explorer.Tours.Core.UseCases.Shopping
             {
                 _cartRepository.Delete(cart.Id);
             }
+        }
+
+        /// <summary>
+        /// Purchases all items in the cart by creating TourPurchaseTokens for each item.
+        /// Uses domain-driven design: the ShoppingCart aggregate validates the purchase,
+        /// then we create tokens for each tour, and finally clear the cart.
+        /// </summary>
+        public List<TourPurchaseTokenDto> PurchaseCart(long touristId)
+        {
+            // Get the cart
+            var cart = _cartRepository.GetByTouristId(touristId);
+            if (cart == null)
+            {
+                throw new InvalidOperationException("Shopping cart not found.");
+            }
+
+            // Validates that cart can be purchased and returns tour IDs
+            var tourIds = cart.PreparePurchase();
+
+            var createdTokens = new List<TourPurchaseToken>();
+
+            // Create tokens for each tour in the cart
+            foreach (var tourId in tourIds)
+            {
+                // Check if user already purchased this tour
+                if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
+                {
+                    throw new InvalidOperationException($"Tour with ID {tourId} has already been purchased.");
+                }
+
+                // Get the tour to validate purchase rules
+                var tour = _tourRepository.Get(tourId);
+                
+                // Use factory method to create token with all business rules enforced
+                var token = TourPurchaseToken.CreateForTour(touristId, tour);
+                
+                // Persist the token
+                var createdToken = _tokenRepository.Create(token);
+                createdTokens.Add(createdToken);
+            }
+
+            // Clear the cart after successful purchase (domain method)
+            cart.ClearAfterPurchase();
+            _cartRepository.Update(cart);
+
+            // Return DTOs
+            return _mapper.Map<List<TourPurchaseTokenDto>>(createdTokens);
         }
 
         private ShoppingCart GetOrCreateCart(long touristId)

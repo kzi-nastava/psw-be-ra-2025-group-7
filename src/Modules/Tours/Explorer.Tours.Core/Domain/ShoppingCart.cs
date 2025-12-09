@@ -72,5 +72,30 @@ namespace Explorer.Tours.Core.Domain
         {
             TotalPrice = Items.Sum(item => item.Price);
         }
+
+        /// <summary>
+        /// Validates the cart can be purchased and returns the tour IDs for token creation.
+        /// </summary>
+        public IReadOnlyList<long> PreparePurchase()
+        {
+            if (Items == null || !Items.Any())
+                throw new InvalidOperationException("Cannot purchase an empty cart.");
+
+            // Return read-only list of tour IDs to create tokens for
+            return Items.Select(item => item.TourId).ToList().AsReadOnly();
+        }
+
+        /// <summary>
+        /// Clears all items from the cart after successful purchase.
+        /// Should only be called after tokens are successfully created.
+        /// </summary>
+        public void ClearAfterPurchase()
+        {
+            if (!Items.Any())
+                throw new InvalidOperationException("Cart is already empty.");
+
+            Items.Clear();
+            RecalculateTotalPrice();
+        }
     }
 }
