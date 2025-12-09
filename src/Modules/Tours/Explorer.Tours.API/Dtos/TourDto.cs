@@ -26,5 +26,6 @@ namespace Explorer.Tours.API.Dtos
         // Životni ciklus ture (priča člana 1)
         public DateTime? PublishedAt { get; set; }
         public DateTime? ArchivedAt { get; set; }
+        public List<TourDurationDto> TourDurations { get; set; } = new();
     }
 }

@@ -92,5 +92,15 @@ namespace Explorer.API.Controllers.Tourist.Blog
             var updated = _blogPostService.Archive(authorId, id);
             return Ok(updated);
         }
+
+
+        [HttpGet("public")]
+        public ActionResult<PagedResult<BlogPostDto>> GetPublic([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = _blogPostService.GetPublic(page, pageSize);
+            return Ok(result);
+        }
+
+
     }
 }

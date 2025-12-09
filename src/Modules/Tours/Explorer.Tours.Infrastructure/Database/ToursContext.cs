@@ -9,6 +9,7 @@ namespace Explorer.Tours.Infrastructure.Database
     public class ToursContext : DbContext
     {
         public DbSet<Equipment> Equipment { get; set; }
+        public DbSet<Monument> Monuments { get; set; }
         public DbSet<Tour> Tours { get; set; }
         public DbSet<TourJournal> TourJournals { get; set; }
         public DbSet<TouristEquipment> TouristEquipment { get; set; }
@@ -17,12 +18,38 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Facility> Facility { get; set; }
         public DbSet<TourProblem> TourProblems { get; set; }
         public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
 
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("tours");
+
+            // ===== Monument konfiguracija =====
+            modelBuilder.Entity<Monument>(b =>
+            {
+                b.ToTable("Monuments");
+                b.HasKey(m => m.Id);
+
+                b.Property(m => m.Name)
+                    .IsRequired();
+
+                b.Property(m => m.Description)
+                    .IsRequired();
+
+                b.Property(m => m.YearOfCreation)
+                    .IsRequired();
+
+                b.Property(m => m.Status)
+                    .IsRequired();
+
+                b.Property(m => m.Latitude)
+                    .IsRequired();
+
+                b.Property(m => m.Longitude)
+                    .IsRequired();
+            });
 
             // ===== Tour konfiguracija (životni ciklus + tvoji KeyPoints) =====
             modelBuilder.Entity<Tour>(b =>
@@ -70,6 +97,25 @@ namespace Explorer.Tours.Infrastructure.Database
 
                     // TODO (drugi članovi): ovde kasnije mogu da dodaju npr. Order polje
                     // za redosled tačaka, ako im zatreba za svoje kartice.
+                });
+                b.OwnsMany(t => t.TourDurations, td =>
+                {
+                    td.ToTable("TourDurations");              // naziv tabele u bazi
+                    td.WithOwner().HasForeignKey("TourId");   // FK ka Tour.Id
+
+                    // Shadow primary key
+                    td.Property<long>("Id");
+                    td.HasKey("Id");
+
+                    // Enum TravelType mapiramo kao string
+                    td.Property(d => d.Type)
+                      .HasColumnName("TransportType")        // da se poklapa sa tvojom kolonom
+                      .HasConversion<string>()               // enum kao string u bazi
+                      .IsRequired();
+
+                    td.Property(d => d.Minutes)
+                      .HasColumnName("DurationInMinutes")    // da se poklapa sa tvojom kolonom
+                      .IsRequired();
                 });
             });
 
@@ -185,6 +231,46 @@ namespace Explorer.Tours.Infrastructure.Database
 
                 // Create index on UserId for faster queries
                 b.HasIndex(tpt => tpt.UserId);
+            });
+
+            // ===== ShoppingCart konfiguracija =====
+            modelBuilder.Entity<ShoppingCart>(b =>
+            {
+                b.ToTable("ShoppingCarts");
+                b.HasKey(sc => sc.Id);
+
+                b.Property(sc => sc.TouristId)
+                    .IsRequired();
+
+                b.Property(sc => sc.TotalPrice)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.HasIndex(sc => sc.TouristId)
+                    .IsUnique();
+
+                b.HasMany(sc => sc.Items)
+                    .WithOne()
+                    .HasForeignKey("ShoppingCartId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ===== OrderItem konfiguracija =====
+            modelBuilder.Entity<OrderItem>(b =>
+            {
+                b.ToTable("OrderItems");
+                b.HasKey(oi => oi.Id);
+
+                b.Property(oi => oi.TourId)
+                    .IsRequired();
+
+                b.Property(oi => oi.TourName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                b.Property(oi => oi.Price)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
             });
         }
     }

@@ -1,18 +1,18 @@
 using Explorer.API.Controllers.Administrator.Administration;
 using Explorer.BuildingBlocks.Core.Exceptions;
-using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Public.Administration;
-using Explorer.Stakeholders.Infrastructure.Database;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Administration;
+using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace Explorer.Stakeholders.Tests.Integration.Administration;
+namespace Explorer.Tours.Tests.Integration.Administration;
 
 [Collection("Sequential")]
-public class MonumentCommandTests : BaseStakeholdersIntegrationTest
+public class MonumentCommandTests : BaseToursIntegrationTest
 {
-    public MonumentCommandTests(StakeholdersTestFactory factory) : base(factory) { }
+    public MonumentCommandTests(ToursTestFactory factory) : base(factory) { }
 
     [Fact]
     public void Creates()
@@ -20,7 +20,7 @@ public class MonumentCommandTests : BaseStakeholdersIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var newEntity = new MonumentDto
         {
             Name = "?avolja varoš",
@@ -89,7 +89,7 @@ public class MonumentCommandTests : BaseStakeholdersIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var updatedEntity = new MonumentDto
         {
             Id = -1,
@@ -145,7 +145,7 @@ public class MonumentCommandTests : BaseStakeholdersIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         // Act
         var result = (OkResult)controller.Delete(-3);
