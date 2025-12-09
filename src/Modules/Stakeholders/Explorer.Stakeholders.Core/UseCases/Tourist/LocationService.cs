@@ -2,6 +2,8 @@
 using Explorer.Stakeholders.API.Public.Tourist;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.API.Dtos;
 using Explorer.BuildingBlocks.Core.Exceptions;
 
 namespace Explorer.Stakeholders.Core.UseCases.Tourist

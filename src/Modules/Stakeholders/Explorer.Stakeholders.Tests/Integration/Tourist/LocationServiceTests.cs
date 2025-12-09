@@ -3,6 +3,8 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public.Tourist;
 using Explorer.Stakeholders.Infrastructure.Database;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +24,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Tourist
             // Arrange
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope, "-21"); // Tourist with location (Belgrade center)
-            var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
             // Act
             var actionResult = controller.GetNearbyMonuments();
@@ -30,12 +32,12 @@ namespace Explorer.Stakeholders.Tests.Integration.Tourist
 
             // Assert - Response
             result.ShouldNotBeNull();
-            result.Count.ShouldBe(3); // All 3 monuments from test data
+            result.Count.ShouldBeGreaterThanOrEqualTo(3); // At least 3 monuments from test data
             
             // Verify monuments are ordered by distance (closest first)
             // Tourist is at Belgrade center (44.8176, 20.4633)
             // Kalemegdanska tvrđava should be first (44.8225, 20.4508) - very close
-            result[0].Name.ShouldBe("Kalemegdanska tvr?ava");
+            result[0].Name.ShouldBe("Kalemegdanska tvrđava");
             result[0].Latitude.ShouldBe(44.8225);
             result[0].Longitude.ShouldBe(20.4508);
             

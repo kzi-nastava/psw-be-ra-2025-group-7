@@ -3,7 +3,7 @@ using System.Net.Mail;
 
 namespace Explorer.Tours.Core.Domain
 {
-    public class Tour : Entity
+    public class Tour : AggregateRoot
     {
         public long AuthorId { get; init; }
         public string Name { get; private set; }
@@ -13,18 +13,21 @@ namespace Explorer.Tours.Core.Domain
         public TourStatus Status { get; private set; }
         public decimal Price { get; private set; }
 
-        // Životni ciklus ture (član 1)
         public DateTime? PublishedAt { get; private set; }
         public DateTime? ArchivedAt { get; private set; }
 
-        // Kartica 3 – kolekcija ključnih tačaka (tvoj deo)
-        public List<KeyPoint> KeyPoints { get; private set; } = new();
 
-        // Potreban EF-u
-        public Tour()
+        public List<KeyPoint> KeyPoints { get; private set; } = new();
+        public List<TourDuration> TourDurations { get; private set; } = new();
+
+        public List<Equipment> RequiredEquipment { get; private set; } = new();
+
+        private Tour()
         {
             Tags = new List<string>();
             KeyPoints = new List<KeyPoint>();
+            TourDurations = new List<TourDuration>();
+            RequiredEquipment = new List<Equipment>();
         }
 
         public Tour(long authorId, string name, string description, TourDifficulty difficulty, List<string> tags)
@@ -40,11 +43,10 @@ namespace Explorer.Tours.Core.Domain
             PublishedAt = null;
             ArchivedAt = null;
             KeyPoints = new List<KeyPoint>();
-
+            TourDurations = new List<TourDuration>();
+            RequiredEquipment = new List<Equipment>();
             Validate();
         }
-
-        // ================= ŽIVOTNI CIKLUS TURE (ČLAN 1) =================
 
         public void Publish()
         {
@@ -53,6 +55,12 @@ namespace Explorer.Tours.Core.Domain
 
             if (!HasRequiredData())
                 throw new InvalidOperationException("Cannot publish tour without all required data.");
+
+            if (KeyPoints.Count < 2)
+                throw new InvalidOperationException("Cannot publish tour with less than 2 key points.");
+
+            if (TourDurations == null || !TourDurations.Any())
+                throw new InvalidOperationException("Cannot publish tour without at least one duration.");
 
             Status = TourStatus.Published;
             PublishedAt = DateTime.UtcNow;
@@ -128,6 +136,38 @@ namespace Explorer.Tours.Core.Domain
             KeyPoints.RemoveAt(index);
         }
 
+        public void AddEquipment(Equipment equipment)
+        {
+            EnsureNotArchived();
+
+            if (equipment == null)
+                throw new ArgumentNullException(nameof(equipment));
+
+            if (RequiredEquipment.Any(e => e.Id == equipment.Id))
+                throw new InvalidOperationException("Equipment is already added to this tour.");
+
+            RequiredEquipment.Add(equipment);
+        }
+
+        public void RemoveEquipment(long equipmentId)
+        {
+            EnsureNotArchived();
+
+            var equipment = RequiredEquipment.FirstOrDefault(e => e.Id == equipmentId);
+
+            if (equipment == null)
+                throw new InvalidOperationException("Equipment is not part of this tour.");
+
+            RequiredEquipment.Remove(equipment);
+        }
+
+        private void EnsureNotArchived()
+        {
+            if (Status == TourStatus.Archived)
+                throw new InvalidOperationException("You cannot modify equipment for archived tours. Please reactivate the tour first.");
+        }
+
+
         // Helper – kartica 3 važi samo dok je tura u pripremi
         private void EnsureDraftStatus()
         {
@@ -169,6 +209,39 @@ namespace Explorer.Tours.Core.Domain
                 throw new ArgumentException("Tags cannot be empty.");
             if (Tags.Any(tag => tag.Length > 50))
                 throw new ArgumentException("Tag cannot exceed 50 characters.");
+        }
+
+        public void AddDuration(TourDuration duration)
+        {
+            EnsureDraftStatus();
+
+            if (duration == null)
+                throw new ArgumentNullException(nameof(duration));
+
+            TourDurations.Add(duration);
+        }
+
+        public void UpdateDuration(int index, TourDuration duration)
+        {
+            EnsureDraftStatus();
+
+            if (index < 0 || index >= TourDurations.Count)
+                throw new ArgumentOutOfRangeException(nameof(index), "Duration index is out of range.");
+
+            if (duration == null)
+                throw new ArgumentNullException(nameof(duration));
+
+            TourDurations[index] = duration;
+        }
+
+        public void RemoveDuration(int index)
+        {
+            EnsureDraftStatus();
+
+            if (index < 0 || index >= TourDurations.Count)
+                throw new ArgumentOutOfRangeException(nameof(index), "Duration index is out of range.");
+
+            TourDurations.RemoveAt(index);
         }
     }
 

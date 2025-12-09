@@ -11,13 +11,15 @@ namespace Explorer.Tours.Core.UseCases.Administration
     public class TourService : ITourService
     {
         private readonly ITourRepository _tourRepository;
+        private readonly IEquipmentRepository _equipmentRepository;
         private readonly IMapper _mapper;
         private readonly IPublicPointRequestRepository _publicPointRequestRepository;
 
-        public TourService(ITourRepository repository, IPublicPointRequestRepository publicPointRequestRepository, IMapper mapper)
+        public TourService(ITourRepository repository, IPublicPointRequestRepository publicPointRequestRepository,IEquipmentRepository equipmentRepository, IMapper mapper)
         {
             _tourRepository = repository;
             _publicPointRequestRepository = publicPointRequestRepository;
+            _equipmentRepository = equipmentRepository;
             _mapper = mapper;
         }
 
@@ -31,7 +33,6 @@ namespace Explorer.Tours.Core.UseCases.Administration
 
         public TourDto Create(TourDto entity)
         {
-            // Životni ciklus – inicijalne vrednosti
             entity.PublishedAt = null;
             entity.ArchivedAt = null;
             entity.Status = (int)TourStatus.Draft;
@@ -131,7 +132,7 @@ namespace Explorer.Tours.Core.UseCases.Administration
                 throw new ForbiddenException("You can modify only your own tours.");
 
             if (tour.Status != TourStatus.Draft)
-                throw new InvalidOperationException("Key points can only be modified while tour is in Draft status.");
+                throw new InvalidOperationException("Changes can only be made while tour is in Draft status.");
 
             return tour;
         }
@@ -175,6 +176,64 @@ namespace Explorer.Tours.Core.UseCases.Administration
             var result = _tourRepository.Update(tour);
 
             return _mapper.Map<TourDto>(result);
+        }
+        //trajanje ture
+        public TourDto AddTourDuration(long tourId, long authorId, TourDurationDto durationDto)
+        {
+            var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
+
+            tour.AddDuration(_mapper.Map<TourDuration>(durationDto));
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
+
+        public TourDto UpdateTourDuration(long tourId, long authorId, int index, TourDurationDto durationDto)
+        {
+            var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
+
+            tour.UpdateDuration(index, _mapper.Map<TourDuration>(durationDto));
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
+
+        public TourDto RemoveTourDuration(long tourId, long authorId, int index)
+        {
+            var tour = GetAuthorDraftTourOrThrow(tourId, authorId);
+
+            tour.RemoveDuration(index);
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
+
+        public TourDto AddEquipment(long tourId, long authorId, long equipmentId)
+        {
+            var tour = _tourRepository.Get(tourId);
+
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can only modify your own tours.");
+
+            var equipment = _equipmentRepository.Get(equipmentId);
+
+            tour.AddEquipment(equipment);
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
+        }
+
+        public TourDto RemoveEquipment(long tourId, long authorId, long equipmentId)
+        {
+            var tour = _tourRepository.Get(tourId);
+
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can only modify your own tours.");
+
+            tour.RemoveEquipment(equipmentId);
+
+            var updated = _tourRepository.Update(tour);
+            return _mapper.Map<TourDto>(updated);
         }
     }
 }

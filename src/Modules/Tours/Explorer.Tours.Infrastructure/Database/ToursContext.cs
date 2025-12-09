@@ -3,12 +3,14 @@ using System.Linq;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Explorer.Tours.Infrastructure.Database
 {
     public class ToursContext : DbContext
     {
         public DbSet<Equipment> Equipment { get; set; }
+        public DbSet<Monument> Monuments { get; set; }
         public DbSet<Tour> Tours { get; set; }
         public DbSet<PublicPointRequest> PublicPointRequests { get; set; }
 
@@ -18,12 +20,37 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Question> Questions { get; set; }
         public DbSet<Facility> Facility { get; set; }
         public DbSet<TourProblem> TourProblems { get; set; }
-
+        public DbSet<AnnualAward> AnnualAwards { get; set; }
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("tours");
+
+            // ===== Monument konfiguracija =====
+            modelBuilder.Entity<Monument>(b =>
+            {
+                b.ToTable("Monuments");
+                b.HasKey(m => m.Id);
+
+                b.Property(m => m.Name)
+                    .IsRequired();
+
+                b.Property(m => m.Description)
+                    .IsRequired();
+
+                b.Property(m => m.YearOfCreation)
+                    .IsRequired();
+
+                b.Property(m => m.Status)
+                    .IsRequired();
+
+                b.Property(m => m.Latitude)
+                    .IsRequired();
+
+                b.Property(m => m.Longitude)
+                    .IsRequired();
+            });
 
             // ===== Tour konfiguracija (životni ciklus + tvoji KeyPoints) =====
             modelBuilder.Entity<Tour>(b =>
@@ -69,9 +96,45 @@ namespace Explorer.Tours.Infrastructure.Database
                     kp.Property(k => k.Secret)
                       .IsRequired();
 
-                    // TODO (drugi članovi): ovde kasnije mogu da dodaju npr. Order polje
-                    // za redosled tačaka, ako im zatreba za svoje kartice.
                 });
+                b.OwnsMany(t => t.TourDurations, td =>
+                {
+                    td.ToTable("TourDurations");
+                    td.WithOwner().HasForeignKey("TourId");
+
+                    td.Property<long>("Id").ValueGeneratedOnAdd();
+                    td.HasKey("Id");
+
+                    td.Property(d => d.Type)
+                      .HasColumnName("TransportType")
+                      .HasConversion<string>()
+                      .HasMaxLength(50)
+                      .IsRequired();
+
+                    td.Property(d => d.Minutes)
+                      .HasColumnName("DurationInMinutes")
+                      .IsRequired();
+
+                    td.HasCheckConstraint("CK_TourDuration_Minutes_Positive", "\"DurationInMinutes\" > 0");
+                });
+
+                b.HasMany(t => t.RequiredEquipment)
+                 .WithMany()
+                 .UsingEntity<Dictionary<string, object>>(
+                     "TourEquipment",
+                     j => j.HasOne<Equipment>()
+                           .WithMany()
+                           .HasForeignKey("EquipmentId")
+                           .OnDelete(DeleteBehavior.Cascade),
+                     j => j.HasOne<Tour>()
+                           .WithMany()
+                           .HasForeignKey("TourId")
+                           .OnDelete(DeleteBehavior.Cascade),
+                     j =>
+                     {
+                         j.ToTable("TourEquipment");
+                         j.HasKey("TourId", "EquipmentId");
+                     });
             });
 
             // ===== TourJournal konfiguracija =====
@@ -190,6 +253,54 @@ namespace Explorer.Tours.Infrastructure.Database
 
 
             // Ostale entitete (Facility, TourProblem, ...) rade drugi u svojim karticama.
+
+
+            modelBuilder.Entity<Tour>().HasKey(t => t.Id);
+            modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
+
+
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+
+            modelBuilder.Entity<TourProblem>(b =>
+            {
+                b.ToTable("TourProblems");
+
+                b.HasKey(tp => tp.Id);
+
+                b.Property(tp => tp.TourId).IsRequired();
+                b.Property(tp => tp.TouristId).IsRequired();
+
+                b.Property(tp => tp.Category)
+                 .HasConversion<int>()
+                 .IsRequired();
+
+                b.Property(tp => tp.Priority)
+                 .HasConversion<int>()
+                 .IsRequired();
+
+                b.Property(tp => tp.Description)
+                 .IsRequired()
+                 .HasMaxLength(2000);
+
+                b.Property(tp => tp.TimeReported)
+                 .IsRequired();
+
+                b.Property(tp => tp.Status)
+                 .HasConversion<int>()
+                 .IsRequired();
+
+                // Ignoriše javni immutable getter
+                b.Ignore(tp => tp.Comments);
+
+                // Mapa za private field _comments -> JSONB u Postgresu
+                b.Property<List<TourProblemMessage>>("_comments")
+                 .HasColumnName("_comments")
+                 .HasColumnType("jsonb")
+                 .HasConversion(
+                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                     v => JsonSerializer.Deserialize<List<TourProblemMessage>>(v, (JsonSerializerOptions?)null)
+                 );
+            });
         }
     }
 }

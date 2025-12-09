@@ -17,6 +17,12 @@ public class TourProblemService : ITourProblemService
         _mapper = mapper;
     }
 
+    public PagedResult<TourProblemDto> GetByAuthor(int authorId, int page, int pageSize)
+    {
+        var result = _repository.GetByAuthor(authorId, page, pageSize);
+        var items = _mapper.Map<List<TourProblemDto>>(result.Results);
+        return new PagedResult<TourProblemDto>(items, result.TotalCount);
+    }
     public PagedResult<TourProblemDto> GetTouristProblemsPages(int touristId, int page, int pageSize)
     {
         var result = _repository.GetByTourist(touristId, page, pageSize);
@@ -36,7 +42,17 @@ public class TourProblemService : ITourProblemService
         if (dto.TimeReported == default)
             dto.TimeReported = DateTime.UtcNow;
 
-        var entity = _mapper.Map<TourProblem>(dto);
+
+        var entity = new TourProblem(
+        dto.TourId,
+        touristId,
+        Enum.Parse<ProblemCategory>(dto.Category, true),
+        Enum.Parse<ProblemPriority>(dto.Priority, true),
+        dto.Description,dto.IsSolved
+    );
+        dto.Comments = new();
+        dto.Status = "Open";
+        dto.TimeReported = DateTime.UtcNow;
         var created = _repository.Create(entity);
         return _mapper.Map<TourProblemDto>(created);
     }
@@ -70,6 +86,18 @@ public class TourProblemService : ITourProblemService
         }
     }
 
+    public TourProblemDto AddAuthorReply(int tourProblemId, int authorId, string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            throw new ArgumentException("Message cannot be empty.");
+
+        var problem = _repository.Get(tourProblemId);
+
+        problem.AddAuthorReply(authorId, message);
+
+        var updated = _repository.Update(problem);
+        return _mapper.Map<TourProblemDto>(updated);
+    }
 
     public void Delete(int id, int touristId)
     {
@@ -94,5 +122,10 @@ public class TourProblemService : ITourProblemService
         return _mapper.Map<TourProblemDto>(updated);
     }
 
+    public TourProblemDto SetPenalty(int id)
+    {
+        var updated = _repository.SetPenalty(id);
 
+        return _mapper.Map<TourProblemDto>(updated);
+    }
 }
