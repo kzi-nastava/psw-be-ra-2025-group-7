@@ -4,6 +4,8 @@ using Explorer.Tours.API.Public.Tourist;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+// Mozda kada se doda Tour Controller u Tourist delu, ovaj namespace treba da se promeni
+
 namespace Explorer.API.Controllers.Tourist.Tours
 {
     [ApiController]
