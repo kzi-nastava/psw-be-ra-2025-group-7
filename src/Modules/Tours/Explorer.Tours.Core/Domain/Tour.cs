@@ -1,4 +1,7 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mail;
 
 namespace Explorer.Tours.Core.Domain
@@ -16,11 +19,13 @@ namespace Explorer.Tours.Core.Domain
         public DateTime? PublishedAt { get; private set; }
         public DateTime? ArchivedAt { get; private set; }
 
-
         public List<KeyPoint> KeyPoints { get; private set; } = new();
         public List<TourDuration> TourDurations { get; private set; } = new();
 
         public List<Equipment> RequiredEquipment { get; private set; } = new();
+
+        // Kartica 4 – ukupna dužina ture u kilometrima (računata na osnovu KeyPoint-ova)
+        public double LengthInKm { get; private set; }
 
         private Tour()
         {
@@ -28,6 +33,7 @@ namespace Explorer.Tours.Core.Domain
             KeyPoints = new List<KeyPoint>();
             TourDurations = new List<TourDuration>();
             RequiredEquipment = new List<Equipment>();
+            LengthInKm = 0;
         }
 
         public Tour(long authorId, string name, string description, TourDifficulty difficulty, List<string> tags)
@@ -45,6 +51,8 @@ namespace Explorer.Tours.Core.Domain
             KeyPoints = new List<KeyPoint>();
             TourDurations = new List<TourDuration>();
             RequiredEquipment = new List<Equipment>();
+            LengthInKm = 0;
+
             Validate();
         }
 
@@ -110,7 +118,9 @@ namespace Explorer.Tours.Core.Domain
                 throw new ArgumentNullException(nameof(keyPoint));
 
             KeyPoints.Add(keyPoint);
-            // TODO (Član 3 / drugi): ovde kasnije mogu da računaju dužinu ture itd.
+
+            // Kartica 4 – posle svake izmene ključnih tačaka računamo dužinu ture
+            RecalculateLengthFromKeyPoints();
         }
 
         public void UpdateKeyPoint(int index, KeyPoint keyPoint)
@@ -124,6 +134,8 @@ namespace Explorer.Tours.Core.Domain
                 throw new ArgumentNullException(nameof(keyPoint));
 
             KeyPoints[index] = keyPoint;
+
+            RecalculateLengthFromKeyPoints();
         }
 
         public void RemoveKeyPoint(int index)
@@ -134,6 +146,8 @@ namespace Explorer.Tours.Core.Domain
                 throw new ArgumentOutOfRangeException(nameof(index), "Key point index is out of range.");
 
             KeyPoints.RemoveAt(index);
+
+            RecalculateLengthFromKeyPoints();
         }
 
         public void AddEquipment(Equipment equipment)
@@ -167,12 +181,11 @@ namespace Explorer.Tours.Core.Domain
                 throw new InvalidOperationException("You cannot modify equipment for archived tours. Please reactivate the tour first.");
         }
 
-
         // Helper – kartica 3 važi samo dok je tura u pripremi
         private void EnsureDraftStatus()
         {
             if (Status != TourStatus.Draft)
-                throw new InvalidOperationException("Key points can only be modified while tour is in Draft status.");
+                throw new InvalidOperationException("Key points and durations can only be modified while tour is in Draft status.");
         }
 
         // ================= VALIDACIJA =================
@@ -211,6 +224,8 @@ namespace Explorer.Tours.Core.Domain
                 throw new ArgumentException("Tag cannot exceed 50 characters.");
         }
 
+        // ================= TOUR DURATION =================
+
         public void AddDuration(TourDuration duration)
         {
             EnsureDraftStatus();
@@ -242,6 +257,56 @@ namespace Explorer.Tours.Core.Domain
                 throw new ArgumentOutOfRangeException(nameof(index), "Duration index is out of range.");
 
             TourDurations.RemoveAt(index);
+        }
+
+        // ================= KARTICA 4 – IZRAČUNAVANJE DUŽINE TURE =================
+
+        private void RecalculateLengthFromKeyPoints()
+        {
+            if (KeyPoints == null || KeyPoints.Count < 2)
+            {
+                LengthInKm = 0;
+                return;
+            }
+
+            double total = 0;
+
+            for (int i = 0; i < KeyPoints.Count - 1; i++)
+            {
+                var from = KeyPoints[i];
+                var to = KeyPoints[i + 1];
+
+                total += CalculateDistanceInKm(
+                    from.Latitude, from.Longitude,
+                    to.Latitude, to.Longitude);
+            }
+
+            LengthInKm = total;
+        }
+
+        private static double CalculateDistanceInKm(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double EarthRadiusKm = 6371.0;
+
+            double dLat = DegreesToRadians(lat2 - lat1);
+            double dLon = DegreesToRadians(lon2 - lon1);
+
+            double rLat1 = DegreesToRadians(lat1);
+            double rLat2 = DegreesToRadians(lat2);
+
+            double a =
+                Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(rLat1) * Math.Cos(rLat2) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+            return EarthRadiusKm * c;
+        }
+
+        private static double DegreesToRadians(double degrees)
+        {
+            return degrees * (Math.PI / 180.0);
         }
     }
 
