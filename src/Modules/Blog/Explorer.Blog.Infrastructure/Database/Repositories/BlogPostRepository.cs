@@ -42,6 +42,7 @@ public class BlogPostRepository : IBlogPostRepository
     {
         return _context.BlogPosts
             .Include(b => b.Images)
+            .Include(b => b.Votes)
             .FirstOrDefault(b => b.Id == id);
     }
 
@@ -65,7 +66,9 @@ public class BlogPostRepository : IBlogPostRepository
         var query = _context.BlogPosts
             .Include(b => b.Images)
             .Where(b => b.Status == BlogStatus.Published
-                     || b.Status == BlogStatus.Archived);
+                     || b.Status == BlogStatus.Archived 
+                     || b.Status == BlogStatus.Active
+                     || b.Status == BlogStatus.Famous);
 
         var total = query.Count();
 
@@ -77,6 +80,14 @@ public class BlogPostRepository : IBlogPostRepository
 
         return (items, total);
     }
+
+    public BlogPost? GetByCommentId(long commentId)
+    {
+        return _context.BlogPosts
+            .Include(b => b.Comments)
+            .FirstOrDefault(b => b.Comments.Any(c => c.Id == commentId));
+    }
+
 
 
 }

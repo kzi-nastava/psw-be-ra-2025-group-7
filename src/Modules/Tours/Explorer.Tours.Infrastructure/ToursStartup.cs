@@ -32,6 +32,7 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourProblemService, TourProblemService>();
+        services.AddScoped<IPublicPointRequestRepository, PublicPointRequestRepository>();
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<ITourService, TourService>();
@@ -44,12 +45,14 @@ public static class ToursStartup
         services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
         services.AddScoped<ITourBrowsingService, TourBrowsingService>();
         services.AddScoped<IShoppingCartService, ShoppingCartService>();
+        services.AddScoped<IAnnualAwardService, AnnualAwardService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
+        services.AddScoped<IAnnualAwardRepository, AnnualAwardRepository>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>();

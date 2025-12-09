@@ -94,6 +94,39 @@ namespace Explorer.Blog.Core.UseCases
             return _mapper.Map<BlogPostDto>(updated);
         }
 
+        public BlogVoteDto Vote(long blogPostId, long userId, int value)
+        {
+            var blogPost = _repository.Get(blogPostId);
+            if (blogPost == null)
+                throw new NotFoundException("Blog post not found.");
+
+            blogPost.Vote(userId, value); 
+            _repository.Update(blogPost);
+
+            blogPost = _repository.Get(blogPostId);
+
+            var userVote = blogPost.Votes.FirstOrDefault(v => v.UserId == userId)?.Value ?? 0;
+            
+            var totalScore = blogPost.Votes.Sum(v => v.Value);
+
+            return new BlogVoteDto
+            {
+                UserId = userId,
+                Value = userVote,
+                Score = totalScore,
+                VotedAt = DateTime.UtcNow
+            };
+        }
+
+
+        public BlogPostDto Get(long id)
+        {
+            var entity = _repository.Get(id);
+            if(entity == null) { throw new NotFoundException("Blog post not found"); }
+
+            return _mapper.Map<BlogPostDto>(entity);
+
+        }
         // Helper
         private BlogPost LoadAndCheckOwnership(long authorId, long blogId)
         {

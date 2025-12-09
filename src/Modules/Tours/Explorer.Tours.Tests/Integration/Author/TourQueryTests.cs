@@ -21,7 +21,7 @@ public class TourQueryTests : BaseToursIntegrationTest
         var controller = CreateController(scope);
 
         // Act
-        var result = ((ObjectResult)controller.GetAll(0, 0).Result)?.Value as PagedResult<TourDto>;
+        var result = ((ObjectResult)controller.GetAll(1, 10).Result)?.Value as PagedResult<TourDto>;
 
         // Assert
         result.ShouldNotBeNull();

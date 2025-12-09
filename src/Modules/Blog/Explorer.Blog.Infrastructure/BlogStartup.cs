@@ -26,6 +26,7 @@ public static class BlogStartup
     {
         // Servis iz Core sloja
         services.AddScoped<IBlogPostService, BlogPostService>();
+        services.AddScoped<IBlogCommentService, BlogCommentService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -40,5 +41,6 @@ public static class BlogStartup
 
         // Repozitorijum iz Infrastructure sloja
         services.AddScoped<IBlogPostRepository, BlogPostRepository>();
+        services.AddScoped<IBlogCommentRepository, BlogCommentRepository>();
     }
 }
