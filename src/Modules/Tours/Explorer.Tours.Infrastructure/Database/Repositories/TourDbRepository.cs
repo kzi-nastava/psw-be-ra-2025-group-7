@@ -117,6 +117,12 @@ public class TourDbRepository : ITourRepository
         DbContext.SaveChanges();
     }
 
+    public List<Tour> GetAll()
+    {
+        return DbContext.Tours
+            .Include(t => t.KeyPoints)
+            .ToList();
+    }
     public IEnumerable<Tour> GetPublishedWithKeyPoints()
     {
         return _dbSet

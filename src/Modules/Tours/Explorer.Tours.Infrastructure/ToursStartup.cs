@@ -41,6 +41,7 @@ public static class ToursStartup
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<IAnnualAwardService, AnnualAwardService>();
+        services.AddScoped<ITouristToursService, TouristToursService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
     }
 

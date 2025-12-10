@@ -11,7 +11,6 @@ public interface ITourRepository
     Tour Create(Tour tour);
     Tour Update(Tour tour);
     void Delete(long id);
-
-    // NOVO – za pretragu po lokaciji: sve published ture sa KeyPointovima
+    List<Tour> GetAll();
     IEnumerable<Tour> GetPublishedWithKeyPoints();
 }
