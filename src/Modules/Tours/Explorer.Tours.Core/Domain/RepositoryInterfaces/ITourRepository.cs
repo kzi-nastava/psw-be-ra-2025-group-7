@@ -1,4 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
+using System.Collections.Generic;
+using Explorer.Tours.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
@@ -10,4 +12,5 @@ public interface ITourRepository
     Tour Update(Tour tour);
     void Delete(long id);
     Tour GetWithKeyPoints(long id);
+    IEnumerable<Tour> GetPublishedWithKeyPoints();
 }
