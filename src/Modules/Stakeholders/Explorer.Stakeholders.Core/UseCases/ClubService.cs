@@ -4,6 +4,7 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,8 +16,10 @@ namespace Explorer.Stakeholders.Core.UseCases
         private readonly IMapper _mapper;
         private readonly INotificationRepository _notificationRepository;
 
-
-        public ClubService(IClubRepository clubRepository, IMapper mapper, INotificationRepository notificationRepository)
+        public ClubService(
+            IClubRepository clubRepository,
+            IMapper mapper,
+            INotificationRepository notificationRepository)
         {
             _clubRepository = clubRepository;
             _mapper = mapper;
@@ -27,7 +30,7 @@ namespace Explorer.Stakeholders.Core.UseCases
         {
             var club = new Club(dto.Name, dto.Description, dto.CreatedBy, dto.ImageUrls);
             var created = _clubRepository.Create(club);
-            return _mapper.Map<ClubDto>(created);
+            return MapClubToDto(created);
         }
 
         public ClubDto Update(ClubDto dto)
@@ -35,7 +38,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             var club = _clubRepository.Get(dto.Id);
             club.Update(dto.Name, dto.Description, dto.ImageUrls);
             var updated = _clubRepository.Update(club);
-            return _mapper.Map<ClubDto>(updated);
+            return MapClubToDto(updated);
         }
 
         public void Delete(long id)
@@ -46,14 +49,14 @@ namespace Explorer.Stakeholders.Core.UseCases
         public List<ClubDto> GetAll()
         {
             return _clubRepository.GetAll()
-                .Select(_mapper.Map<ClubDto>)
+                .Select(c => MapClubToDto(c))
                 .ToList();
         }
 
         public ClubDto Get(long id)
         {
             var club = _clubRepository.Get(id);
-            return _mapper.Map<ClubDto>(club);
+            return MapClubToDto(club);
         }
 
         public void Close(long clubId, long ownerId)
@@ -152,5 +155,64 @@ namespace Explorer.Stakeholders.Core.UseCases
             if (club.CreatedBy != ownerId)
                 throw new ForbiddenException("Only the owner can perform this action.");
         }
+
+        private ClubDto MapClubToDto(Club club)
+        {
+            if (club == null) return null;
+            var dto = new ClubDto
+            {
+                Id = club.Id,
+                Name = club.Name,
+                Description = club.Description,
+                ImageUrls = club.ImageUrls?.ToList() ?? new List<string>(),
+                CreatedBy = club.CreatedBy,
+                CreatedAt = club.CreatedAt,
+                UpdatedAt = club.UpdatedAt,
+                Status = (ClubStatusDto)club.Status
+            };
+
+            dto.Members = new List<ClubMemberDto>();
+            dto.JoinRequests = new List<ClubJoinRequestDto>();
+            dto.Invitations = new List<ClubInvitationDto>();
+
+            // Members
+            if (club.Members != null)
+            {
+                dto.Members = club.Members
+                    .Select(m => new ClubMemberDto
+                    {
+                        TouristId = m.TouristId,
+                        JoinedAt = m.JoinedAt
+                    })
+                    .ToList();
+            }
+
+            // JoinRequests
+            if (club.JoinRequests != null)
+            {
+                dto.JoinRequests = club.JoinRequests
+                    .Select(r => new ClubJoinRequestDto
+                    {
+                        TouristId = r.TouristId,
+                        RequestedAt = r.RequestedAt
+                    })
+                    .ToList();
+            }
+
+            // Invitations
+            if (club.Invitations != null)
+            {
+                dto.Invitations = club.Invitations
+                    .Select(i => new ClubInvitationDto
+                    {
+                        TouristId = i.TouristId,
+                        SentAt = i.SentAt
+                    })
+                    .ToList();
+            }
+
+            return dto;
+        }
+
     }
 }

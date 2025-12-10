@@ -29,6 +29,13 @@ public class ClubsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id:long}")]
+    public ActionResult<ClubDto> GetById(long id)
+    {
+        var club = _clubService.Get(id);
+        return Ok(club);
+    }
+
     [HttpPost]
     public ActionResult<ClubDto> Create([FromBody] ClubDto dto)
     {
@@ -128,8 +135,6 @@ public class ClubsController : ControllerBase
         _clubService.RejectRequest(clubId, ownerId, touristId);
         return Ok("Membership request rejected.");
     }
-
-    // ------------- Invitations -------------
 
     // Owner poziva turistu
     [HttpPost("{clubId:long}/invite/{touristId:long}")]

@@ -21,8 +21,8 @@ namespace Explorer.Stakeholders.API.Dtos
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public ClubStatusDto Status { get; set; }
-
-
-
+        public List<ClubMemberDto> Members { get; set; } = new();
+        public List<ClubJoinRequestDto> JoinRequests { get; set; } = new();
+        public List<ClubInvitationDto> Invitations { get; set; } = new();
     }
 }
