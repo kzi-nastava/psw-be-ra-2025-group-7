@@ -13,6 +13,11 @@ public class StakeholdersContext : DbContext
     public DbSet<Club> Clubs { get; set; }
     public DbSet<TourPreferences> TourPreferences { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<ClubJoinRequest> ClubJoinRequests { get; set; }
+    public DbSet<ClubInvitation> ClubInvitations { get; set; }
+    public DbSet<ClubMember> ClubMembers { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) { }
 
@@ -23,6 +28,29 @@ public class StakeholdersContext : DbContext
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
         modelBuilder.Entity<Message>()
             .HasIndex(m => new { m.SentByUserId, m.SentToUserId, m.Id });
+
+        modelBuilder.Entity<Notification>(builder =>
+        {
+            builder.ToTable("Notifications", "stakeholders");
+
+            builder.HasKey(n => n.Id);
+
+            builder.Property(n => n.TouristId)
+                .IsRequired();
+
+            builder.Property(n => n.ClubId)
+                .IsRequired();
+
+            builder.Property(n => n.Type)
+                .IsRequired();
+
+            builder.Property(n => n.CreatedAt)
+                .IsRequired();
+
+            builder.Property(n => n.IsRead)
+                .IsRequired();
+        });
+
 
         ConfigureStakeholder(modelBuilder);
     }
@@ -38,5 +66,32 @@ public class StakeholdersContext : DbContext
             .HasOne<User>()
             .WithOne()
             .HasForeignKey<UserProfile>(up => up.UserId);
+
+        modelBuilder.Entity<Club>()
+            .HasMany(c => c.Members)
+            .WithOne()
+            .HasForeignKey("ClubId")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Club>()
+            .HasMany(c => c.JoinRequests)
+            .WithOne()
+            .HasForeignKey("ClubId")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Club>()
+            .HasMany(c => c.Invitations)
+            .WithOne()
+            .HasForeignKey("ClubId")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ClubMember>()
+            .HasKey(m => m.Id);
+
+        modelBuilder.Entity<ClubJoinRequest>()
+            .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ClubInvitation>()
+            .HasKey(i => i.Id);
     }
 }

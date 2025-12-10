@@ -28,17 +28,28 @@ public class ClubDbRepository : IClubRepository
 
     public Club Get(long id)
     {
-        var entity = _dbSet.Find(id);
+        var entity = _dbSet
+            .Include(c => c.Members)
+            .Include(c => c.JoinRequests)
+            .Include(c => c.Invitations)
+            .SingleOrDefault(c => c.Id == id);
+
         if (entity == null)
         {
             throw new NotFoundException("Club not found: " + id);
         }
+
         return entity;
     }
 
     public List<Club> GetByOwner(long ownerId)
-    { 
-        return _dbSet.Where(c => c.CreatedBy == ownerId).ToList();
+    {
+        return _dbSet
+            .Where(c => c.CreatedBy == ownerId)
+            .Include(c => c.Members)
+            .Include(c => c.JoinRequests)
+            .Include(c => c.Invitations)
+            .ToList();
     }
 
     public Club Create(Club entity)
@@ -71,7 +82,11 @@ public class ClubDbRepository : IClubRepository
 
     public List<Club> GetAll()
     {
-        return _dbSet.ToList();
+        return _dbSet
+            .Include(c => c.Members)
+            .Include(c => c.JoinRequests)
+            .Include(c => c.Invitations)
+            .ToList();
     }
 
 }
