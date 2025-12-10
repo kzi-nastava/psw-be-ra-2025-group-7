@@ -1,4 +1,4 @@
-using Explorer.BuildingBlocks.Infrastructure.Database;
+﻿using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.API.Public.Tourist;
@@ -41,6 +41,7 @@ public static class ToursStartup
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<IAnnualAwardService, AnnualAwardService>();
+        services.AddScoped<ITourSearchService, TourSearchService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
