@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Notifications.API.Public;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
@@ -9,12 +10,19 @@ using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 public class TourProblemService : ITourProblemService
 {
     private readonly ITourProblemRepository _repository;
+    private readonly ITourRepository _tourRepository;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notificationService;
 
-    public TourProblemService(ITourProblemRepository repository, IMapper mapper)
+    public TourProblemService(ITourProblemRepository repository, ITourRepository tourRepository,
+ IMapper mapper, INotificationService notificationService)
+
     {
         _repository = repository;
+        _tourRepository = tourRepository;
         _mapper = mapper;
+        _notificationService = notificationService;
+
     }
 
     public PagedResult<TourProblemDto> GetByAuthor(int authorId, int page, int pageSize)
@@ -93,11 +101,48 @@ public class TourProblemService : ITourProblemService
 
         var problem = _repository.Get(tourProblemId);
 
+        // 1) Dodaj poruku u problem (ovo i dalje radi domen, ne diramo)
         problem.AddAuthorReply(authorId, message);
 
         var updated = _repository.Update(problem);
+
+        // 2) Odredi ko je primalac (druga strana)
+        // sender = authorId
+        long receiverId;
+
+        if (authorId == updated.TouristId)
+        {
+            // poruku šalje TURISTA → notifikacija ide AUTORU TURE
+            var tour = _tourRepository.Get(updated.TourId);
+            receiverId = tour.AuthorId;
+        }
+        else
+        {
+            // poruku šalje AUTOR / ADMIN / bilo ko “sa druge strane” → notifikacija ide TURISTI
+            receiverId = updated.TouristId;
+        }
+
+        // 3) Pripremi preview poruke i vreme
+        var lastComment = updated.Comments.Last();      // upravo dodata poruka
+        var createdAt = lastComment.CreatedAt;
+        var fullText = lastComment.Message?.Trim() ?? string.Empty;
+
+        var previewLength = 30;
+        var preview = fullText.Length <= previewLength
+            ? fullText
+            : fullText.Substring(0, previewLength);
+
+        // 4) Kreiraj notifikaciju preko servisa
+        _notificationService.CreateProblemMessageNotification(
+            recipientUserId: receiverId,
+            problemId: updated.Id,
+            messagePreview: preview,
+            createdAt: createdAt
+        );
+
         return _mapper.Map<TourProblemDto>(updated);
     }
+
 
     public void Delete(int id, int touristId)
     {

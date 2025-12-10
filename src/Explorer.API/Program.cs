@@ -10,6 +10,11 @@ using Microsoft.Extensions.FileProviders;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using System;
+using Explorer.Notifications.API.Public;
+using Explorer.Notifications.Infrastructure;  // gde je implementacija NotificationService
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.Infrastructure.Database;
+using Explorer.Notifications.Infrastructure; // gde ti je TourRepository
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,12 +28,17 @@ builder.Services.ConfigureAuth();
 
 builder.Services.RegisterModules();
 
+
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("touristOrAuthorPolicy", policy =>
         policy.RequireRole("Tourist", "Author")); // dozvoljava obe uloge
 });
 
+// REGISTRACIJA NOTIFIKACIJA
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 
 var app = builder.Build();
