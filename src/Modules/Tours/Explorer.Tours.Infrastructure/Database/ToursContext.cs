@@ -12,8 +12,6 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Equipment> Equipment { get; set; }
         public DbSet<Monument> Monuments { get; set; }
         public DbSet<Tour> Tours { get; set; }
-        public DbSet<PublicPointRequest> PublicPointRequests { get; set; }
-
         public DbSet<TourJournal> TourJournals { get; set; }
         public DbSet<TouristEquipment> TouristEquipment { get; set; }
         public DbSet<Quiz> Quizzes { get; set; }
@@ -21,6 +19,7 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Facility> Facility { get; set; }
         public DbSet<TourProblem> TourProblems { get; set; }
         public DbSet<AnnualAward> AnnualAwards { get; set; }
+        public DbSet<PublicPointRequest> PublicPointRequests { get; set; }
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

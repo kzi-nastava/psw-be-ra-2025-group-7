@@ -30,15 +30,12 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourProblemService, TourProblemService>();
-        services.AddScoped<IPublicPointRequestRepository, PublicPointRequestRepository>();
+        services.AddScoped<IPublicPointRequestService, PublicPointRequestService>();
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
-        services.AddScoped<IFacilityService, FacilityService>();
-        services.AddScoped<ITourService, TourService>();
         services.AddScoped<ITourJournalService, TourJournalService>();
-        services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<IAnnualAwardService, AnnualAwardService>();
     }
@@ -47,15 +44,12 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
+        services.AddScoped<IPublicPointRequestRepository, PublicPointRequestRepository>();
         services.AddScoped<IAnnualAwardRepository, AnnualAwardRepository>();
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>();
         services.AddScoped<ITourJournalRepository, TourJournalDbRepository>();
-
-        services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
-        services.AddScoped<IFacilityRepository, FacilityDbRepository>();
-        services.AddScoped<ITourRepository, TourDbRepository>();
         services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
         services.AddScoped<IQuizRepository, QuizRepository>();
 

@@ -114,4 +114,14 @@ public class TourDbRepository : ITourRepository
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
     }
+
+    public Tour GetWithKeyPoints(long id)
+    {
+        var entity = _dbSet
+            .Include(t => t.KeyPoints)
+            .FirstOrDefault(t => t.Id == id);
+
+        if (entity == null) throw new NotFoundException("Not found: " + id);
+        return entity;
+    }
 }
