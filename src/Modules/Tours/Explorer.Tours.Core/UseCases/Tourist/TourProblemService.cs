@@ -125,7 +125,24 @@ public class TourProblemService : ITourProblemService
     public TourProblemDto SetPenalty(int id)
     {
         var updated = _repository.SetPenalty(id);
-
         return _mapper.Map<TourProblemDto>(updated);
     }
+    public TourProblemDto MarkAsResolved(int id, int touristId)
+    {
+        var problem = _repository.Get(id);
+        problem.MarkAsResolved(touristId);
+        var updated = _repository.Update(problem);
+        return _mapper.Map<TourProblemDto>(updated);
+    }  
+    public TourProblemDto MarkAsUnresolved(int id, int touristId,string message)
+    {
+        if(string.IsNullOrWhiteSpace(message))
+            throw new ArgumentException("Message cannot be empty.");
+        var problem = _repository.Get(id);
+        problem.MarkAsNotResolved(touristId,message);
+        var updated = _repository.Update(problem);
+        return _mapper.Map<TourProblemDto>(updated);
+    }
+
+     
 }
