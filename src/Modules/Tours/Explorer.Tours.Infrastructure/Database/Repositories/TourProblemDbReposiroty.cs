@@ -19,6 +19,26 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             _dbSet = _dbContext.Set<TourProblem>();
         }
 
+        public PagedResult<TourProblem> GetByAuthor(int authorId, int page, int pageSize)
+        {
+            // Spajamo TourProblem sa Tour preko TourId
+            var query =
+                from tp in _dbSet
+                join t in _dbContext.Tours on tp.TourId equals t.Id
+                where t.AuthorId == authorId
+                orderby tp.Id
+                select tp;
+
+            var totalCount = query.Count();
+
+            var items = query
+                .Skip(page * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<TourProblem>(items, totalCount);
+        }
+
         public PagedResult<TourProblem> GetByTourist(int touristId, int page, int pageSize)
         {
             var query = _dbSet.Where(tp => tp.TouristId == touristId).OrderBy(tp => tp.Id);
@@ -33,6 +53,16 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
         {
             var entity = _dbSet.AsNoTracking().FirstOrDefault(e => e.Id == id);
             if (entity == null) throw new KeyNotFoundException("Not found: " + id);
+            return entity;
+        }
+        public TourProblem AddAuthorReply(int tourProblemId, int authorId, string message)
+        {
+            var entity = _dbSet.FirstOrDefault(tp => tp.Id == tourProblemId);
+            if (entity == null) throw new KeyNotFoundException("TourProblem not found");
+
+            entity.AddAuthorReply(authorId, message);
+
+            _dbContext.SaveChanges();
             return entity;
         }
         public TourProblem Create(TourProblem entity)
@@ -81,6 +111,17 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
 
             entity.ResolveDue = DateTime.SpecifyKind(resolveDue, DateTimeKind.Utc);
 
+            _dbContext.SaveChanges();
+            return entity;
+        }
+
+        public TourProblem SetPenalty(int id)
+        {
+            var entity = _dbSet.FirstOrDefault(e => e.Id == id);
+            if (entity == null)
+                throw new KeyNotFoundException($"Problem {id} not found.");
+            entity.IsSolved = true;
+            entity.Status = ProblemStatus.Unresolved;
             _dbContext.SaveChanges();
             return entity;
         }

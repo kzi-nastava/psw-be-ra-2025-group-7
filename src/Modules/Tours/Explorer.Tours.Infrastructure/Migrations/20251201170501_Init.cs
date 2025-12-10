@@ -140,6 +140,34 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "KeyPoints",
+                schema: "tours",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Latitude = table.Column<double>(type: "double precision", nullable: false),
+                    Longitude = table.Column<double>(type: "double precision", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    ImageUrl = table.Column<string>(type: "text", nullable: true),
+                    Secret = table.Column<string>(type: "text", nullable: false),
+                    TourId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KeyPoints", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KeyPoints_Tours_TourId",
+                        column: x => x.TourId,
+                        principalSchema: "tours",
+                        principalTable: "Tours",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+
+            migrationBuilder.CreateTable(
                 name: "Questions",
                 schema: "tours",
                 columns: table => new
@@ -255,6 +283,7 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 column: "QuizId");
 
             migrationBuilder.CreateIndex(
+<<<<<<< HEAD:src/Modules/Tours/Explorer.Tours.Infrastructure/Migrations/20251201170501_Init.cs
                 name: "IX_TourPurchaseTokens_TourId",
                 schema: "tours",
                 table: "TourPurchaseTokens",
@@ -272,6 +301,12 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 table: "TourPurchaseTokens",
                 columns: new[] { "UserId", "TourId" },
                 unique: true);
+=======
+                name: "IX_KeyPoints_TourId",
+                schema: "tours",
+                table: "KeyPoints",
+                column: "TourId");
+>>>>>>> development:src/Modules/Tours/Explorer.Tours.Infrastructure/Migrations/20251201110454_Init.cs
         }
 
         /// <inheritdoc />
@@ -306,7 +341,15 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 schema: "tours");
 
             migrationBuilder.DropTable(
+<<<<<<< HEAD:src/Modules/Tours/Explorer.Tours.Infrastructure/Migrations/20251201170501_Init.cs
                 name: "TourPurchaseTokens",
+=======
+                name: "KeyPoints",
+                schema: "tours");
+
+            migrationBuilder.DropTable(
+                name: "Tours",
+>>>>>>> development:src/Modules/Tours/Explorer.Tours.Infrastructure/Migrations/20251201110454_Init.cs
                 schema: "tours");
 
             migrationBuilder.DropTable(

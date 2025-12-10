@@ -21,12 +21,17 @@ public class TourQueryTests : BaseToursIntegrationTest
         var controller = CreateController(scope);
 
         // Act
-        var result = ((ObjectResult)controller.GetAll(0, 0).Result)?.Value as PagedResult<TourDto>;
+        var result = ((ObjectResult)controller.GetAll(1, 10).Result)?.Value as PagedResult<TourDto>;
 
         // Assert
         result.ShouldNotBeNull();
+<<<<<<< HEAD
         result.Results.Count.ShouldBe(12); // Ažurirano: 8 originalnih + 4 za Shopping Cart (-10, -11, -100, -101)
         result.TotalCount.ShouldBe(12);
+=======
+        result.Results.Count.ShouldBe(8);  
+        result.TotalCount.ShouldBe(8);     
+>>>>>>> development
     }
 
     private static TourAuthoringController CreateController(IServiceScope scope)

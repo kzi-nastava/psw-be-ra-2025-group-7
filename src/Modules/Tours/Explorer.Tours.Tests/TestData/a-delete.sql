@@ -12,8 +12,14 @@ DELETE FROM tours."TourJournals";
 DELETE FROM tours."Facility";
 DELETE FROM tours."Monuments";
 
+<<<<<<< HEAD
+=======
+DELETE FROM tours."Quizzes"; 
+DELETE FROM tours."Questions";
+>>>>>>> development
 DELETE FROM tours."Option";
 DELETE FROM tours."Questions";
 DELETE FROM tours."Quizzes";
 
 DELETE FROM tours."TouristEquipment";
+DELETE FROM tours."AnnualAwards";

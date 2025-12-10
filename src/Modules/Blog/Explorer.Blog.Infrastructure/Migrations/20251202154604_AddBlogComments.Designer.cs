@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Blog.Infrastructure.Migrations
 {
     [DbContext(typeof(BlogContext))]
-    [Migration("20251129233958_AddBlogLifecycleColumns")]
-    partial class AddBlogLifecycleColumns
+    [Migration("20251202154604_AddBlogComments")]
+    partial class AddBlogComments
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,8 +60,73 @@ namespace Explorer.Blog.Infrastructure.Migrations
                     b.ToTable("BlogPosts", "blog");
                 });
 
+            modelBuilder.Entity("Explorer.Blog.Core.Domain.BlogVote", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("BlogPostId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("VotedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogPostId");
+
+                    b.ToTable("BlogVotes", "blog");
+                });
+
             modelBuilder.Entity("Explorer.Blog.Core.Domain.BlogPost", b =>
                 {
+                    b.OwnsMany("Explorer.Blog.Core.Domain.BlogComment", "Comments", b1 =>
+                        {
+                            b1.Property<long>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bigint");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
+
+                            b1.Property<long>("AuthorId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("BlogId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("BlogPostId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<DateTime?>("LastModifiedAt")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<string>("Text")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("character varying(1000)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("BlogPostId");
+
+                            b1.ToTable("BlogComments", "blog");
+
+                            b1.WithOwner()
+                                .HasForeignKey("BlogPostId");
+                        });
+
                     b.OwnsMany("Explorer.Blog.Core.Domain.BlogImage", "Images", b1 =>
                         {
                             b1.Property<int>("Id")
@@ -90,7 +155,22 @@ namespace Explorer.Blog.Infrastructure.Migrations
                                 .HasForeignKey("BlogPostId");
                         });
 
+                    b.Navigation("Comments");
+
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("Explorer.Blog.Core.Domain.BlogVote", b =>
+                {
+                    b.HasOne("Explorer.Blog.Core.Domain.BlogPost", null)
+                        .WithMany("Votes")
+                        .HasForeignKey("BlogPostId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Explorer.Blog.Core.Domain.BlogPost", b =>
+                {
+                    b.Navigation("Votes");
                 });
 #pragma warning restore 612, 618
         }

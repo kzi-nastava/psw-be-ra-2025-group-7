@@ -2,6 +2,7 @@
 using Explorer.Tours.API.Public.Tourist;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 
 namespace Explorer.API.Controllers.Administrator
 {
@@ -31,6 +32,34 @@ namespace Explorer.API.Controllers.Administrator
 
             return Ok(_service.SetResolveDue(id, dto.ResolveDue));
         }
+        [HttpPost("{id:int}/reply")]
+        public ActionResult<TourProblemDto> AdminReply(int id, [FromBody] string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return BadRequest("Message cannot be empty.");
+            var adminId = (int)User.PersonId();
+            try
+            {
+                var updated = _service.AddAuthorReply(id, adminId, message);
+                return Ok(updated);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("{id}/penalty")]
+        public ActionResult<TourProblemDto> SetPenalty(int id)
+        {
+            var result = _service.SetPenalty(id);
+            return Ok(result);
+        }
+
 
     }
 }

@@ -23,11 +23,17 @@ namespace Explorer.Blog.Core.Domain
 
         public List<BlogImage> Images { get; private set; } = new();
 
+        public List<BlogComment> Comments { get; private set; } = new();
+        public List<BlogVote> Votes { get; private set; } = new();
+        public int Score => Votes.Sum(v => v.Value);
+
+
+
         protected BlogPost() { }  
 
         public BlogPost(long authorId, string title, string description, IEnumerable<BlogImage>? images = null)
         {
-            if (authorId <= 0)
+            if (authorId == 0)
                 throw new ArgumentException("AuthorId must be a positive number.", nameof(authorId));
 
 
@@ -121,6 +127,101 @@ namespace Explorer.Blog.Core.Domain
         {
             if (Status != BlogStatus.Published)
                 throw new InvalidOperationException("Operation allowed only for published blogs.");
+        }
+
+        public void AddComment(BlogComment comment)
+        {
+            if (Status == BlogStatus.Draft)
+                throw new InvalidOperationException("Comments can only be added to published blogs.");
+
+            if (Status == BlogStatus.Archived || Status == BlogStatus.Closed)
+                throw new InvalidOperationException("Comments cannot be added to archived nor closed blogs.");
+
+            Comments.Add(comment);
+            RecalculatePopularityStatus();
+        }
+
+        private void RecalculatePopularityStatus()
+        {
+            // Logika za automatsko promovisanje bloga na osnovu broja komentara
+            if (Status != BlogStatus.Draft)
+            {
+                if (Comments.Count >= 10)
+                {
+                    Status = BlogStatus.Famous;
+                }
+                else if (Comments.Count >= 5 && Comments.Count < 10)
+                {
+                    Status = BlogStatus.Active;
+                }
+            }
+        }
+        //Helper metoda
+        private BlogComment GetCommentOrThrow(long commentId)
+        {
+            var comment = Comments.FirstOrDefault(c => c.Id == commentId);
+            if (comment == null)
+                throw new InvalidOperationException("Comment does not exist.");
+
+            return comment;
+        }
+
+        public void DeleteComment(long commentId, long userId)
+        {
+            var comment = GetCommentOrThrow(commentId);
+
+            if (comment.UserId != userId)
+                throw new InvalidOperationException("Only the author of the comment can delete it.");
+
+            var timePassed = DateTime.UtcNow - comment.CreatedAt;
+            if (timePassed > TimeSpan.FromMinutes(15))
+                throw new InvalidOperationException("Comment can only be deleted within 15 minutes of creation.");
+
+            Comments.Remove(comment);
+
+            RecalculatePopularityStatus();
+        }
+
+        public void EditComment(long commentId, long userId, string newText)
+        {
+            var comment = GetCommentOrThrow(commentId);
+
+            if (comment.UserId != userId)
+                throw new InvalidOperationException("Only the author of the comment can edit it.");
+
+            var timePassed = DateTime.UtcNow - comment.CreatedAt;
+            if (timePassed > TimeSpan.FromMinutes(15))
+                throw new InvalidOperationException("Comment can only be edited within 15 minutes of creation.");
+
+            comment.EditText(newText);
+        }
+
+
+        public void Vote(long userId, int value)
+        {
+            if (value != 1 && value != -1)
+                throw new ArgumentException("Vote must be +1 or -1");
+
+            var existingVote = Votes.FirstOrDefault(v => v.UserId == userId);
+
+
+            if (existingVote != null )
+            {
+                if (existingVote.Value == value) // alo je kliknuo isto onda povuci glas
+                {
+                    Votes.Remove(existingVote);
+                    return;
+                }
+
+                existingVote.ChangeVote(value); //menja se glas
+            }
+            else
+            {
+                var newVote = new BlogVote(userId, value);  //prvi put se glasa
+                Votes.Add(newVote);
+            }
+
+
         }
     }
 }
