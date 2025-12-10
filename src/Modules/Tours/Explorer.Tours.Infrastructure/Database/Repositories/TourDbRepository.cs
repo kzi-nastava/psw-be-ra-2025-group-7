@@ -114,4 +114,11 @@ public class TourDbRepository : ITourRepository
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
     }
+
+    public List<Tour> GetAll()
+    {
+        return DbContext.Tours
+            .Include(t => t.KeyPoints)
+            .ToList();
+    }
 }
