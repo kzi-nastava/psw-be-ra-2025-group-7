@@ -1,4 +1,4 @@
--- ============================================================
+Ôªø-- ============================================================
 -- d-shopping-cart.sql
 -- Testni podaci za ShoppingCart funkcionalnost
 -- ============================================================
@@ -9,7 +9,7 @@
 -- Tura -3 ve? postoji kao Published (Price: 100)
 -- Tura -5 ve? postoji kao Published (Price: 120)
 
--- Dodajemo joö jednu Published turu sa razli?itom cenom
+-- Dodajemo jo≈° jednu Published turu sa razli?itom cenom
 INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt")
 VALUES 
     (-10, 'Test Tour Published - For Cart', 'Published tour specifically for shopping cart tests', 1, 'test,shopping', 1, 75.50, -1, '2024-01-20 12:00:00', NULL);
@@ -17,8 +17,8 @@ VALUES
 -- Key points za turu -10 (potrebno je minimum 2 za Published status)
 INSERT INTO tours."KeyPoints" ("Id", "Latitude", "Longitude", "Name", "Description", "ImageUrl", "Secret", "TourId")
 VALUES
-    (-520, 45.2600, 19.8300, 'KP1 Tour -10', 'First key point for tour -10', NULL, 'secret10', -10),
-    (-521, 45.2610, 19.8310, 'KP2 Tour -10', 'Second key point for tour -10', NULL, 'secret11', -10);
+    (-540, 45.2600, 19.8300, 'KP1 Tour -10', 'First key point for tour -10', NULL, 'secret10', -10),
+    (-541, 45.2610, 19.8310, 'KP2 Tour -10', 'Second key point for tour -10', NULL, 'secret11', -10);
 
 -- ------------------------------------------------------------
 -- 2. Arhivirana tura za testiranje validacije
@@ -43,8 +43,8 @@ VALUES
 -- Key points za draft turu -101 (draft ture mogu imati key points, samo nisu objavljene)
 INSERT INTO tours."KeyPoints" ("Id", "Latitude", "Longitude", "Name", "Description", "ImageUrl", "Secret", "TourId")
 VALUES
-    (-540, 45.2640, 19.8340, 'KP1 Draft Tour', 'First key point for draft tour', NULL, 'secret_draft1', -101),
-    (-541, 45.2650, 19.8350, 'KP2 Draft Tour', 'Second key point for draft tour', NULL, 'secret_draft2', -101);
+    (-560, 45.2640, 19.8340, 'KP1 Draft Tour', 'First key point for draft tour', NULL, 'secret_draft1', -101),
+    (-561, 45.2650, 19.8350, 'KP2 Draft Tour', 'Second key point for draft tour', NULL, 'secret_draft2', -101);
 
 -- ------------------------------------------------------------
 -- 4. Shopping Carts za testiranje
@@ -79,6 +79,6 @@ VALUES
 -- ------------------------------------------------------------
 -- Testovi koriste slede?e TouristId-jeve: 1, 2, 3, 4, 5, 6, 7
 -- Published ture dostupne za dodavanje u korpu: -3, -5, -10, -11
--- Arhivirana tura (ne moûe u korpu): -100
--- Draft tura (ne moûe u korpu): -101
+-- Arhivirana tura (ne mo≈æe u korpu): -100
+-- Draft tura (ne mo≈æe u korpu): -101
 -- ------------------------------------------------------------
