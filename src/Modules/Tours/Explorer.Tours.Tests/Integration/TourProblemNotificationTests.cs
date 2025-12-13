@@ -125,7 +125,7 @@ namespace Explorer.Tours.Tests.Integration
 
                 var dto = new TourProblemDto
                 {
-                    TourId = 1,
+                    TourId = -1,
                     Category = "Other",
                     Priority = "Low",
                     Description = "Test problem",
