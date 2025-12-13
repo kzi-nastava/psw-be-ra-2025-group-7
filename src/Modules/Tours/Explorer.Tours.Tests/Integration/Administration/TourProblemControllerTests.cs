@@ -55,7 +55,8 @@ namespace Explorer.Tours.Tests.Integration.Administration
         private AdminTourProblemController CreateController(IServiceScope scope)
         {
             return new AdminTourProblemController(
-                scope.ServiceProvider.GetRequiredService<ITourProblemService>()
+                scope.ServiceProvider.GetRequiredService<ITourProblemService>(),
+                scope.ServiceProvider.GetRequiredService<Explorer.Notifications.API.Public.INotificationService>()
             );
         }
 

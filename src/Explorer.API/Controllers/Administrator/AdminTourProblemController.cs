@@ -3,6 +3,10 @@ using Explorer.Tours.API.Public.Tourist;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Explorer.Stakeholders.Infrastructure.Authentication;
+using Explorer.Notifications.API.Public;
+using Explorer.Tours.Infrastructure.Database.Repositories;
+using Explorer.Tours.API.Public.Administration;
+using Explorer.Tours.Core.UseCases.Administration;
 
 namespace Explorer.API.Controllers.Administrator
 {
@@ -11,10 +15,14 @@ namespace Explorer.API.Controllers.Administrator
     public class AdminTourProblemController : ControllerBase
     {
         private readonly ITourProblemService _service;
+        private readonly INotificationService _notificationService;
+        private readonly ITourService _tourService;
 
-        public AdminTourProblemController(ITourProblemService service)
+        public AdminTourProblemController(ITourProblemService service, INotificationService notificationService, ITourService tourService)
         {
             _service = service;
+            _notificationService = notificationService;
+            _tourService = tourService;
         }
 
         [HttpGet("all")]
@@ -30,7 +38,18 @@ namespace Explorer.API.Controllers.Administrator
             if (dto == null || string.IsNullOrWhiteSpace(dto.ResolveDue))
                 return BadRequest("ResolveDue is required.");
 
-            return Ok(_service.SetResolveDue(id, dto.ResolveDue));
+            // 1️⃣ ažuriraj problem
+            var updatedProblem = _service.SetResolveDue(id, dto.ResolveDue);
+
+            // 2️⃣ pošalji notifikaciju
+            _notificationService.CreateProblemMessageNotification(
+                recipientUserId: (_tourService.GetById(updatedProblem.TourId)).AuthorId,
+                problemId: updatedProblem.Id,
+                messagePreview: $"Rok za rešavanje problema je postavljen na {dto.ResolveDue}.",
+                createdAt: DateTime.UtcNow
+            );
+
+            return Ok(updatedProblem);
         }
         [HttpPost("{id:int}/reply")]
         public ActionResult<TourProblemDto> AdminReply(int id, [FromBody] string message)

@@ -25,5 +25,6 @@ namespace Explorer.Tours.API.Public.Administration
 
         TourDto AddEquipment(long tourId, long authorId, long equipmentId);
         TourDto RemoveEquipment(long tourId, long authorId, long equipmentId);
+        TourDto GetById(long id);
     }
 }
