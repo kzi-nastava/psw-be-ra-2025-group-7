@@ -8,3 +8,8 @@ INSERT INTO tours."KeyPoints" ("Id", "Latitude", "Longitude", "Name", "Descripti
 VALUES
     (-512, 45.2675, 19.8350, 'KP1 Tour 2', 'First key point for tour 2', NULL, 'secret3', -501),
     (-513, 45.2685, 19.8360, 'KP2 Tour 2', 'Second key point for tour 2', NULL, 'secret4', -501);
+
+-- KeyPoints za Tour -3 (Published tour za search test)
+INSERT INTO tours."KeyPoints" ("Id", "Latitude", "Longitude", "Name", "Description", "ImageUrl", "Secret", "TourId")
+VALUES
+    (-520, 45.2551, 19.8636, 'KP1 Tour -3', 'Key point za published turu -3', NULL, 'secret-pub-1', -3);
