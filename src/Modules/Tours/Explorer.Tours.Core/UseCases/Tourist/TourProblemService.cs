@@ -40,7 +40,6 @@ public class TourProblemService : ITourProblemService
 
     public TourProblemDto Create(TourProblemDto dto, int touristId)
     {
-      
         if (string.IsNullOrWhiteSpace(dto.Category) ||
             string.IsNullOrWhiteSpace(dto.Priority) ||
             string.IsNullOrWhiteSpace(dto.Description))
@@ -50,20 +49,49 @@ public class TourProblemService : ITourProblemService
         if (dto.TimeReported == default)
             dto.TimeReported = DateTime.UtcNow;
 
-
+        // 1) Napravi domen entitet
         var entity = new TourProblem(
-        dto.TourId,
-        touristId,
-        Enum.Parse<ProblemCategory>(dto.Category, true),
-        Enum.Parse<ProblemPriority>(dto.Priority, true),
-        dto.Description,dto.IsSolved
-    );
+            dto.TourId,
+            touristId,
+            Enum.Parse<ProblemCategory>(dto.Category, true),
+            Enum.Parse<ProblemPriority>(dto.Priority, true),
+            dto.Description,
+            dto.IsSolved
+        );
+
         dto.Comments = new();
         dto.Status = "Open";
         dto.TimeReported = DateTime.UtcNow;
+
+        // 2) Sačuvaj u bazi
         var created = _repository.Create(entity);
+
+        // 3) Pripremi notifikaciju za AUTORA TURE
+        //    (turista je prijavio novi problem → obavesti autora)
+        var tour = _tourRepository.Get(created.TourId);
+        long receiverId = tour.AuthorId;   // pretpostavka: AuthorId je long
+
+        // prvi komentar je inicijalni opis problema (dodaje se u konstruktoru)
+        var firstComment = created.Comments.LastOrDefault();
+        var createdAt = firstComment?.CreatedAt ?? created.TimeReported;
+        var fullText = firstComment?.Message?.Trim() ?? dto.Description?.Trim() ?? string.Empty;
+
+        var previewLength = 30;
+        var preview = fullText.Length <= previewLength
+            ? fullText
+            : fullText.Substring(0, previewLength);
+
+        _notificationService.CreateProblemMessageNotification(
+            recipientUserId: receiverId,
+            problemId: created.Id,
+            messagePreview: preview,
+            createdAt: createdAt
+        );
+
+        // 4) Vrati DTO
         return _mapper.Map<TourProblemDto>(created);
     }
+
 
     public TourProblemDto Update(TourProblemDto dto, int touristId)
     {
@@ -178,16 +206,43 @@ public class TourProblemService : ITourProblemService
         problem.MarkAsResolved(touristId);
         var updated = _repository.Update(problem);
         return _mapper.Map<TourProblemDto>(updated);
-    }  
-    public TourProblemDto MarkAsUnresolved(int id, int touristId,string message)
+    }
+    public TourProblemDto MarkAsUnresolved(int id, int touristId, string message)
     {
-        if(string.IsNullOrWhiteSpace(message))
+        if (string.IsNullOrWhiteSpace(message))
             throw new ArgumentException("Message cannot be empty.");
+
+        // 1) Učitaj problem i uradi domenensku logiku
         var problem = _repository.Get(id);
-        problem.MarkAsNotResolved(touristId,message);
+        problem.MarkAsNotResolved(touristId, message);   // dodaje komentar + status = Unresolved
+
         var updated = _repository.Update(problem);
+
+        // 2) Pripremi notifikaciju za AUTORA TURE
+        //    (turista šalje poruku → notifikacija ide autoru)
+        var tour = _tourRepository.Get(updated.TourId);
+        long receiverId = tour.AuthorId;
+
+        // poslednji komentar je upravo ovaj "nije rešeno" koji je turist uneo
+        var lastComment = updated.Comments.Last();
+        var createdAt = lastComment.CreatedAt;
+        var fullText = lastComment.Message?.Trim() ?? string.Empty;
+
+        var previewLength = 30;
+        var preview = fullText.Length <= previewLength
+            ? fullText
+            : fullText.Substring(0, previewLength);
+
+        _notificationService.CreateProblemMessageNotification(
+            recipientUserId: receiverId,
+            problemId: updated.Id,
+            messagePreview: preview,
+            createdAt: createdAt
+        );
+
         return _mapper.Map<TourProblemDto>(updated);
     }
 
-     
+
+
 }
