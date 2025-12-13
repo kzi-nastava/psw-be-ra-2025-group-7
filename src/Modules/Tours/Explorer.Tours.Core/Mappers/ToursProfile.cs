@@ -13,7 +13,7 @@ public class ToursProfile : Profile
         CreateMap<EquipmentDto, Equipment>().ReverseMap();
         CreateMap<FacilityDto, Facility>().ReverseMap();
         CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
-        CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
+        CreateMap<KeyPoint, KeyPointWithoutSecretDto>();
 
             CreateMap<TourDto, Tour>()
                 .ForMember(dest => dest.KeyPoints,
@@ -23,6 +23,26 @@ public class ToursProfile : Profile
                 .ForMember(dest => dest.RequiredEquipment,
                            opt => opt.MapFrom(src => src.RequiredEquipment ?? new List<EquipmentDto>()))
                 .ReverseMap();
+            
+            // Tour to PurchasedTourInfoDto (for purchased tours without secrets)
+            CreateMap<Tour, PurchasedTourInfoDto>()
+                .ForMember(dest => dest.KeyPoints,
+                           opt => opt.MapFrom(src => src.KeyPoints))
+                .ForMember(dest => dest.TourDurations,
+                           opt => opt.MapFrom(src => src.TourDurations));
+            
+            // Tour to TourPreviewDto (for browsing - limited info before purchase)
+            CreateMap<Tour, TourPreviewDto>()
+                .ForMember(dest => dest.Difficulty,
+                           opt => opt.MapFrom(src => src.Difficulty.ToString()))
+                .ForMember(dest => dest.IsPurchasable,
+                           opt => opt.MapFrom(src => src.Status == TourStatus.Published))
+                .ForMember(dest => dest.StartingPoint,
+                           opt => opt.MapFrom(src => src.KeyPoints != null && src.KeyPoints.Any() 
+                               ? src.KeyPoints.First() 
+                               : null))
+                .ForMember(dest => dest.TourDurations,
+                           opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDuration>()));
 
             // Mapiranje za kreiranje ture (priča člana 1)
             CreateMap<CreateTourDto, Tour>();
@@ -57,6 +77,14 @@ public class ToursProfile : Profile
                 .ReverseMap()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type));
 
+            // Shopping Cart mapovi
+            CreateMap<OrderItem, OrderItemDto>().ReverseMap();
+            CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
+            
+            // Tour Purchase Token mapovi - includes purchased tour info
+            CreateMap<TourPurchaseToken, TourPurchaseTokenDto>()
+                .ForMember(dest => dest.Tour, 
+                           opt => opt.MapFrom(src => src.Tour));
             CreateMap<AnnualAward, AnnualAwardDto>()
                 .ForMember(d => d.Status, opt => opt.MapFrom(s => s.Status.ToString()));
             CreateMap<AnnualAwardDto, AnnualAward>()
