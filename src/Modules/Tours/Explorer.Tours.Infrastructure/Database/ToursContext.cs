@@ -13,6 +13,7 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Monument> Monuments { get; set; }
         public DbSet<Tour> Tours { get; set; }
         public DbSet<PublicPointRequest> PublicPointRequests { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<TourJournal> TourJournals { get; set; }
         public DbSet<TouristEquipment> TouristEquipment { get; set; }
