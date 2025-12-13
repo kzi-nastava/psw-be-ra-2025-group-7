@@ -39,6 +39,16 @@ public class TourDbRepository : ITourRepository
         return new PagedResult<Tour>(items, totalCount);
     }
 
+    public PagedResult<Tour> GetPublishedTours(int page, int pageSize)
+    {
+        var task = _dbSet
+            .Where(t => t.Status == TourStatus.Published)
+            .GetPagedById(page, pageSize);
+
+        task.Wait();
+        return task.Result;
+    }
+
     public Tour Get(long id)
     {
         var entity = _dbSet

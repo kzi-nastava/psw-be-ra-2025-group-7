@@ -30,7 +30,7 @@ namespace Explorer.Tours.Tests.Integration.Tours
 
         [Theory]
         // oko KeyPointa published ture -3 (45.2551, 19.8636)
-        [InlineData(45.2551, 19.8636, 5.0, 1)]
+        [InlineData(45.2551, 19.8636, 5.0, 3)]
         // Daleka lokacija – ne bi trebalo nista da vrati
         [InlineData(0.0, 0.0, 1.0, 0)]
         public void SearchByLocation_returns_expected_number_of_tours(
