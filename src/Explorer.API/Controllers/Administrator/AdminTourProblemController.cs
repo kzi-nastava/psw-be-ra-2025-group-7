@@ -79,6 +79,13 @@ namespace Explorer.API.Controllers.Administrator
             return Ok(result);
         }
 
+        [HttpPut("{id}/archive")]
+        public ActionResult<TourProblemDto> ArchiveTour(int id)
+        {
+            var result = _service.ArchiveTour(id);
+            return Ok(result);
+        }
+
 
     }
 }

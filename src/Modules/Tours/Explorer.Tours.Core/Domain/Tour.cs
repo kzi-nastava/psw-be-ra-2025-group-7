@@ -10,7 +10,7 @@ namespace Explorer.Tours.Core.Domain
         public string Description { get; private set; }
         public TourDifficulty Difficulty { get; private set; }
         public List<string> Tags { get; private set; }
-        public TourStatus Status { get; private set; }
+        public TourStatus Status { get; set; }
         public decimal Price { get; private set; }
 
         public DateTime? PublishedAt { get; private set; }

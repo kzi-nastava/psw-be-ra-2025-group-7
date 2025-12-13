@@ -34,7 +34,7 @@ namespace Explorer.Tours.Tests.Integration.Administration
 
             // Seed testnih problema
             context.TourProblems.Add(new TourProblem(
-                tourId: 1,
+                tourId: -1,
                 touristId: -11,
                 category: ProblemCategory.Safety,
                 priority: ProblemPriority.High,
@@ -42,7 +42,7 @@ namespace Explorer.Tours.Tests.Integration.Administration
                 isSolved: false
             ));
             context.TourProblems.Add(new TourProblem(
-                tourId: 2,
+                tourId: -2,
                 touristId: -12,
                 category: ProblemCategory.Equipment,
                 priority: ProblemPriority.Medium,
@@ -56,7 +56,8 @@ namespace Explorer.Tours.Tests.Integration.Administration
         {
             return new AdminTourProblemController(
                 scope.ServiceProvider.GetRequiredService<ITourProblemService>(),
-                scope.ServiceProvider.GetRequiredService<Explorer.Notifications.API.Public.INotificationService>()
+                scope.ServiceProvider.GetRequiredService<Explorer.Notifications.API.Public.INotificationService>(),
+                scope.ServiceProvider.GetRequiredService<Explorer.Tours.API.Public.Administration.ITourService>()
             );
         }
 
