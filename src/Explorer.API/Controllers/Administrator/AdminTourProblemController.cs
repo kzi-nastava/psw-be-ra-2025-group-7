@@ -86,6 +86,35 @@ namespace Explorer.API.Controllers.Administrator
             return Ok(result);
         }
 
+        [HttpGet("{id}")]
+        public ActionResult<TourProblemDto> GetById(int id)
+        {
+            try
+            {
+                var problem = _service.GetById(id); // moraš implementirati u servisu
+                return Ok(problem);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+
+        [HttpGet("{id}/tour")]
+        public ActionResult<TourDto> GetTour(int id)
+        {
+            try
+            {
+                var tour = _tourService.GetById(id);
+                return Ok(tour);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
 
     }
 }
