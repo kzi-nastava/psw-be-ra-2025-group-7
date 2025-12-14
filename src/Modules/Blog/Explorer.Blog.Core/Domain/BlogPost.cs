@@ -29,7 +29,7 @@ namespace Explorer.Blog.Core.Domain
 
 
 
-        protected BlogPost() { }  
+        protected BlogPost() { }
 
         public BlogPost(long authorId, string title, string description, IEnumerable<BlogImage>? images = null)
         {
@@ -50,11 +50,12 @@ namespace Explorer.Blog.Core.Domain
             }
         }
 
-        
+
         // Izmena bloga dok je u pripremi-naslov, opis, slike
         public void EditDraft(string title, string description, IEnumerable<BlogImage>? images)
         {
-            EnsureDraft();  
+            ClosedBlogCheck();
+            EnsureDraft();
 
             SetTitle(title);
             SetDescription(description);
@@ -68,29 +69,31 @@ namespace Explorer.Blog.Core.Domain
             LastModifiedAt = DateTime.UtcNow;
         }
 
-       //izmena samo opisa-kad je blog objavljen
+        //izmena samo opisa-kad je blog objavljen
         public void UpdatePublishedDescription(string description)
         {
-            EnsurePublished();      
+            ClosedBlogCheck();
+
+            EnsurePublished();
 
             SetDescription(description);
             LastModifiedAt = DateTime.UtcNow;
         }
 
-      
+
         public void Publish()
         {
             EnsureDraft();
             Status = BlogStatus.Published;
         }
 
-     
+
         public void Archive()
         {
             if (Status == BlogStatus.Archived || Status == BlogStatus.Closed)
                 throw new InvalidOperationException("Blog is already read-only.");
 
-          
+
             if (Status != BlogStatus.Published &&
                 Status != BlogStatus.Active &&
                 Status != BlogStatus.Famous)
@@ -131,6 +134,8 @@ namespace Explorer.Blog.Core.Domain
 
         public void AddComment(BlogComment comment)
         {
+            ClosedBlogCheck();
+
             if (Status == BlogStatus.Draft)
                 throw new InvalidOperationException("Comments can only be added to published blogs.");
 
@@ -143,19 +148,38 @@ namespace Explorer.Blog.Core.Domain
 
         private void RecalculatePopularityStatus()
         {
-            // Logika za automatsko promovisanje bloga na osnovu broja komentara
-            if (Status != BlogStatus.Draft)
+            var score = Votes.Sum(v => v.Value);
+            var commentCount = GetCommentCount();
+
+            // CLOSED 
+            if (score < -10)
             {
-                if (Comments.Count >= 10)
-                {
-                    Status = BlogStatus.Famous;
-                }
-                else if (Comments.Count >= 5 && Comments.Count < 10)
-                {
-                    Status = BlogStatus.Active;
-                }
+                Status = BlogStatus.Closed;
+                return;
             }
+
+            // FAMOUS
+            if (score > 5 && commentCount > 2) // 500, 30
+            {
+                Status = BlogStatus.Famous;
+                return;
+            }
+
+            // ACTIVE
+            if (score > 3 || commentCount > 3) //30,10
+            {
+                Status = BlogStatus.Active;
+                return;
+            }
+
+            // ne diraj Draft i Archived
+            if (Status == BlogStatus.Draft || Status == BlogStatus.Archived)
+                return;
+
+            // fallback
+            Status = BlogStatus.Published;
         }
+
         //Helper metoda
         private BlogComment GetCommentOrThrow(long commentId)
         {
@@ -168,6 +192,7 @@ namespace Explorer.Blog.Core.Domain
 
         public void DeleteComment(long commentId, long userId)
         {
+            ClosedBlogCheck();
             var comment = GetCommentOrThrow(commentId);
 
             if (comment.UserId != userId)
@@ -184,6 +209,7 @@ namespace Explorer.Blog.Core.Domain
 
         public void EditComment(long commentId, long userId, string newText)
         {
+            ClosedBlogCheck();
             var comment = GetCommentOrThrow(commentId);
 
             if (comment.UserId != userId)
@@ -199,21 +225,34 @@ namespace Explorer.Blog.Core.Domain
 
         public void Vote(long userId, int value)
         {
-            if (value != 1 && value != -1)
-                throw new ArgumentException("Vote must be +1 or -1");
+            ClosedBlogCheck();
+
+            if (value != 1 && value != -1 && value != 0)
+                throw new ArgumentException("Vote must be +1 or -1 or 0" );
 
             var existingVote = Votes.FirstOrDefault(v => v.UserId == userId);
 
+            if (value == 0)
+            {
+                if (existingVote != null)
+                {
+                    Votes.Remove(existingVote);
+                    RecalculatePopularityStatus();
+                }
+                return;
+            }
 
-            if (existingVote != null )
+            if (existingVote != null)
             {
                 if (existingVote.Value == value) // alo je kliknuo isto onda povuci glas
                 {
                     Votes.Remove(existingVote);
+
                     return;
                 }
 
                 existingVote.ChangeVote(value); //menja se glas
+
             }
             else
             {
@@ -221,7 +260,28 @@ namespace Explorer.Blog.Core.Domain
                 Votes.Add(newVote);
             }
 
+            RecalculatePopularityStatus();
 
         }
+
+
+        //broj komentara
+        public int GetCommentCount()
+        {
+            if (Comments == null)
+                return 0;
+
+            return Comments.Count;
+        }
+
+        // da li je blog zatvoren
+        public void ClosedBlogCheck() 
+        {
+            if (Status == BlogStatus.Closed)
+                throw new InvalidOperationException("Blog is closed and read-only.");
+
+        }
+
+
     }
 }

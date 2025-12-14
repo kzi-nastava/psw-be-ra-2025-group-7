@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -34,6 +35,26 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Clubs",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: false),
+                    ImageUrls = table.Column<List<string>>(type: "text[]", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clubs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Messages",
                 schema: "stakeholders",
                 columns: table => new
@@ -44,11 +65,49 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                     SentToUserId = table.Column<long>(type: "bigint", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
                     SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EditedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    EditedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Messages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TouristId = table.Column<long>(type: "bigint", nullable: false),
+                    ClubId = table.Column<long>(type: "bigint", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TourPreferences",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TouristId = table.Column<long>(type: "bigint", nullable: false),
+                    PreferredDifficulty = table.Column<int>(type: "integer", nullable: false),
+                    WalkingRating = table.Column<int>(type: "integer", nullable: false),
+                    BicycleRating = table.Column<int>(type: "integer", nullable: false),
+                    BoatRating = table.Column<int>(type: "integer", nullable: false),
+                    CarRating = table.Column<int>(type: "integer", nullable: false),
+                    Tags = table.Column<List<string>>(type: "text[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TourPreferences", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -66,6 +125,77 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClubInvitations",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TouristId = table.Column<long>(type: "bigint", nullable: false),
+                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    ClubId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClubInvitations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClubInvitations_Clubs_ClubId",
+                        column: x => x.ClubId,
+                        principalSchema: "stakeholders",
+                        principalTable: "Clubs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClubJoinRequests",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TouristId = table.Column<long>(type: "bigint", nullable: false),
+                    RequestedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    ClubId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClubJoinRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClubJoinRequests_Clubs_ClubId",
+                        column: x => x.ClubId,
+                        principalSchema: "stakeholders",
+                        principalTable: "Clubs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClubMembers",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TouristId = table.Column<long>(type: "bigint", nullable: false),
+                    JoinedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ClubId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClubMembers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClubMembers_Clubs_ClubId",
+                        column: x => x.ClubId,
+                        principalSchema: "stakeholders",
+                        principalTable: "Clubs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -146,6 +276,24 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ClubInvitations_ClubId",
+                schema: "stakeholders",
+                table: "ClubInvitations",
+                column: "ClubId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClubJoinRequests_ClubId",
+                schema: "stakeholders",
+                table: "ClubJoinRequests",
+                column: "ClubId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClubMembers_ClubId",
+                schema: "stakeholders",
+                table: "ClubMembers",
+                column: "ClubId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Messages_SentByUserId_SentToUserId_Id",
                 schema: "stakeholders",
                 table: "Messages",
@@ -187,7 +335,23 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 schema: "stakeholders");
 
             migrationBuilder.DropTable(
+                name: "ClubInvitations",
+                schema: "stakeholders");
+
+            migrationBuilder.DropTable(
+                name: "ClubJoinRequests",
+                schema: "stakeholders");
+
+            migrationBuilder.DropTable(
+                name: "ClubMembers",
+                schema: "stakeholders");
+
+            migrationBuilder.DropTable(
                 name: "Messages",
+                schema: "stakeholders");
+
+            migrationBuilder.DropTable(
+                name: "Notifications",
                 schema: "stakeholders");
 
             migrationBuilder.DropTable(
@@ -195,7 +359,15 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 schema: "stakeholders");
 
             migrationBuilder.DropTable(
+                name: "TourPreferences",
+                schema: "stakeholders");
+
+            migrationBuilder.DropTable(
                 name: "UserProfiles",
+                schema: "stakeholders");
+
+            migrationBuilder.DropTable(
+                name: "Clubs",
                 schema: "stakeholders");
 
             migrationBuilder.DropTable(

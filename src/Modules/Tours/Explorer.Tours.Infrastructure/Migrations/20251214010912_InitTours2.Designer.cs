@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Tours.Infrastructure.Migrations
 {
     [DbContext(typeof(ToursContext))]
-    [Migration("20251201170501_Init")]
-    partial class Init
+    [Migration("20251214010912_InitTours2")]
+    partial class InitTours2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,39 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.AnnualAward", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("VotingEndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("VotingStartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AnnualAwards", "tours");
+                });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Option", b =>
                 {
@@ -155,6 +188,158 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.ToTable("Facility", "tours");
                 });
 
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.Monument", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("YearOfCreation")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Monuments", "tours");
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.Notification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Preview")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProblemId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications", "tours");
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.OrderItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long?>("ShoppingCartId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TourId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TourName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShoppingCartId");
+
+                    b.ToTable("OrderItems", "tours");
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.PublicPointRequest", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AdminComment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long>("AuthorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("KeyPointIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("TourId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PublicPointRequests", "tours");
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.ShoppingCart", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long>("TouristId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TouristId")
+                        .IsUnique();
+
+                    b.ToTable("ShoppingCarts", "tours");
+                });
+
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Tour", b =>
                 {
                     b.Property<long>("Id")
@@ -247,9 +432,19 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("IsSolved")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ResolveDue")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("TimeReported")
@@ -260,6 +455,11 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
                     b.Property<int>("TouristId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("_comments")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("_comments");
 
                     b.HasKey("Id");
 
@@ -314,6 +514,21 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.ToTable("TouristEquipment", "tours");
                 });
 
+            modelBuilder.Entity("TourEquipment", b =>
+                {
+                    b.Property<long>("TourId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("EquipmentId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("TourId", "EquipmentId");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.ToTable("TourEquipment", "tours");
+                });
+
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Option", b =>
                 {
                     b.HasOne("Explorer.Tours.Core.Domain.Entities.Question", "Question")
@@ -334,6 +549,14 @@ namespace Explorer.Tours.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.OrderItem", b =>
+                {
+                    b.HasOne("Explorer.Tours.Core.Domain.ShoppingCart", null)
+                        .WithMany("Items")
+                        .HasForeignKey("ShoppingCartId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Tour", b =>
@@ -382,7 +605,43 @@ namespace Explorer.Tours.Infrastructure.Migrations
                                 .HasForeignKey("TourId");
                         });
 
+                    b.OwnsMany("Explorer.Tours.Core.Domain.TourDuration", "TourDurations", b1 =>
+                        {
+                            b1.Property<long>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bigint");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
+
+                            b1.Property<int>("Minutes")
+                                .HasColumnType("integer")
+                                .HasColumnName("DurationInMinutes");
+
+                            b1.Property<long>("TourId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<string>("Type")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("TransportType");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("TourId");
+
+                            b1.ToTable("TourDurations", "tours", t =>
+                                {
+                                    t.HasCheckConstraint("CK_TourDuration_Minutes_Positive", "\"DurationInMinutes\" > 0");
+                                });
+
+                            b1.WithOwner()
+                                .HasForeignKey("TourId");
+                        });
+
                     b.Navigation("KeyPoints");
+
+                    b.Navigation("TourDurations");
                 });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
@@ -396,6 +655,21 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.Navigation("Tour");
                 });
 
+            modelBuilder.Entity("TourEquipment", b =>
+                {
+                    b.HasOne("Explorer.Tours.Core.Domain.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Explorer.Tours.Core.Domain.Tour", null)
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Question", b =>
                 {
                     b.Navigation("Options");
@@ -404,6 +678,11 @@ namespace Explorer.Tours.Infrastructure.Migrations
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Quiz", b =>
                 {
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.ShoppingCart", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

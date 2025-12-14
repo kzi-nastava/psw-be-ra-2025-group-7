@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Stakeholders.Infrastructure.Migrations
 {
     [DbContext(typeof(StakeholdersContext))]
-    [Migration("20251202231107_InitToursPrefrences")]
-    partial class InitToursPrefrences
+    [Migration("20251214005756_InitStakeholders")]
+    partial class InitStakeholders
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -59,6 +59,121 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                     b.ToTable("Accounts", "stakeholders");
                 });
 
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Club", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<List<string>>("ImageUrls")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Clubs", "stakeholders");
+                });
+
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.ClubInvitation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("ClubId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("TouristId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.ToTable("ClubInvitations", "stakeholders");
+                });
+
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.ClubJoinRequest", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("ClubId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("TouristId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.ToTable("ClubJoinRequests", "stakeholders");
+                });
+
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.ClubMember", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("ClubId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("TouristId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.ToTable("ClubMembers", "stakeholders");
+                });
+
             modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Message", b =>
                 {
                     b.Property<long>("Id")
@@ -90,7 +205,7 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                     b.ToTable("Messages", "stakeholders");
                 });
 
-            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Monument", b =>
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Notification", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -98,29 +213,24 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<long>("ClubId")
+                        .HasColumnType("bigint");
 
-                    b.Property<double>("Latitude")
-                        .HasColumnType("double precision");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<double>("Longitude")
-                        .HasColumnType("double precision");
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<long>("TouristId")
+                        .HasColumnType("bigint");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("YearOfCreation")
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Monuments", "stakeholders");
+                    b.ToTable("Notifications", "stakeholders");
                 });
 
             modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Person", b =>
@@ -292,6 +402,30 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                     b.ToTable("UserProfiles", "stakeholders");
                 });
 
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.ClubInvitation", b =>
+                {
+                    b.HasOne("Explorer.Stakeholders.Core.Domain.Club", null)
+                        .WithMany("Invitations")
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.ClubJoinRequest", b =>
+                {
+                    b.HasOne("Explorer.Stakeholders.Core.Domain.Club", null)
+                        .WithMany("JoinRequests")
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.ClubMember", b =>
+                {
+                    b.HasOne("Explorer.Stakeholders.Core.Domain.Club", null)
+                        .WithMany("Members")
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Person", b =>
                 {
                     b.HasOne("Explorer.Stakeholders.Core.Domain.User", null)
@@ -319,6 +453,15 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                         .HasForeignKey("Explorer.Stakeholders.Core.Domain.UserProfile", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Club", b =>
+                {
+                    b.Navigation("Invitations");
+
+                    b.Navigation("JoinRequests");
+
+                    b.Navigation("Members");
                 });
 #pragma warning restore 612, 618
         }
