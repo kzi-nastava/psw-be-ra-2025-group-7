@@ -3,6 +3,7 @@ using System;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Tours.Infrastructure.Migrations
 {
     [DbContext(typeof(ToursContext))]
-    partial class ToursContextModelSnapshot : ModelSnapshot
+    [Migration("20251214145738_AddShoppingCartTables")]
+    partial class AddShoppingCartTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -218,39 +221,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.ToTable("Monuments", "tours");
                 });
 
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.Notification", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Preview")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Notifications", "tours");
-                });
-
             modelBuilder.Entity("Explorer.Tours.Core.Domain.OrderItem", b =>
                 {
                     b.Property<long>("Id")
@@ -378,54 +348,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tours", "tours");
-                });
-
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourExecution", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime?>("AbandonedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<double>("StartLatitude")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("StartLongitude")
-                        .HasColumnType("double precision");
-
-                    b.Property<DateTime>("StartedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("TourId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TouristId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("_unlockedKeyPointIndices")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("UnlockedKeyPointIndices");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TourId");
-
-                    b.HasIndex("TouristId");
-
-                    b.HasIndex("TouristId", "TourId", "Status");
-
-                    b.ToTable("TourExecutions", "tours");
                 });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TourJournal", b =>
@@ -684,54 +606,9 @@ namespace Explorer.Tours.Infrastructure.Migrations
                                 .HasForeignKey("TourId");
                         });
 
-                    b.OwnsMany("Explorer.Tours.Core.Domain.TourDuration", "TourDurations", b1 =>
-                        {
-                            b1.Property<long>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("bigint");
-
-                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
-
-                            b1.Property<int>("Minutes")
-                                .HasColumnType("integer")
-                                .HasColumnName("DurationInMinutes");
-
-                            b1.Property<long>("TourId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<string>("Type")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("character varying(50)")
-                                .HasColumnName("TransportType");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("TourId");
-
-                            b1.ToTable("TourDurations", "tours", t =>
-                                {
-                                    t.HasCheckConstraint("CK_TourDuration_Minutes_Positive", "\"DurationInMinutes\" > 0");
-                                });
-
-                            b1.WithOwner()
-                                .HasForeignKey("TourId");
-                        });
-
                     b.Navigation("KeyPoints");
 
                     b.Navigation("TourDurations");
-                });
-
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourExecution", b =>
-                {
-                    b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
-                        .WithMany()
-                        .HasForeignKey("TourId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Tour");
                 });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
