@@ -159,14 +159,14 @@ namespace Explorer.Blog.Core.Domain
             }
 
             // FAMOUS
-            if (score > 5 && commentCount > 2) // 500, 30
+            if (score > 500 && commentCount > 30) // testirano sa  (score > 5 && commentCount > 3)
             {
                 Status = BlogStatus.Famous;
                 return;
             }
 
             // ACTIVE
-            if (score > 3 || commentCount > 3) //30,10
+            if (score > 30 || commentCount > 10) // testirano sa  (score > 3 || commentCount > 2)
             {
                 Status = BlogStatus.Active;
                 return;
