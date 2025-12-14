@@ -307,6 +307,7 @@ namespace Explorer.Tours.Core.Domain
         private static double DegreesToRadians(double degrees)
         {
             return degrees * (Math.PI / 180.0);
+        }
         // ================= VALIDACIJA ZA KUPOVINU (SHOPPING CART) =================
 
         public void ValidatePurchase()
