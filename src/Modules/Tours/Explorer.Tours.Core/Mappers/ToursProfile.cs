@@ -93,6 +93,12 @@ public class ToursProfile : Profile
                 .ForMember(d => d.Status, opt => opt.Ignore());
             CreateMap<UpdateAnnualAwardDto, AnnualAward>()
                 .ForMember(d => d.Status, opt => opt.Ignore());
+            
+            // TourExecution mappings
+            CreateMap<TourExecution, TourExecutionDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.UnlockedKeyPointIndices, opt => opt.MapFrom(src => src.UnlockedKeyPointIndices.ToList()))
+                .ForMember(dest => dest.Tour, opt => opt.MapFrom(src => src.Tour));
         }
     }
 }

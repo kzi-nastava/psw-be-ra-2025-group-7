@@ -24,6 +24,8 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<AnnualAward> AnnualAwards { get; set; }
+        public DbSet<TourExecution> TourExecutions { get; set; }
+
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -373,6 +375,43 @@ namespace Explorer.Tours.Infrastructure.Database
                  );
             });
 
+            // ===== TourExecution konfiguracija =====
+            modelBuilder.Entity<TourExecution>(b =>
+            {
+                b.ToTable("TourExecutions");
+                b.HasKey(te => te.Id);
+
+                b.Property(te => te.TouristId).IsRequired();
+                b.Property(te => te.TourId).IsRequired();
+                b.Property(te => te.StartedAt).IsRequired();
+                b.Property(te => te.CompletedAt).IsRequired(false);
+                b.Property(te => te.AbandonedAt).IsRequired(false);
+                b.Property(te => te.Status).IsRequired();
+                b.Property(te => te.StartLatitude).IsRequired();
+                b.Property(te => te.StartLongitude).IsRequired();
+
+                // Mapiranje privatne liste _unlockedKeyPointIndices kao JSON
+                b.Property<List<int>>("_unlockedKeyPointIndices")
+                    .HasColumnName("UnlockedKeyPointIndices")
+                    .HasColumnType("jsonb")
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                        v => JsonSerializer.Deserialize<List<int>>(v, (JsonSerializerOptions?)null) ?? new List<int>()
+                    );
+
+                // Ignoriši public readonly property koji vraća read-only verziju
+                b.Ignore(te => te.UnlockedKeyPointIndices);
+
+                // Relacija sa Tour entitetom
+                b.HasOne(te => te.Tour)
+                    .WithMany()
+                    .HasForeignKey(te => te.TourId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Indeksi za brže pretrage
+                b.HasIndex(te => te.TouristId);
+                b.HasIndex(te => new { te.TouristId, te.TourId, te.Status });
+            });
         }
     }
 }

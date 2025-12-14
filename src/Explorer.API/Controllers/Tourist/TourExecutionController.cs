@@ -1,0 +1,77 @@
+﻿using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Stakeholders.Infrastructure.Authentication;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Tourist;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Explorer.API.Controllers.Tourist;
+
+[Authorize(Policy = "touristPolicy")]
+[Route("api/tourist/tour-executions")]
+[ApiController]
+public class TourExecutionController : ControllerBase
+{
+    private readonly ITourExecutionService _tourExecutionService;
+
+    public TourExecutionController(ITourExecutionService tourExecutionService)
+    {
+        _tourExecutionService = tourExecutionService;
+    }
+
+    [HttpPost("start")]
+    public ActionResult<TourExecutionDto> StartTour([FromBody] StartTourExecutionDto dto)
+    {
+        var touristId = User.PersonId();
+        var result = _tourExecutionService.StartTour(touristId, dto);
+        return Ok(result);
+    }
+
+    [HttpPut("{executionId:long}/complete")]
+    public ActionResult<TourExecutionDto> CompleteTour(long executionId)
+    {
+        var touristId = User.PersonId();
+        var result = _tourExecutionService.CompleteTour(touristId, executionId);
+        return Ok(result);
+    }
+
+    [HttpPut("{executionId:long}/abandon")]
+    public ActionResult<TourExecutionDto> AbandonTour(long executionId)
+    {
+        var touristId = User.PersonId();
+        var result = _tourExecutionService.AbandonTour(touristId, executionId);
+        return Ok(result);
+    }
+
+    [HttpPost("{executionId:long}/unlock-keypoint")]
+    public ActionResult<TourExecutionDto> UnlockKeyPoint(long executionId, [FromBody] UnlockKeyPointDto dto)
+    {
+        var touristId = User.PersonId();
+        var result = _tourExecutionService.UnlockKeyPoint(touristId, executionId, dto);
+        return Ok(result);
+    }
+
+    [HttpGet("active/{tourId:long}")]
+    public ActionResult<TourExecutionDto> GetActiveExecution(long tourId)
+    {
+        var touristId = User.PersonId();
+        var result = _tourExecutionService.GetActiveExecution(touristId, tourId);
+        return Ok(result);
+    }
+
+    [HttpGet("history")]
+    public ActionResult<PagedResult<TourExecutionDto>> GetExecutionHistory([FromQuery] int page, [FromQuery] int pageSize)
+    {
+        var touristId = User.PersonId();
+        var result = _tourExecutionService.GetExecutionHistory(touristId, page, pageSize);
+        return Ok(result);
+    }
+
+    [HttpGet("{executionId:long}/keypoint/{keyPointIndex:int}/secret")]
+    public ActionResult<object> GetKeyPointSecret(long executionId, int keyPointIndex)
+    {
+        var touristId = User.PersonId();
+        var secret = _tourExecutionService.GetKeyPointSecret(touristId, executionId, keyPointIndex);
+        return Ok(new { secret });
+    }
+}
