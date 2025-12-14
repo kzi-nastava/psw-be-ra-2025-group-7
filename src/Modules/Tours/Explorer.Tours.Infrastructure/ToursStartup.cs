@@ -1,4 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Notifications.API.Public;
+using Explorer.Notifications.Infrastructure;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.API.Public.Shopping;
@@ -48,6 +50,7 @@ public static class ToursStartup
         services.AddScoped<IAnnualAwardService, AnnualAwardService>();
         services.AddScoped<ITouristToursService, TouristToursService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
+        services.AddScoped<INotificationService, NotificationService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -65,6 +68,7 @@ public static class ToursStartup
         services.AddScoped<ITourRepository, TourDbRepository>();
         services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
         services.AddScoped<IQuizRepository, QuizRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
         services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
 

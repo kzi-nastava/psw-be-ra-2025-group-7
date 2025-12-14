@@ -235,5 +235,14 @@ namespace Explorer.Tours.Core.UseCases.Administration
             var updated = _tourRepository.Update(tour);
             return _mapper.Map<TourDto>(updated);
         }
+
+        public TourDto GetById(long id)
+        {
+            // 1️⃣ repository vraća DOMAIN entitet
+            var result = _tourRepository.Get(id);
+
+            // 2️⃣ mapiranje u DTO
+            return _mapper.Map<TourDto>(result);
+        }
     }
 }
