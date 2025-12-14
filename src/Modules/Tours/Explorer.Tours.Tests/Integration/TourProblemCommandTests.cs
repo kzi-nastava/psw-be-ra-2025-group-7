@@ -24,7 +24,7 @@ namespace Explorer.Tours.Tests.Integration
 
             var dto = new TourProblemDto
             {
-                TourId = 1,
+                TourId = -4,
                 Category = "Equipment",
                 Priority = "Medium",
                 Description = "Lost item",
@@ -77,7 +77,7 @@ namespace Explorer.Tours.Tests.Integration
                 {
                     var seedDto = new TourProblemDto
                     {
-                        TourId = 1,
+                        TourId = -1,
                         Category = "Equipment",
                         Priority = "Medium",
                         Description = "Initial equipment issue to be updated.",
@@ -159,7 +159,7 @@ namespace Explorer.Tours.Tests.Integration
                 {
                     var dto = new TourProblemDto
                     {
-                        TourId = 2,
+                        TourId = -2,
                         Category = "Safety",
                         Priority = "Low",
                         Description = "Safety related problem to be deleted.",

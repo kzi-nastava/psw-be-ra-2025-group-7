@@ -4,6 +4,8 @@ using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
@@ -35,6 +37,16 @@ public class TourDbRepository : ITourRepository
             .ToList();
 
         return new PagedResult<Tour>(items, totalCount);
+    }
+
+    public PagedResult<Tour> GetPublishedTours(int page, int pageSize)
+    {
+        var task = _dbSet
+            .Where(t => t.Status == TourStatus.Published)
+            .GetPagedById(page, pageSize);
+
+        task.Wait();
+        return task.Result;
     }
 
     public Tour Get(long id)
@@ -113,5 +125,20 @@ public class TourDbRepository : ITourRepository
         var entity = Get(id);
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
+    }
+
+    public List<Tour> GetAll()
+    {
+        return DbContext.Tours
+            .Include(t => t.KeyPoints)
+            .ToList();
+    }
+    public IEnumerable<Tour> GetPublishedWithKeyPoints()
+    {
+        return _dbSet
+            .Include(t => t.KeyPoints)
+            .Include(t => t.TourDurations)
+            .Where(t => t.Status == TourStatus.Published)
+            .ToList();
     }
 }

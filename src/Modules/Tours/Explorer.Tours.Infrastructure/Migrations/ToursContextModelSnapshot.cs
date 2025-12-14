@@ -382,6 +382,35 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.ToTable("TourProblems", "tours");
                 });
 
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("TourId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TourId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "TourId")
+                        .IsUnique();
+
+                    b.ToTable("TourPurchaseTokens", "tours");
+                });
+
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TouristEquipment", b =>
                 {
                     b.Property<long>("Id")
@@ -536,6 +565,17 @@ namespace Explorer.Tours.Infrastructure.Migrations
                         .HasForeignKey("TourId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
+                {
+                    b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tour");
                 });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Question", b =>

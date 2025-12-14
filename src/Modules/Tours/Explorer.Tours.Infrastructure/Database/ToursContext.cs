@@ -13,12 +13,15 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Monument> Monuments { get; set; }
         public DbSet<Tour> Tours { get; set; }
         public DbSet<PublicPointRequest> PublicPointRequests { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         public DbSet<TourJournal> TourJournals { get; set; }
         public DbSet<TouristEquipment> TouristEquipment { get; set; }
         public DbSet<Quiz> Quizzes { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Facility> Facility { get; set; }
         public DbSet<TourProblem> TourProblems { get; set; }
+        public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<AnnualAward> AnnualAwards { get; set; }
 
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
@@ -205,6 +208,76 @@ namespace Explorer.Tours.Infrastructure.Database
                  .IsRequired();
             });
 
+            // ===== TourPurchaseToken konfiguracija =====
+            modelBuilder.Entity<TourPurchaseToken>(b =>
+            {
+                b.ToTable("TourPurchaseTokens");
+
+                b.HasKey(tpt => tpt.Id);
+
+                b.Property(tpt => tpt.UserId)
+                    .IsRequired();
+
+                b.Property(tpt => tpt.TourId)
+                    .IsRequired();
+
+                b.Property(tpt => tpt.PurchaseDate)
+                    .IsRequired();
+
+                // Configure foreign key relationship to Tour
+                b.HasOne(tpt => tpt.Tour)
+                    .WithMany()
+                    .HasForeignKey(tpt => tpt.TourId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Create unique index to ensure one purchase per user per tour
+                b.HasIndex(tpt => new { tpt.UserId, tpt.TourId })
+                    .IsUnique();
+
+                // Create index on UserId for faster queries
+                b.HasIndex(tpt => tpt.UserId);
+            });
+
+            // ===== ShoppingCart konfiguracija =====
+            modelBuilder.Entity<ShoppingCart>(b =>
+            {
+                b.ToTable("ShoppingCarts");
+                b.HasKey(sc => sc.Id);
+
+                b.Property(sc => sc.TouristId)
+                    .IsRequired();
+
+                b.Property(sc => sc.TotalPrice)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.HasIndex(sc => sc.TouristId)
+                    .IsUnique();
+
+                b.HasMany(sc => sc.Items)
+                    .WithOne()
+                    .HasForeignKey("ShoppingCartId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ===== OrderItem konfiguracija =====
+            modelBuilder.Entity<OrderItem>(b =>
+            {
+                b.ToTable("OrderItems");
+                b.HasKey(oi => oi.Id);
+
+                b.Property(oi => oi.TourId)
+                    .IsRequired();
+
+                b.Property(oi => oi.TourName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                b.Property(oi => oi.Price)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+            });
+
             // ===== PublicPointRequest konfiguracija =====
             modelBuilder.Entity<PublicPointRequest>(b =>
             {
@@ -223,6 +296,14 @@ namespace Explorer.Tours.Infrastructure.Database
             });
 
             // ===== TourProblem konfiguracija =====
+
+            // Ostale entitete (Facility, TourProblem, ...) rade drugi u svojim karticama.
+
+
+            modelBuilder.Entity<Tour>().HasKey(t => t.Id);
+            modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+
             modelBuilder.Entity<TourProblem>(b =>
             {
                 b.ToTable("TourProblems");
@@ -250,6 +331,7 @@ namespace Explorer.Tours.Infrastructure.Database
                      v => JsonSerializer.Deserialize<List<TourProblemMessage>>(v, (JsonSerializerOptions?)null)
                  );
             });
+
         }
     }
 }

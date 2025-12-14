@@ -13,7 +13,7 @@ namespace Explorer.Tours.Core.Domain
         public string Description { get; private set; }
         public TourDifficulty Difficulty { get; private set; }
         public List<string> Tags { get; private set; }
-        public TourStatus Status { get; private set; }
+        public TourStatus Status { get; set; }
         public decimal Price { get; private set; }
 
         public DateTime? PublishedAt { get; private set; }
@@ -307,6 +307,15 @@ namespace Explorer.Tours.Core.Domain
         private static double DegreesToRadians(double degrees)
         {
             return degrees * (Math.PI / 180.0);
+        // ================= VALIDACIJA ZA KUPOVINU (SHOPPING CART) =================
+
+        public void ValidatePurchase()
+        {
+            if (Status == TourStatus.Archived)
+                throw new InvalidOperationException("Archived tours cannot be purchased.");
+
+            if (Status != TourStatus.Published)
+                throw new InvalidOperationException("Only published tours can be purchased.");
         }
     }
 

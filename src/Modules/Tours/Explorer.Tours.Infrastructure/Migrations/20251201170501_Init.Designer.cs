@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Tours.Infrastructure.Migrations
 {
     [DbContext(typeof(ToursContext))]
-    [Migration("20251201110454_Init")]
+    [Migration("20251201170501_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -266,6 +266,35 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.ToTable("TourProblems", "tours");
                 });
 
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("TourId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TourId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "TourId")
+                        .IsUnique();
+
+                    b.ToTable("TourPurchaseTokens", "tours");
+                });
+
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TouristEquipment", b =>
                 {
                     b.Property<long>("Id")
@@ -305,6 +334,66 @@ namespace Explorer.Tours.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.Tour", b =>
+                {
+                    b.OwnsMany("Explorer.Tours.Core.Domain.KeyPoint", "KeyPoints", b1 =>
+                        {
+                            b1.Property<long>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bigint");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
+
+                            b1.Property<string>("Description")
+                                .IsRequired()
+                                .HasMaxLength(2000)
+                                .HasColumnType("character varying(2000)");
+
+                            b1.Property<string>("ImageUrl")
+                                .HasColumnType("text");
+
+                            b1.Property<double>("Latitude")
+                                .HasColumnType("double precision");
+
+                            b1.Property<double>("Longitude")
+                                .HasColumnType("double precision");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)");
+
+                            b1.Property<string>("Secret")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<long>("TourId")
+                                .HasColumnType("bigint");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("TourId");
+
+                            b1.ToTable("KeyPoints", "tours");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TourId");
+                        });
+
+                    b.Navigation("KeyPoints");
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
+                {
+                    b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tour");
                 });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Question", b =>

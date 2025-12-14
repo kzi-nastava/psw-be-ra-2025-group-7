@@ -36,6 +36,9 @@ public static class StakeholdersStartup
         services.AddScoped<ITourPreferencesService, TourPreferencesService>();
         services.AddScoped<ILocationService, LocationService>();
         services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<INotificationService, NotificationService>();
+
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -48,6 +51,7 @@ public static class StakeholdersStartup
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
         services.AddScoped<IClubRepository, ClubDbRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<INotificationRepository, NotificationDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();
