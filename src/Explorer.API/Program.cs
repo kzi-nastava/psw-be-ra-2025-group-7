@@ -36,11 +36,6 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("Tourist", "Author")); // dozvoljava obe uloge
 });
 
-// REGISTRACIJA NOTIFIKACIJA
-builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-
-
 var app = builder.Build();
 
 

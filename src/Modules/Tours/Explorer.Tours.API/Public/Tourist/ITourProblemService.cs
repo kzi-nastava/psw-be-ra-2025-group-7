@@ -18,5 +18,8 @@ namespace Explorer.Tours.API.Public.Tourist
         TourProblemDto SetPenalty(int id);
         TourProblemDto MarkAsResolved(int id, int touristId);
         TourProblemDto MarkAsUnresolved(int id, int touristId,string comment);
+        TourProblemDto ArchiveTour(int id);
+
+        TourProblemDto GetById(int id);
     }
 }
