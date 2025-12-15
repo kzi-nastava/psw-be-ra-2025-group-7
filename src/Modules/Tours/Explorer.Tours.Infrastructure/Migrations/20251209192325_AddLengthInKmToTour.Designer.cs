@@ -3,6 +3,7 @@ using System;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Tours.Infrastructure.Migrations
 {
     [DbContext(typeof(ToursContext))]
-    partial class ToursContextModelSnapshot : ModelSnapshot
+    [Migration("20251209192325_AddLengthInKmToTour")]
+    partial class AddLengthInKmToTour
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -382,35 +385,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.ToTable("TourProblems", "tours");
                 });
 
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long>("TourId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TourId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId", "TourId")
-                        .IsUnique();
-
-                    b.ToTable("TourPurchaseTokens", "tours");
-                });
-
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TouristEquipment", b =>
                 {
                     b.Property<long>("Id")
@@ -565,17 +539,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
                         .HasForeignKey("TourId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
-                {
-                    b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
-                        .WithMany()
-                        .HasForeignKey("TourId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Tour");
                 });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Question", b =>

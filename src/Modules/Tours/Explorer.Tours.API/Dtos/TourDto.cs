@@ -14,13 +14,16 @@ namespace Explorer.Tours.API.Dtos
         public int Status { get; set; }
         public decimal Price { get; set; }
 
-
         public List<KeyPointDto> KeyPoints { get; set; } = new();
 
         public DateTime? PublishedAt { get; set; }
         public DateTime? ArchivedAt { get; set; }
+
         public List<TourDurationDto> TourDurations { get; set; } = new();
 
         public List<EquipmentDto> RequiredEquipment { get; set; } = new();
+
+        // KARTICA 4 – dužina ture u km za prikaz na frontendu
+        public double LengthInKm { get; set; }
     }
 }
