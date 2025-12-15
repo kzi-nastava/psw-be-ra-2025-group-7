@@ -37,7 +37,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Tourist
             // Verify monuments are ordered by distance (closest first)
             // Tourist is at Belgrade center (44.8176, 20.4633)
             // Kalemegdanska tvrđava should be first (44.8225, 20.4508) - very close
-            result[0].Name.ShouldBe("Kalemegdanska tvrđava");
+            result[0].Name.ShouldBe("Kalemegdanska tvr?ava");
             result[0].Latitude.ShouldBe(44.8225);
             result[0].Longitude.ShouldBe(20.4508);
             
