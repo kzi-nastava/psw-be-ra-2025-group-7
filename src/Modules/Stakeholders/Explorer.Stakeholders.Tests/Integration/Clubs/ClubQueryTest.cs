@@ -27,7 +27,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Clubs
             {
                 Name = "Klub za pretragu",
                 Description = "Opis za Retrieves_all",
-                CreatedBy = -21,
+                CreatedBy = 1,
                 ImageUrls = new List<string> { "retrieves-all.jpg" }
             };
 
@@ -73,7 +73,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Clubs
         {
             return new ClubsController(scope.ServiceProvider.GetRequiredService<IClubService>())
             {
-                ControllerContext = BuildContext("-21")
+                ControllerContext = BuildContext("1")
             };
         }
     }

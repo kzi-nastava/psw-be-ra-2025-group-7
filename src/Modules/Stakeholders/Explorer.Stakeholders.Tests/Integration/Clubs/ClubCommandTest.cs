@@ -28,7 +28,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         {
             Name = "Test klub",
             Description = "Opis test kluba",
-            CreatedBy = -21,
+            CreatedBy = 1,
             ImageUrls = new List<string> { "image1.jpg" }
         };
 
@@ -88,7 +88,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
             {
                 Name = "Pocetno ime",
                 Description = "Pocetni opis",
-                CreatedBy = -21,
+                CreatedBy = 1,
                 ImageUrls = new List<string> { "initial.jpg" }
             });
 
@@ -108,7 +108,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
                 Id = idToUpdate,
                 Name = "Ažurirano ime",
                 Description = "Ažurirani opis",
-                CreatedBy = -21,
+                CreatedBy = 1,
                 ImageUrls = new List<string> { "updated.jpg" }
             };
 
@@ -151,7 +151,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
             Id = -1000,
             Name = "Ne postoji klub",
             Description = "Neki opis",
-            CreatedBy = -21,
+            CreatedBy = 1,
             ImageUrls = new List<string> { "nema.jpg" }
         };
 
@@ -171,7 +171,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         {
             Name = "Klub za brisanje",
             Description = "Opis kluba za brisanje",
-            CreatedBy = -21,
+            CreatedBy = 1,
             ImageUrls = new List<string> { "obrisi.jpg" }
         };
 
@@ -214,7 +214,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         var clubService = scope.ServiceProvider.GetRequiredService<IClubService>();
 
         // owner = -21, tourist = -22 (može biti bilo koji ID, nema FK ka Person)
-        const long ownerPersonId = -21;
+        const long ownerPersonId = 1;
         const long touristPersonId = -22;
 
         var ownerController = new ClubsController(clubService)
@@ -254,7 +254,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
 
         // 4) Assert – Notification u bazi
         var notifications = dbContext.Set<Notification>()
-            .Where(n => n.TouristId == touristPersonId && n.ClubId == clubId)
+            .Where(n => n.UserId == touristPersonId && n.ClubId == clubId)
             .ToList();
 
         notifications.Count.ShouldBe(1);
@@ -271,7 +271,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
         var clubService = scope.ServiceProvider.GetRequiredService<IClubService>();
 
-        const long ownerPersonId = -21;
+        const long ownerPersonId = 1;
         const long touristPersonId = -23; 
 
         var ownerController = new ClubsController(clubService)
@@ -311,7 +311,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
 
         // 4) Assert – Notification u bazi
         var notifications = dbContext.Set<Notification>()
-            .Where(n => n.TouristId == touristPersonId && n.ClubId == clubId)
+            .Where(n => n.UserId == touristPersonId && n.ClubId == clubId)
             .ToList();
 
         notifications.Count.ShouldBe(1);
@@ -327,7 +327,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
     {
         return new ClubsController(scope.ServiceProvider.GetRequiredService<IClubService>())
         {
-            ControllerContext = BuildContext("-21")
+            ControllerContext = BuildContext("1")
         };
     }
 }

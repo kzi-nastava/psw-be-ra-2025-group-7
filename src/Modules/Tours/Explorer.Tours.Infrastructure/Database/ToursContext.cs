@@ -30,6 +30,20 @@ namespace Explorer.Tours.Infrastructure.Database
         {
             modelBuilder.HasDefaultSchema("tours");
 
+            // ===== Notification konfiguracija =====
+            modelBuilder.Entity<Notification>(b =>
+            {
+                b.ToTable("Notifications");
+                b.HasKey(n => n.Id);
+                b.Property(n => n.UserId).IsRequired();
+                b.Property(n => n.Title).IsRequired();
+                b.Property(n => n.Preview).IsRequired();
+                b.Property(n => n.ProblemId).IsRequired();
+                b.Property(n => n.CreatedAt).IsRequired();
+                b.Property(n => n.IsRead).IsRequired();
+                // No FK constraint - UserId is just a reference, not enforced by DB
+            });
+
             // ===== Monument konfiguracija =====
             modelBuilder.Entity<Monument>(b =>
             {
