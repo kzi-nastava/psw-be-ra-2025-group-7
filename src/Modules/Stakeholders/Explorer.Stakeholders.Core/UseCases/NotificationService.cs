@@ -19,16 +19,22 @@ namespace Explorer.Stakeholders.Core.UseCases
             _mapper = mapper;
         }
 
-        public List<NotificationDto> GetForTourist(long touristId)
+        public List<NotificationDto> GetForUser(long userId, bool onlyUnread = false)
         {
-            var list = _repository.GetForTourist(touristId);
+            var list = _repository.GetForUser(userId, onlyUnread);
             return list.Select(_mapper.Map<NotificationDto>).ToList();
         }
-        public void MarkAsRead(long notificationId, long touristId)
+
+        public int GetUnreadCount(long userId)
+        {
+            return _repository.GetUnreadCount(userId);
+        }
+
+        public void MarkAsRead(long notificationId, long userId)
         {
             var notification = _repository.Get(notificationId);
 
-            if (notification == null || notification.UserId != touristId)
+            if (notification == null || notification.UserId != userId)
             {
                 throw new NotFoundException("Notification not found.");
             }
@@ -38,6 +44,23 @@ namespace Explorer.Stakeholders.Core.UseCases
                 notification.MarkAsRead();
                 _repository.Update(notification);
             }
+        }
+
+        public void MarkAllAsRead(long userId)
+        {
+            _repository.MarkAllAsRead(userId);
+        }
+
+        public void Delete(long notificationId, long userId)
+        {
+            var notification = _repository.Get(notificationId);
+
+            if (notification == null || notification.UserId != userId)
+            {
+                throw new NotFoundException("Notification not found.");
+            }
+
+            _repository.Delete(notificationId);
         }
     }
 }
