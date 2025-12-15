@@ -14,6 +14,6 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
         List<Club> GetAll();
         Club Get(long id);
         List<Club> GetByOwner(long ownerId);
-
+        List<long> GetMemberIds(long clubId);
     }
 }
