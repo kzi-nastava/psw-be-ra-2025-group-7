@@ -75,5 +75,31 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
                 _dbContext.SaveChanges();
             }
         }
+
+        public void DeleteByFollowerMessageId(long followerMessageId)
+        {
+            var notifications = _dbSet
+                .Where(n => n.SourceFollowerMessageId == followerMessageId)
+                .ToList();
+
+            if (notifications.Any())
+            {
+                _dbSet.RemoveRange(notifications);
+                _dbContext.SaveChanges();
+            }
+        }
+
+        public void DeleteByClubMessageId(long clubMessageId)
+        {
+            var notifications = _dbSet
+                .Where(n => n.SourceClubMessageId == clubMessageId)
+                .ToList();
+
+            if (notifications.Any())
+            {
+                _dbSet.RemoveRange(notifications);
+                _dbContext.SaveChanges();
+            }
+        }
     }
 }

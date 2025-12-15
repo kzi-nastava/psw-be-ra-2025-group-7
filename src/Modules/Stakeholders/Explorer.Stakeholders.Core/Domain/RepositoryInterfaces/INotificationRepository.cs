@@ -11,5 +11,7 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
         void Update(Notification notification);
         void MarkAllAsRead(long userId);
         void Delete(long id);
+        void DeleteByFollowerMessageId(long followerMessageId);
+        void DeleteByClubMessageId(long clubMessageId);
     }
 }
