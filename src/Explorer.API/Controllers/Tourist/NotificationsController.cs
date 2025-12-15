@@ -20,11 +20,27 @@ namespace Explorer.API.Controllers.Tourist
         }
 
         [HttpGet]
-        public ActionResult<List<NotificationDto>> GetMine()
+        public ActionResult<List<NotificationDto>> GetMine([FromQuery] bool onlyUnread = false)
         {
             var touristId = User.PersonId();
-            var result = _notificationService.GetForTourist(touristId);
+            var result = _notificationService.GetForUser(touristId, onlyUnread);
             return Ok(result);
+        }
+
+        [HttpGet("unread")]
+        public ActionResult<List<NotificationDto>> GetUnread()
+        {
+            var touristId = User.PersonId();
+            var result = _notificationService.GetForUser(touristId, onlyUnread: true);
+            return Ok(result);
+        }
+
+        [HttpGet("unread/count")]
+        public ActionResult<int> GetUnreadCount()
+        {
+            var touristId = User.PersonId();
+            var count = _notificationService.GetUnreadCount(touristId);
+            return Ok(count);
         }
 
         [HttpPatch("{id:long}/read")]
@@ -32,6 +48,22 @@ namespace Explorer.API.Controllers.Tourist
         {
             var touristId = User.PersonId();
             _notificationService.MarkAsRead(id, touristId);
+            return Ok();
+        }
+
+        [HttpPut("read-all")]
+        public IActionResult MarkAllAsRead()
+        {
+            var touristId = User.PersonId();
+            _notificationService.MarkAllAsRead(touristId);
+            return Ok();
+        }
+
+        [HttpDelete("{id:long}")]
+        public IActionResult Delete(long id)
+        {
+            var touristId = User.PersonId();
+            _notificationService.Delete(id, touristId);
             return Ok();
         }
     }

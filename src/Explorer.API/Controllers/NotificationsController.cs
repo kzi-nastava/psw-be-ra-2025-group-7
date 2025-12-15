@@ -1,58 +1,70 @@
-﻿using Explorer.Notifications.API.Public;
+﻿using System.Collections.Generic;
+using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Explorer.Stakeholders.Infrastructure.Authentication;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.API.Controllers
 {
-    [Authorize]  // svaki ulogovan korisnik
+    [Authorize]
     [Route("api/notifications")]
+    [ApiController]
     public class NotificationsController : ControllerBase
     {
-        private readonly INotificationRepository _notificationRepository;
+        private readonly INotificationService _notificationService;
 
-        public NotificationsController(INotificationRepository notificationRepository)
+        public NotificationsController(INotificationService notificationService)
         {
-            _notificationRepository = notificationRepository;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
-        public ActionResult<List<NotificationDto>> GetAll([FromQuery] bool onlyUnread = false)
+        public ActionResult<List<NotificationDto>> GetAll()
         {
-            var userId = (int)User.PersonId();
-            var items = _notificationRepository.GetForUser(userId, onlyUnread);
-
-            // ako želiš DTO, napravi mapiranje; za sada možeš i direktno
-            var result = items.Select(n => new NotificationDto
-            {
-                Id = n.Id,
-                Title = n.Title,
-                Preview = n.Preview,
-                ProblemId = n.ProblemId,
-                CreatedAt = n.CreatedAt,
-                IsRead = n.IsRead
-            }).ToList();
-
+            var userId = User.PersonId();
+            var result = _notificationService.GetForUser(userId, onlyUnread: false);
             return Ok(result);
         }
 
-        [HttpPut("{id:int}/read")]
-        public IActionResult MarkAsRead(int id)
+        [HttpGet("unread")]
+        public ActionResult<List<NotificationDto>> GetUnread()
         {
-            var userId = (int)User.PersonId();
-            _notificationRepository.MarkAsRead(id, userId);
+            var userId = User.PersonId();
+            var result = _notificationService.GetForUser(userId, onlyUnread: true);
+            return Ok(result);
+        }
+
+        [HttpGet("unread/count")]
+        public ActionResult<int> GetUnreadCount()
+        {
+            var userId = User.PersonId();
+            var count = _notificationService.GetUnreadCount(userId);
+            return Ok(count);
+        }
+
+        [HttpPut("{id:long}/read")]
+        public IActionResult MarkAsRead(long id)
+        {
+            var userId = User.PersonId();
+            _notificationService.MarkAsRead(id, userId);
             return NoContent();
         }
-    }
 
-    public class NotificationDto
-    {
-        public long Id { get; set; }
-        public string Title { get; set; }
-        public string Preview { get; set; }
-        public int ProblemId { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public bool IsRead { get; set; }
+        [HttpPut("read-all")]
+        public IActionResult MarkAllAsRead()
+        {
+            var userId = User.PersonId();
+            _notificationService.MarkAllAsRead(userId);
+            return NoContent();
+        }
+
+        [HttpDelete("{id:long}")]
+        public IActionResult Delete(long id)
+        {
+            var userId = User.PersonId();
+            _notificationService.Delete(id, userId);
+            return NoContent();
+        }
     }
 }
