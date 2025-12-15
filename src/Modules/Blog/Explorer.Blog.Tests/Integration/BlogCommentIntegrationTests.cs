@@ -94,7 +94,7 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
     }
 
     [Fact]
-    public void Blog_status_changes_to_active_after_5_comments()
+    public void Blog_status_changes_to_active_after_15_comments()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
@@ -108,8 +108,8 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
 
         var controller = CreateCommentController(scope, "-11");
 
-        // Act - Dodaj 5 komentara
-        for (int i = 1; i <= 5; i++)
+        // Act - Dodaj 15 komentara
+        for (int i = 1; i <= 15; i++)
         {
             var dto = new CreateCommentDto
             {
@@ -125,12 +125,12 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
             .Include(b => b.Comments)
             .First(b => b.Id == newBlog.Id);
 
-        updatedBlog.Comments.Count.ShouldBe(5);
+        updatedBlog.Comments.Count.ShouldBe(15);
         updatedBlog.Status.ShouldBe(Core.Domain.BlogStatus.Active);
     }
 
     [Fact]
-    public void Blog_status_changes_to_famous_after_10_comments()
+    public void Blog_status_changes_to_famous_after_30_comments()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
@@ -138,15 +138,22 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
 
         // Kreiraj novi Published blog
         var newBlog = new Core.Domain.BlogPost(-12, "Test Blog za Famous Status", "Opis");
-        newBlog.Publish(); 
+        newBlog.Publish();
+
+        // Dodaj glasove da Score bude dovoljan (npr. 550)
+        for (int i = 1; i <= 550; i++)
+        {
+            newBlog.Vote(userId: -1000 + i, value: 1);
+        }
+
         dbContext.BlogPosts.Add(newBlog);
         dbContext.SaveChanges();
-        newBlog.Status.ShouldBe(Core.Domain.BlogStatus.Published);
+        newBlog.Status.ShouldBe(Core.Domain.BlogStatus.Active);
 
         var controller = CreateCommentController(scope, "-12");
 
-        // Act - Dodaj 10 komentara
-        for (int i = 1; i <= 12; i++)
+        // Act - Dodaj 40 komentara
+        for (int i = 1; i <= 40; i++)
         {
             var dto = new CreateCommentDto
             {
@@ -156,15 +163,16 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
             };
             controller.Create(dto);
         }
-        
+
         // Assert
         var updatedBlog = dbContext.BlogPosts
             .Include(b => b.Comments)
             .First(b => b.Id == newBlog.Id);
 
-        updatedBlog.Comments.Count.ShouldBe(12);
+        updatedBlog.Comments.Count.ShouldBe(40);
         updatedBlog.Status.ShouldBe(Core.Domain.BlogStatus.Famous);
     }
+
 
     private static BlogCommentController CreateCommentController(IServiceScope scope, string userId)
     {

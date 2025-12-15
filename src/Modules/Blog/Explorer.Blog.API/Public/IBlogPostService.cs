@@ -28,6 +28,7 @@ namespace Explorer.Blog.API.Public
 
         BlogPostDto Get(long id);
         BlogVoteDto Vote(long blogPostId, long userId, int value);
+        PagedResult<BlogPostDto> GetFiltered(BlogFilterDto filter);
 
     }
 }

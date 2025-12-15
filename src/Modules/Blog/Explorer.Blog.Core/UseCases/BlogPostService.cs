@@ -5,6 +5,7 @@ using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -127,6 +128,22 @@ namespace Explorer.Blog.Core.UseCases
             return _mapper.Map<BlogPostDto>(entity);
 
         }
+
+        // filtriranje blogova na osnovu statusa
+        public PagedResult<BlogPostDto> GetFiltered(BlogFilterDto filter)
+        {
+            var (items, total) = _repository.GetFiltered(
+                filter.Active,
+                filter.Famous,
+                filter.Page,
+                filter.PageSize
+            );
+
+            var dtos = _mapper.Map<List<BlogPostDto>>(items);
+            return new PagedResult<BlogPostDto>(dtos, total);
+        }
+
+
         // Helper
         private BlogPost LoadAndCheckOwnership(long authorId, long blogId)
         {
