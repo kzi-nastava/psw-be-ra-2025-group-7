@@ -13,13 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Stakeholders.Infrastructure.Migrations
 {
     [DbContext(typeof(StakeholdersContext))]
-<<<<<<<< HEAD:src/Modules/Stakeholders/Explorer.Stakeholders.Infrastructure/Migrations/20251214005756_InitStakeholders.Designer.cs
-    [Migration("20251214005756_InitStakeholders")]
-    partial class InitStakeholders
-========
     [Migration("20251215005210_InitComplete")]
     partial class InitComplete
->>>>>>>> development:src/Modules/Stakeholders/Explorer.Stakeholders.Infrastructure/Migrations/20251215005210_InitComplete.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -323,11 +318,6 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-<<<<<<<< HEAD:src/Modules/Stakeholders/Explorer.Stakeholders.Infrastructure/Migrations/20251214005756_InitStakeholders.Designer.cs
-                    b.Property<long>("ClubId")
-                        .HasColumnType("bigint");
-
-========
                     b.Property<long?>("ClubId")
                         .HasColumnType("bigint");
 
@@ -335,16 +325,12 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
->>>>>>>> development:src/Modules/Stakeholders/Explorer.Stakeholders.Infrastructure/Migrations/20251215005210_InitComplete.Designer.cs
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("boolean");
 
-<<<<<<<< HEAD:src/Modules/Stakeholders/Explorer.Stakeholders.Infrastructure/Migrations/20251214005756_InitStakeholders.Designer.cs
-                    b.Property<long>("TouristId")
-========
                     b.Property<long?>("ResourceId")
                         .HasColumnType("bigint");
 
@@ -355,16 +341,11 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<long?>("SourceFollowerMessageId")
->>>>>>>> development:src/Modules/Stakeholders/Explorer.Stakeholders.Infrastructure/Migrations/20251215005210_InitComplete.Designer.cs
                         .HasColumnType("bigint");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
-<<<<<<<< HEAD:src/Modules/Stakeholders/Explorer.Stakeholders.Infrastructure/Migrations/20251214005756_InitStakeholders.Designer.cs
-                    b.HasKey("Id");
-
-========
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
@@ -380,7 +361,6 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "IsRead");
 
->>>>>>>> development:src/Modules/Stakeholders/Explorer.Stakeholders.Infrastructure/Migrations/20251215005210_InitComplete.Designer.cs
                     b.ToTable("Notifications", "stakeholders");
                 });
 
