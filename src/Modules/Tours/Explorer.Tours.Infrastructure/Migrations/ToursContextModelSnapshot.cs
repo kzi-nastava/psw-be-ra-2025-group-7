@@ -218,68 +218,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.ToTable("Monuments", "tours");
                 });
 
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.Notification", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Preview")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Notifications", "tours");
-                });
-
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.OrderItem", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<long?>("ShoppingCartId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TourId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("TourName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ShoppingCartId");
-
-                    b.ToTable("OrderItems", "tours");
-                });
-
             modelBuilder.Entity("Explorer.Tours.Core.Domain.PublicPointRequest", b =>
                 {
                     b.Property<long>("Id")
@@ -315,28 +253,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.ToTable("PublicPointRequests", "tours");
                 });
 
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.ShoppingCart", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<long>("TouristId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TouristId")
-                        .IsUnique();
-
-                    b.ToTable("ShoppingCarts", "tours");
-                });
-
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Tour", b =>
                 {
                     b.Property<long>("Id")
@@ -357,6 +273,9 @@ namespace Explorer.Tours.Infrastructure.Migrations
 
                     b.Property<int>("Difficulty")
                         .HasColumnType("integer");
+
+                    b.Property<double>("LengthInKm")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -548,14 +467,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.Navigation("Quiz");
                 });
 
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.OrderItem", b =>
-                {
-                    b.HasOne("Explorer.Tours.Core.Domain.ShoppingCart", null)
-                        .WithMany("Items")
-                        .HasForeignKey("ShoppingCartId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Tour", b =>
                 {
                     b.OwnsMany("Explorer.Tours.Core.Domain.KeyPoint", "KeyPoints", b1 =>
@@ -641,17 +552,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.Navigation("TourDurations");
                 });
 
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
-                {
-                    b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
-                        .WithMany()
-                        .HasForeignKey("TourId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Tour");
-                });
-
             modelBuilder.Entity("TourEquipment", b =>
                 {
                     b.HasOne("Explorer.Tours.Core.Domain.Equipment", null)
@@ -667,6 +567,17 @@ namespace Explorer.Tours.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
+                {
+                    b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tour");
+                });
+
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Question", b =>
                 {
                     b.Navigation("Options");
@@ -675,11 +586,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Quiz", b =>
                 {
                     b.Navigation("Questions");
-                });
-
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.ShoppingCart", b =>
-                {
-                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

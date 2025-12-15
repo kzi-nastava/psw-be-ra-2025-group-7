@@ -11,11 +11,19 @@ namespace Explorer.Stakeholders.Core.UseCases;
 public class ClubMessageService : IClubMessageService
 {
     private readonly IClubMessageRepository _messageRepository;
+    private readonly IClubRepository _clubRepository;
+    private readonly INotificationService _notificationService;
     private readonly IMapper _mapper;
 
-    public ClubMessageService(IClubMessageRepository messageRepository, IMapper mapper)
+    public ClubMessageService(
+        IClubMessageRepository messageRepository,
+        IClubRepository clubRepository,
+        INotificationService notificationService,
+        IMapper mapper)
     {
         _messageRepository = messageRepository;
+        _clubRepository = clubRepository;
+        _notificationService = notificationService;
         _mapper = mapper;
     }
 
@@ -30,9 +38,6 @@ public class ClubMessageService : IClubMessageService
             resourceType = parsedType;
         }
 
-        // TODO: Verify that authorId is a member of the club
-        // This would require ClubMember repository which might not exist yet
-        
         var message = new ClubMessage(
             messageDto.ClubId,
             messageDto.AuthorId,
@@ -42,11 +47,21 @@ public class ClubMessageService : IClubMessageService
         );
 
         var created = _messageRepository.Create(message);
+        var createdDto = _mapper.Map<ClubMessageDto>(created);
 
-        // TODO (taèka 3): Kreirati notifikacije za sve èlanove kluba
-        // _notificationService.CreateClubMessageNotification(clubId, created);
+        // Preserve author and club info for notification content
+        createdDto.AuthorName = messageDto.AuthorName;
+        createdDto.AuthorSurname = messageDto.AuthorSurname;
+        createdDto.ClubName = messageDto.ClubName;
 
-        return _mapper.Map<ClubMessageDto>(created);
+        // Create notifications for all club members
+        var memberIds = _clubRepository.GetMemberIds(messageDto.ClubId);
+        if (memberIds.Any())
+        {
+            _notificationService.CreateClubMessageNotifications(createdDto, memberIds);
+        }
+
+        return createdDto;
     }
 
     public ClubMessageDto UpdateMessage(ClubMessageDto messageDto, long requesterId)
@@ -82,10 +97,10 @@ public class ClubMessageService : IClubMessageService
         if (club.CreatedBy != requesterId)
             throw new UnauthorizedAccessException("Only club owner can delete messages");
 
-        _messageRepository.Delete(messageId);
+        // Delete associated notifications first
+        _notificationService.DeleteClubMessageNotifications(messageId);
 
-        // TODO (taèka 3): Obrisati povezane notifikacije
-        // _notificationService.DeleteClubMessageNotifications(messageId);
+        _messageRepository.Delete(messageId);
     }
 
     public PagedResult<ClubMessageDto> GetClubMessages(long clubId, int page, int pageSize)
