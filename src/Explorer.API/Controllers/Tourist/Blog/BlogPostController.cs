@@ -122,6 +122,26 @@ namespace Explorer.API.Controllers.Tourist.Blog
             return Ok(result);
         }
 
+        [HttpGet("filtered")]
+        public ActionResult<PagedResult<BlogPostDto>> GetFiltered(
+                                                                    [FromQuery] bool? active,
+                                                                    [FromQuery] bool? famous,
+                                                                    [FromQuery] int page = 1,
+                                                                    [FromQuery] int pageSize = 10)
+        {
+            var filter = new BlogFilterDto
+            {
+                Active = active,
+                Famous = famous,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = _blogPostService.GetFiltered(filter);
+            return Ok(result);
+        }
+
+
 
     }
 }

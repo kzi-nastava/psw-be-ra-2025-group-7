@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Blog.Infrastructure.Migrations
 {
     [DbContext(typeof(BlogContext))]
-    [Migration("20251202154604_AddBlogComments")]
-    partial class AddBlogComments
+    [Migration("20251215221400_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -97,12 +97,6 @@ namespace Explorer.Blog.Infrastructure.Migrations
 
                             NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
 
-                            b1.Property<long>("AuthorId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("BlogId")
-                                .HasColumnType("bigint");
-
                             b1.Property<long>("BlogPostId")
                                 .HasColumnType("bigint");
 
@@ -116,6 +110,9 @@ namespace Explorer.Blog.Infrastructure.Migrations
                                 .IsRequired()
                                 .HasMaxLength(1000)
                                 .HasColumnType("character varying(1000)");
+
+                            b1.Property<long>("UserId")
+                                .HasColumnType("bigint");
 
                             b1.HasKey("Id");
 

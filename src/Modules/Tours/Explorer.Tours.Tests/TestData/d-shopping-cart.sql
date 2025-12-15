@@ -10,9 +10,9 @@
 -- Tura -5 ve? postoji kao Published (Price: 120)
 
 -- Dodajemo još jednu Published turu sa razli?itom cenom
-INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt")
+INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt", "LengthInKm")
 VALUES 
-    (-10, 'Test Tour Published - For Cart', 'Published tour specifically for shopping cart tests', 1, 'test,shopping', 1, 75.50, -1, '2024-01-20 12:00:00', NULL);
+    (-10, 'Test Tour Published - For Cart', 'Published tour specifically for shopping cart tests', 1, 'test,shopping', 1, 75.50, -1, '2024-01-20 12:00:00', NULL, 0);
 
 -- Key points za turu -10 (potrebno je minimum 2 za Published status)
 INSERT INTO tours."KeyPoints" ("Id", "Latitude", "Longitude", "Name", "Description", "ImageUrl", "Secret", "TourId")
@@ -23,9 +23,9 @@ VALUES
 -- ------------------------------------------------------------
 -- 2. Arhivirana tura za testiranje validacije
 -- ------------------------------------------------------------
-INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt")
+INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt", "LengthInKm")
 VALUES 
-    (-100, 'Test Tour Archived', 'Archived tour - cannot be purchased', 1, 'test,archived', 2, 75.00, -1, '2024-01-10 10:00:00', '2024-02-01 10:00:00');
+    (-100, 'Test Tour Archived', 'Archived tour - cannot be purchased', 1, 'test,archived', 2, 75.00, -1, '2024-01-10 10:00:00', '2024-02-01 10:00:00', 0);
 
 -- Key points za arhivirana turu -100
 INSERT INTO tours."KeyPoints" ("Id", "Latitude", "Longitude", "Name", "Description", "ImageUrl", "Secret", "TourId")
@@ -36,9 +36,9 @@ VALUES
 -- ------------------------------------------------------------
 -- 3. Draft tura za testiranje validacije
 -- ------------------------------------------------------------
-INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt")
+INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt", "LengthInKm")
 VALUES 
-    (-101, 'Test Tour Draft', 'Draft tour - cannot be purchased', 1, 'test,draft', 0, 80.00, -1, NULL, NULL);
+    (-101, 'Test Tour Draft', 'Draft tour - cannot be purchased', 1, 'test,draft', 0, 80.00, -1, NULL, NULL, 0);
 
 -- Key points za draft turu -101 (draft ture mogu imati key points, samo nisu objavljene)
 INSERT INTO tours."KeyPoints" ("Id", "Latitude", "Longitude", "Name", "Description", "ImageUrl", "Secret", "TourId")
@@ -64,9 +64,9 @@ VALUES
 -- 5. Dodatne Published ture sa cenom 0 za testiranje
 -- ------------------------------------------------------------
 -- Za testiranje da korpa radi ispravno sa besplatnim turama
-INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt")
+INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt", "LengthInKm")
 VALUES 
-    (-11, 'Free Tour Published', 'Free published tour for testing', 1, 'test,free', 1, 0, -1, '2024-01-22 14:00:00', NULL);
+    (-11, 'Free Tour Published', 'Free published tour for testing', 1, 'test,free', 1, 0, -1, '2024-01-22 14:00:00', NULL, 0);
 
 -- Key points za besplatnu turu -11
 INSERT INTO tours."KeyPoints" ("Id", "Latitude", "Longitude", "Name", "Description", "ImageUrl", "Secret", "TourId")

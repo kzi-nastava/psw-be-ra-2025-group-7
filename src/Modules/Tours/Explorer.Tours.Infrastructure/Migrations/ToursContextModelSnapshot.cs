@@ -358,6 +358,9 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     b.Property<int>("Difficulty")
                         .HasColumnType("integer");
 
+                    b.Property<double>("LengthInKm")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -645,40 +648,6 @@ namespace Explorer.Tours.Infrastructure.Migrations
                             b1.HasIndex("TourId");
 
                             b1.ToTable("KeyPoints", "tours");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TourId");
-                        });
-
-                    b.OwnsMany("Explorer.Tours.Core.Domain.TourDuration", "TourDurations", b1 =>
-                        {
-                            b1.Property<long>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("bigint");
-
-                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
-
-                            b1.Property<int>("Minutes")
-                                .HasColumnType("integer")
-                                .HasColumnName("DurationInMinutes");
-
-                            b1.Property<long>("TourId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<string>("Type")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("character varying(50)")
-                                .HasColumnName("TransportType");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("TourId");
-
-                            b1.ToTable("TourDurations", "tours", t =>
-                                {
-                                    t.HasCheckConstraint("CK_TourDuration_Minutes_Positive", "\"DurationInMinutes\" > 0");
-                                });
 
                             b1.WithOwner()
                                 .HasForeignKey("TourId");

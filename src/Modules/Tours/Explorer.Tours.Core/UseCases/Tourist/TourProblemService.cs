@@ -207,6 +207,19 @@ public class TourProblemService : ITourProblemService
         return _mapper.Map<TourProblemDto>(updated);
     }
 
+    public TourProblemDto GetById(int id)
+    {
+        try
+        {
+            var problem = _repository.Get(id); // već postoji u repo
+            return _mapper.Map<TourProblemDto>(problem);
+        }
+        catch (KeyNotFoundException)
+        {
+            throw new NotFoundException("TourProblem not found.");
+        }
+    }
+
     public TourProblemDto MarkAsResolved(int id, int touristId)
     {
         var problem = _repository.Get(id);
