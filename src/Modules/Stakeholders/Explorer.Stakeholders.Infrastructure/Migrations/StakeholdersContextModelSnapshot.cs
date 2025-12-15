@@ -171,6 +171,111 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                     b.ToTable("ClubMembers", "stakeholders");
                 });
 
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.ClubMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AuthorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ClubId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(280)
+                        .HasColumnType("character varying(280)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("ResourceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("ResourceType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("ClubMessages", "stakeholders");
+                });
+
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Follower", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("FollowedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("FollowedId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("FollowerId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FollowedId");
+
+                    b.HasIndex("FollowerId");
+
+                    b.HasIndex("FollowerId", "FollowedId")
+                        .IsUnique();
+
+                    b.ToTable("Followers", "stakeholders");
+                });
+
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.FollowerMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AuthorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(280)
+                        .HasColumnType("character varying(280)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("ResourceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("ResourceType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("FollowerMessages", "stakeholders");
+                });
+
             modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Message", b =>
                 {
                     b.Property<long>("Id")
@@ -210,8 +315,12 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("ClubId")
+                    b.Property<long?>("ClubId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -219,13 +328,35 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("boolean");
 
-                    b.Property<long>("TouristId")
+                    b.Property<long?>("ResourceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("ResourceType")
+                        .HasColumnType("integer");
+
+                    b.Property<long?>("SourceClubMessageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("SourceFollowerMessageId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("SourceClubMessageId");
+
+                    b.HasIndex("SourceFollowerMessageId");
+
+                    b.HasIndex("UserId", "IsRead");
 
                     b.ToTable("Notifications", "stakeholders");
                 });
@@ -421,6 +552,30 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                         .WithMany("Members")
                         .HasForeignKey("ClubId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Notification", b =>
+                {
+                    b.HasOne("Explorer.Stakeholders.Core.Domain.Club", null)
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Explorer.Stakeholders.Core.Domain.ClubMessage", null)
+                        .WithMany()
+                        .HasForeignKey("SourceClubMessageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Explorer.Stakeholders.Core.Domain.FollowerMessage", null)
+                        .WithMany()
+                        .HasForeignKey("SourceFollowerMessageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Explorer.Stakeholders.Core.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Explorer.Stakeholders.Core.Domain.Person", b =>

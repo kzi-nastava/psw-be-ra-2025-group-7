@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Stakeholders.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitStakeholders : Migration
+    public partial class InitComplete : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,6 +35,26 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ClubMessages",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ClubId = table.Column<long>(type: "bigint", nullable: false),
+                    AuthorId = table.Column<long>(type: "bigint", nullable: false),
+                    Content = table.Column<string>(type: "character varying(280)", maxLength: 280, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ResourceId = table.Column<long>(type: "bigint", nullable: true),
+                    ResourceType = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClubMessages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Clubs",
                 schema: "stakeholders",
                 columns: table => new
@@ -55,6 +75,40 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FollowerMessages",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    AuthorId = table.Column<long>(type: "bigint", nullable: false),
+                    Content = table.Column<string>(type: "character varying(280)", maxLength: 280, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ResourceId = table.Column<long>(type: "bigint", nullable: true),
+                    ResourceType = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FollowerMessages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Followers",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FollowerId = table.Column<long>(type: "bigint", nullable: false),
+                    FollowedId = table.Column<long>(type: "bigint", nullable: false),
+                    FollowedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Followers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Messages",
                 schema: "stakeholders",
                 columns: table => new
@@ -70,24 +124,6 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Messages", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Notifications",
-                schema: "stakeholders",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    TouristId = table.Column<long>(type: "bigint", nullable: false),
-                    ClubId = table.Column<long>(type: "bigint", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsRead = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Notifications", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -251,6 +287,57 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                schema: "stakeholders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false),
+                    ResourceId = table.Column<long>(type: "bigint", nullable: true),
+                    ResourceType = table.Column<int>(type: "integer", nullable: true),
+                    SourceFollowerMessageId = table.Column<long>(type: "bigint", nullable: true),
+                    SourceClubMessageId = table.Column<long>(type: "bigint", nullable: true),
+                    ClubId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_ClubMessages_SourceClubMessageId",
+                        column: x => x.SourceClubMessageId,
+                        principalSchema: "stakeholders",
+                        principalTable: "ClubMessages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Clubs_ClubId",
+                        column: x => x.ClubId,
+                        principalSchema: "stakeholders",
+                        principalTable: "Clubs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Notifications_FollowerMessages_SourceFollowerMessageId",
+                        column: x => x.SourceFollowerMessageId,
+                        principalSchema: "stakeholders",
+                        principalTable: "FollowerMessages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Notifications_People_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "stakeholders",
+                        principalTable: "People",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Reviews",
                 schema: "stakeholders",
                 columns: table => new
@@ -294,10 +381,89 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 column: "ClubId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ClubMessages_AuthorId",
+                schema: "stakeholders",
+                table: "ClubMessages",
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClubMessages_ClubId",
+                schema: "stakeholders",
+                table: "ClubMessages",
+                column: "ClubId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClubMessages_CreatedAt",
+                schema: "stakeholders",
+                table: "ClubMessages",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FollowerMessages_AuthorId",
+                schema: "stakeholders",
+                table: "FollowerMessages",
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FollowerMessages_CreatedAt",
+                schema: "stakeholders",
+                table: "FollowerMessages",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Followers_FollowedId",
+                schema: "stakeholders",
+                table: "Followers",
+                column: "FollowedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Followers_FollowerId",
+                schema: "stakeholders",
+                table: "Followers",
+                column: "FollowerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Followers_FollowerId_FollowedId",
+                schema: "stakeholders",
+                table: "Followers",
+                columns: new[] { "FollowerId", "FollowedId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Messages_SentByUserId_SentToUserId_Id",
                 schema: "stakeholders",
                 table: "Messages",
                 columns: new[] { "SentByUserId", "SentToUserId", "Id" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_ClubId",
+                schema: "stakeholders",
+                table: "Notifications",
+                column: "ClubId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_CreatedAt",
+                schema: "stakeholders",
+                table: "Notifications",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_SourceClubMessageId",
+                schema: "stakeholders",
+                table: "Notifications",
+                column: "SourceClubMessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_SourceFollowerMessageId",
+                schema: "stakeholders",
+                table: "Notifications",
+                column: "SourceFollowerMessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId_IsRead",
+                schema: "stakeholders",
+                table: "Notifications",
+                columns: new[] { "UserId", "IsRead" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_People_UserId",
@@ -347,6 +513,10 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 schema: "stakeholders");
 
             migrationBuilder.DropTable(
+                name: "Followers",
+                schema: "stakeholders");
+
+            migrationBuilder.DropTable(
                 name: "Messages",
                 schema: "stakeholders");
 
@@ -367,7 +537,15 @@ namespace Explorer.Stakeholders.Infrastructure.Migrations
                 schema: "stakeholders");
 
             migrationBuilder.DropTable(
+                name: "ClubMessages",
+                schema: "stakeholders");
+
+            migrationBuilder.DropTable(
                 name: "Clubs",
+                schema: "stakeholders");
+
+            migrationBuilder.DropTable(
+                name: "FollowerMessages",
                 schema: "stakeholders");
 
             migrationBuilder.DropTable(

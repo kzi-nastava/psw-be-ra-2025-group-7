@@ -14,7 +14,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Clubs
             return new Club(
                 name: "Test klub",
                 description: "Opis",
-                createdBy: -21,
+                createdBy: 1,
                 imageUrls: new List<string> { "img.jpg" });
         }
 

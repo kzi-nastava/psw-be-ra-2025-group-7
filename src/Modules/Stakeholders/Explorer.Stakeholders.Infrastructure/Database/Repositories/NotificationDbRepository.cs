@@ -27,7 +27,7 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
         public List<Notification> GetForTourist(long touristId)
         {
             return _dbSet
-                .Where(n => n.TouristId == touristId)
+                .Where(n => n.UserId == touristId)
                 .OrderByDescending(n => n.CreatedAt)
                 .ToList();
         }
