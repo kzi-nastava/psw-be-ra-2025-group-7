@@ -24,11 +24,12 @@ namespace Explorer.Tours.Tests.Integration
 
             var dto = new TourProblemDto
             {
-                TourId = 1,
+                TourId = -4,
                 Category = "Equipment",
                 Priority = "Medium",
                 Description = "Lost item",
-                TimeReported = DateTime.UtcNow
+                TimeReported = DateTime.UtcNow,
+                IsSolved = false
             };
 
             // Act
@@ -76,11 +77,12 @@ namespace Explorer.Tours.Tests.Integration
                 {
                     var seedDto = new TourProblemDto
                     {
-                        TourId = 1,
+                        TourId = -1,
                         Category = "Equipment",
                         Priority = "Medium",
                         Description = "Initial equipment issue to be updated.",
-                        TimeReported = DateTime.UtcNow
+                        TimeReported = DateTime.UtcNow,
+                        IsSolved = false
                     };
 
                     var created = ((ObjectResult)controller.Create(seedDto).Result)?.Value as TourProblemDto;
@@ -103,7 +105,8 @@ namespace Explorer.Tours.Tests.Integration
                     Category = "Other",
                     Priority = "High",
                     Description = "Updated description",
-                    TimeReported = DateTime.UtcNow
+                    TimeReported = DateTime.UtcNow,
+                    IsSolved = false
                 };
 
                 updated = ((ObjectResult)controller.Update(id, dto).Result)?.Value as TourProblemDto;
@@ -156,11 +159,12 @@ namespace Explorer.Tours.Tests.Integration
                 {
                     var dto = new TourProblemDto
                     {
-                        TourId = 2,
+                        TourId = -2,
                         Category = "Safety",
                         Priority = "Low",
                         Description = "Safety related problem to be deleted.",
-                        TimeReported = DateTime.UtcNow
+                        TimeReported = DateTime.UtcNow,
+                        IsSolved = false
                     };
 
                     var created = ((ObjectResult)controller.Create(dto).Result)?.Value as TourProblemDto;

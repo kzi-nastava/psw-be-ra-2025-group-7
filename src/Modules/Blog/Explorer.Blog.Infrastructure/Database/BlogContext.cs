@@ -9,6 +9,8 @@ public class BlogContext : DbContext
 
 
     public DbSet<BlogPost> BlogPosts { get; set; } = null!;  //DbSet za BlogPost entitet
+    public DbSet<BlogComment> BlogComments { get; set; } = null!; //DbSet za BlogComment entitet
+    public DbSet<BlogVote> BlogVotes { get; set; } = null!; 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("blog");
@@ -24,6 +26,12 @@ public class BlogContext : DbContext
             b.Property(x => x.Description).IsRequired();
             b.Property(x => x.CreatedAt).IsRequired();
 
+            b.Property(x => x.Status)
+            .IsRequired()
+            .HasConversion<int>();  
+
+            b.Property(x => x.LastModifiedAt);
+
             // Images kao owned kolekcija (BlogImage)
             b.OwnsMany(x => x.Images, img =>
             {
@@ -36,6 +44,37 @@ public class BlogContext : DbContext
                 img.Property(i => i.Url).IsRequired();
                 img.Property(i => i.Order).IsRequired();
             });
+
+            b.OwnsMany(x => x.Comments, comment =>
+            {
+                comment.ToTable("BlogComments");
+                comment.WithOwner().HasForeignKey("BlogPostId");
+
+                comment.Property<long>("Id");
+                comment.HasKey("Id");
+
+                comment.Property(c => c.UserId).IsRequired();
+                comment.Property(c => c.Text).IsRequired().HasMaxLength(1000);
+                comment.Property(c => c.CreatedAt).IsRequired();
+                comment.Property(c => c.LastModifiedAt);
+            });
+        });
+
+        // Konfiguracija za BlogVote
+        modelBuilder.Entity<BlogVote>(bv =>
+        {
+            bv.ToTable("BlogVotes");
+            bv.HasKey(x => x.Id);
+
+            bv.Property(x => x.UserId).IsRequired();
+            bv.Property(x => x.Value).IsRequired();
+            bv.Property(x => x.VotedAt).IsRequired();
+
+            // Relacija: BlogPost 1 -> N BlogVotes
+            bv.HasOne<BlogPost>()
+             .WithMany(b => b.Votes)
+             .HasForeignKey("BlogPostId")
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

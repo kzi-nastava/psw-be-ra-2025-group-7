@@ -22,6 +22,8 @@ public class BlogPostRepository : IBlogPostRepository
     {
         IQueryable<BlogPost> query = _context.BlogPosts
             .Include(b => b.Images)
+            .Include(b => b.Comments)
+            .Include(b => b.Votes)
             .Where(b => b.AuthorId == authorId)
             .OrderByDescending(b => b.CreatedAt);
 
@@ -42,6 +44,8 @@ public class BlogPostRepository : IBlogPostRepository
     {
         return _context.BlogPosts
             .Include(b => b.Images)
+            .Include(b => b.Votes)
+            .Include(b=>b.Comments)
             .FirstOrDefault(b => b.Id == id);
     }
 
@@ -55,9 +59,74 @@ public class BlogPostRepository : IBlogPostRepository
     public BlogPost Update(BlogPost blogPost)
     {
         _context.BlogPosts.Update(blogPost);
-        _context.SaveChanges();
+        var affected = _context.SaveChanges();
+        Console.WriteLine("SaveChanges affected: " + affected);
         return blogPost;
     }
+
+
+    public (IEnumerable<BlogPost> items, int total) GetPublic(int page, int pageSize)
+    {
+        var query = _context.BlogPosts
+            .Include(b => b.Images)
+            .Include(b => b.Votes)
+            .Include(b=>b.Comments)
+            .Where(b => b.Status == BlogStatus.Published
+                     || b.Status == BlogStatus.Archived 
+                     || b.Status == BlogStatus.Active
+                     || b.Status == BlogStatus.Famous);
+
+        var total = query.Count();
+
+        var items = query
+            .OrderByDescending(b => b.LastModifiedAt ?? b.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (items, total);
+    }
+
+    public BlogPost? GetByCommentId(long commentId)
+    {
+        return _context.BlogPosts
+            .Include(b => b.Comments)
+            .Include(b=>b.Votes)
+            .FirstOrDefault(b => b.Comments.Any(c => c.Id == commentId));
+    }
+
+
+    // filtriranje blogova na osnovu statusa
+    public (IList<BlogPost> Items, int TotalCount) GetFiltered(bool? active, bool? famous, int page, int pageSize)
+    {
+        var query = _context.BlogPosts
+            .Include(b => b.Images)
+            .Include(b => b.Comments)
+            .Include(b => b.Votes)
+            .AsQueryable();
+
+        if (active == true && famous != true)
+            query = query.Where(b => b.Status == BlogStatus.Active);
+        else if (famous == true && active != true)
+            query = query.Where(b => b.Status == BlogStatus.Famous);
+        else if (active == true && famous == true)
+            query = query.Where(b => b.Status == BlogStatus.Active || b.Status == BlogStatus.Famous);
+        // else: bez filtera (vraca sve blogove)
+
+        var total = query.Count();
+
+        var items = query
+            .OrderByDescending(b => b.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (items, total);
+    }
+
+
+
+
 }
 
 

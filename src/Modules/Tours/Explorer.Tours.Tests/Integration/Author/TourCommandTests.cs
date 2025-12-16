@@ -7,6 +7,7 @@ using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using Xunit;
 
 namespace Explorer.Tours.Tests.Integration.Author;
 
@@ -22,15 +23,13 @@ public class TourCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
-        var newEntity = new TourDto
+
+        var newEntity = new CreateTourDto
         {
             Name = "New Test Tour",
             Description = "Test description for new tour",
             Difficulty = 1,
             Tags = new List<string> { "test", "new" },
-            Status = 0,
-            Price = 0,
-            AuthorId = -1
         };
 
         // Act
@@ -40,11 +39,16 @@ public class TourCommandTests : BaseToursIntegrationTest
         result.ShouldNotBeNull();
         result.Id.ShouldNotBe(0);
         result.Name.ShouldBe(newEntity.Name);
+        result.Status.ShouldBe(0); // Draft
+        result.Price.ShouldBe(0);
+        result.PublishedAt.ShouldBeNull();
+        result.ArchivedAt.ShouldBeNull();
 
         // Assert - Database
         var storedEntity = dbContext.Tours.FirstOrDefault(t => t.Name == newEntity.Name);
         storedEntity.ShouldNotBeNull();
         storedEntity.Id.ShouldBe(result.Id);
+        storedEntity.Status.ShouldBe(TourStatus.Draft);
     }
 
     [Fact]
@@ -53,10 +57,13 @@ public class TourCommandTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
-        var newEntity = new TourDto
+
+        var newEntity = new CreateTourDto
         {
-            Name = "",  // Invalid - empty name
-            Description = "Test"
+            Name = "",  
+            Description = "Test",
+            Difficulty = 1,
+            Tags = new List<string>(),
         };
 
         // Act & Assert
@@ -83,7 +90,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = ((ObjectResult)controller.Update(updatedEntity).Result)?.Value as TourDto;
+        var result = ((ObjectResult)controller.Update(updatedEntity.Id, updatedEntity).Result)?.Value as TourDto;
 
         // Assert - Response
         result.ShouldNotBeNull();
@@ -119,7 +126,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         };
 
         // Act & Assert
-        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity));
+        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity.Id, updatedEntity));
     }
 
     [Fact]
@@ -141,6 +148,54 @@ public class TourCommandTests : BaseToursIntegrationTest
         var storedEntity = dbContext.Tours.FirstOrDefault(t => t.Id == -2);
         storedEntity.ShouldBeNull();
     }
+    [Fact]
+    public void AddKeyPoint_with_make_public_creates_public_point_request()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        // prvo kreiramo novu turu za ovog autora (-1), da smo sigurni da je Draft
+        var newTour = new CreateTourDto
+        {
+            Name = "Tour with public keypoint",
+            Description = "Desc",
+            Difficulty = 1,
+            Tags = new List<string> { "public-test" }
+        };
+
+        var createdResult = ((ObjectResult)controller.Create(newTour).Result)?.Value as TourDto;
+        createdResult.ShouldNotBeNull();
+        var tourId = createdResult!.Id;
+
+        var keyPointDto = new KeyPointDto
+        {
+            Latitude = 45.20,
+            Longitude = 19.80,
+            Name = "Public KP",
+            Description = "Some description",
+            ImageUrl = null,
+            Secret = "Secret data",
+            MakePublic = true      // 🔥 bitno!
+        };
+
+        // Act
+        var addResult = ((ObjectResult)controller.AddKeyPoint(tourId, keyPointDto).Result);
+
+        // Assert - response
+        addResult.ShouldNotBeNull();
+        addResult.StatusCode.ShouldBe(200);
+
+        // Assert - PublicPointRequest u bazi
+        var request = dbContext.PublicPointRequests
+            .FirstOrDefault(r => r.TourId == tourId && r.AuthorId == -1);
+
+        request.ShouldNotBeNull();
+        request!.Status.ShouldBe(PublicPointRequestStatus.Pending);
+        request.KeyPointIndex.ShouldBe(0); // prva (i jedina) tačka na toj turi
+    }
+
 
     [Fact]
     public void Delete_fails_invalid_id()

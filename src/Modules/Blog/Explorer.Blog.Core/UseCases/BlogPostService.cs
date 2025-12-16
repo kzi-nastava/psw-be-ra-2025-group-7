@@ -5,6 +5,7 @@ using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,16 @@ namespace Explorer.Blog.Core.UseCases
             return new PagedResult<BlogPostDto>(resultDtos, total);
         }
 
+
+        public PagedResult<BlogPostDto> GetPublic(int page, int pageSize)
+        {
+            var (items, total) = _repository.GetPublic(page, pageSize);
+
+            var resultDtos = _mapper.Map<List<BlogPostDto>>(items);
+            return new PagedResult<BlogPostDto>(resultDtos, total);
+        }
+
+
         public BlogPostDto Create(long authorId, CreateBlogPostDto dto)
         {
             var images = _mapper.Map<IEnumerable<BlogImage>>(dto); // koristi mapu CreateBlogPostDto → IEnumerable<BlogImage>
@@ -41,25 +52,109 @@ namespace Explorer.Blog.Core.UseCases
             return _mapper.Map<BlogPostDto>(created);
         }
 
-        public BlogPostDto Update(long authorId, UpdateBlogPostDto dto)
+        public BlogPostDto UpdateDraft(long authorId, UpdateBlogPostDto dto)
         {
-            var existing = _repository.Get(dto.Id);
-            if (existing == null)
-            {
-                throw new NotFoundException("Blog post not found.");
-            }
+            var existing = LoadAndCheckOwnership(authorId, dto.Id);
 
-            if (existing.AuthorId != authorId)
-            {
-                throw new ForbiddenException("You cannot edit this blog post.");
-            }
-
-            var images = _mapper.Map<IEnumerable<BlogImage>>(dto); // UpdateBlogPostDto → IEnumerable<BlogImage>
-
-            existing.Edit(dto.Title, dto.Description, images);
+            existing.EditDraft(
+                dto.Title,
+                dto.Description,
+                _mapper.Map<IEnumerable<BlogImage>>(dto));
 
             var updated = _repository.Update(existing);
             return _mapper.Map<BlogPostDto>(updated);
+        }
+
+        public BlogPostDto UpdatePublishedDescription(long authorId, UpdatePublishedBlogDescriptionDto dto)
+        {
+            var existing = LoadAndCheckOwnership(authorId, dto.Id);
+
+            existing.UpdatePublishedDescription(dto.Description);
+
+            var updated = _repository.Update(existing);
+            return _mapper.Map<BlogPostDto>(updated);
+        }
+
+        public BlogPostDto Publish(long authorId, long blogId)
+        {
+            var existing = LoadAndCheckOwnership(authorId, blogId);
+
+            existing.Publish();
+
+            var updated = _repository.Update(existing);
+            return _mapper.Map<BlogPostDto>(updated);
+        }
+
+        public BlogPostDto Archive(long authorId, long blogId)
+        {
+            var existing = LoadAndCheckOwnership(authorId, blogId);
+
+            existing.Archive();
+
+            var updated = _repository.Update(existing);
+            return _mapper.Map<BlogPostDto>(updated);
+        }
+
+        public BlogVoteDto Vote(long blogPostId, long userId, int value)
+        {
+            var blogPost = _repository.Get(blogPostId);
+            if (blogPost == null)
+                throw new NotFoundException("Blog post not found.");
+
+            blogPost.Vote(userId, value); 
+            _repository.Update(blogPost);
+
+            blogPost = _repository.Get(blogPostId);
+
+            var userVote = blogPost.Votes.FirstOrDefault(v => v.UserId == userId)?.Value ?? 0;
+            
+            var totalScore = blogPost.Votes.Sum(v => v.Value);
+
+            return new BlogVoteDto
+            {
+                UserId = userId,
+                Value = userVote,
+                Score = totalScore,
+                VotedAt = DateTime.UtcNow
+            };
+        }
+
+
+        public BlogPostDto Get(long id)
+        {
+            var entity = _repository.Get(id);
+            if(entity == null) { throw new NotFoundException("Blog post not found"); }
+
+            return _mapper.Map<BlogPostDto>(entity);
+
+        }
+
+        // filtriranje blogova na osnovu statusa
+        public PagedResult<BlogPostDto> GetFiltered(BlogFilterDto filter)
+        {
+            var (items, total) = _repository.GetFiltered(
+                filter.Active,
+                filter.Famous,
+                filter.Page,
+                filter.PageSize
+            );
+
+            var dtos = _mapper.Map<List<BlogPostDto>>(items);
+            return new PagedResult<BlogPostDto>(dtos, total);
+        }
+
+
+        // Helper
+        private BlogPost LoadAndCheckOwnership(long authorId, long blogId)
+        {
+            var existing = _repository.Get(blogId);
+            if (existing == null)
+                throw new NotFoundException("Blog post not found.");
+
+            if (existing.AuthorId != authorId)
+                throw new ForbiddenException("You cannot edit this blog post.");
+
+            return existing;
         }
     }
 

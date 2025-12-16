@@ -1,12 +1,10 @@
 ﻿using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Stakeholders.API.Public;
-using Explorer.Stakeholders.API.Public.Administration;
 using Explorer.Stakeholders.API.Public.Tourist;
 using Explorer.Stakeholders.API.Services;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.Mappers;
 using Explorer.Stakeholders.Core.UseCases;
-using Explorer.Stakeholders.Core.UseCases.Administration;
 using Explorer.Stakeholders.Core.UseCases.Tourist;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Stakeholders.Infrastructure.Database;
@@ -32,13 +30,18 @@ public static class StakeholdersStartup
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
-        services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IUserProfileService, UserProfileService>();
         services.AddScoped<IAccountService, AccountService>();
-
-        
+        services.AddScoped<IClubService, ClubService>();
+        services.AddScoped<ITourPreferencesService, TourPreferencesService>();
         services.AddScoped<ILocationService, LocationService>();
         services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IFollowerService, FollowerService>();
+        services.AddScoped<IFollowerMessageService, FollowerMessageService>();
+        services.AddScoped<IClubMessageService, ClubMessageService>();
+        services.AddScoped<INotificationService, NotificationService>();
+
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -47,10 +50,17 @@ public static class StakeholdersStartup
         services.AddScoped<IUserRepository, UserDbRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IMessageRepository, MessageDbRepository>();
-        services.AddScoped<IMonumentRepository, MonumentDbRepository>();
+        services.AddScoped<ITourPreferencesRepository, TourPreferencesDbRepository>();
         services.AddScoped<IUserProfileRepository, UserProfileDbRepository>();
-        
+        services.AddScoped<IClubRepository, ClubDbRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<INotificationRepository, NotificationDbRepository>();
+
+        
+        // New follower system repositories
+        services.AddScoped<IFollowerRepository, FollowerDbRepository>();
+        services.AddScoped<IFollowerMessageRepository, FollowerMessageDbRepository>();
+        services.AddScoped<IClubMessageRepository, ClubMessageDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

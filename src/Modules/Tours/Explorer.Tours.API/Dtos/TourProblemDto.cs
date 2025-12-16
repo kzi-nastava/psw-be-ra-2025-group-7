@@ -13,8 +13,13 @@ namespace Explorer.Tours.API.Dtos
         public int TouristId { get; set; }
         public string Category { get; set; } = "";
         public string Priority { get; set; } = "";
-
         public string Description { get; set; } = "";
         public DateTime TimeReported { get; set; }
+        public DateTime? ResolveDue { get; set; }
+        public bool IsSolved { get; set; }
+        public string Status { get; set; } = "";
+        public List<TourProblemMessageDto> Comments { get; set; } = new();
+
+
     }
 }
