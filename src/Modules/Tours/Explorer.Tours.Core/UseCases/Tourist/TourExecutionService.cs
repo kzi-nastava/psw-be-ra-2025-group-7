@@ -135,7 +135,7 @@ public class TourExecutionService : ITourExecutionService
         return result;
     }
 
-    public PagedResult<TourExecutionDto> GetExecutionHistory(long touristId, int page, int pageSize)
+    public PagedResult<TourExecutionDto> GetExecutionHistory(long touristId, int page = 1, int pageSize = 20)
     {
         var pagedResult = _executionRepository.GetByTouristId(touristId, page, pageSize);
         
@@ -170,6 +170,74 @@ public class TourExecutionService : ITourExecutionService
 
         var keyPoint = tour.KeyPoints[keyPointIndex];
         return keyPoint.Secret;
+    }
+
+    public TourExecutionDto UpdateLastActivity(long touristId, long executionId)
+    {
+        var execution = _executionRepository.Get(executionId);
+
+        if (execution.TouristId != touristId)
+            throw new ForbiddenException("You can only update your own tour executions.");
+
+        execution.UpdateLastActivity();
+        var updatedExecution = _executionRepository.Update(execution);
+        
+        var result = _mapper.Map<TourExecutionDto>(updatedExecution);
+        var tour = _tourRepository.Get(updatedExecution.TourId);
+        result.Tour = _mapper.Map<TourDto>(tour);
+        
+        return result;
+    }
+
+    public double GetProgressPercentage(long touristId, long executionId)
+    {
+        var execution = _executionRepository.Get(executionId);
+
+        if (execution.TouristId != touristId)
+            throw new ForbiddenException("You can only check progress on your own tour executions.");
+
+        return execution.CalculateProgressPercentage();
+    }
+
+    public KeyPointProximityCheckResultDto CheckKeyPointProximity(long touristId, long executionId, CheckKeyPointProximityDto dto)
+    {
+        var execution = _executionRepository.Get(executionId);
+
+        if (execution.TouristId != touristId)
+            throw new ForbiddenException("You can only check proximity on your own tour executions.");
+
+        // Proveri blizinu i automatski otključaj ako je blizu
+        var proximityResult = execution.CheckProximityAndUnlock(dto.Latitude, dto.Longitude);
+
+        // Sačuvaj promene (LastActivity je uvek ažurirano, možda i nova tačka otključana)
+        var updatedExecution = _executionRepository.Update(execution);
+
+        var result = new KeyPointProximityCheckResultDto
+        {
+            TourExecution = _mapper.Map<TourExecutionDto>(updatedExecution)
+        };
+
+        // Dodaj Tour u DTO
+        result.TourExecution.Tour = _mapper.Map<TourDto>(execution.Tour);
+
+        if (proximityResult.HasValue)
+        {
+            var (keyPointIndex, distanceKm, wasAlreadyUnlocked) = proximityResult.Value;
+            var keyPoint = execution.Tour.KeyPoints[keyPointIndex];
+            
+            result.IsNearKeyPoint = true;
+            result.KeyPointIndex = keyPointIndex;
+            result.KeyPointName = keyPoint.Name;
+            result.DistanceInMeters = distanceKm * 1000; // Convert to meters
+            result.WasAlreadyUnlocked = wasAlreadyUnlocked;
+            result.UnlockedAt = execution.GetKeyPointUnlockTime(keyPointIndex);
+        }
+        else
+        {
+            result.IsNearKeyPoint = false;
+        }
+
+        return result;
     }
 
     private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)

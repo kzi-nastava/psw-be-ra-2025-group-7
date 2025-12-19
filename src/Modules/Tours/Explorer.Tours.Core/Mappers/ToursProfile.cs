@@ -110,6 +110,11 @@ namespace Explorer.Tours.Core.Mappers
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(dest => dest.UnlockedKeyPointIndices, opt => opt.MapFrom(src => src.UnlockedKeyPointIndices.ToList()))
                 .ForMember(dest => dest.Tour, opt => opt.MapFrom(src => src.Tour));
+
+            // TourReview mappings
+            CreateMap<TourReview, TourReviewDto>()
+                .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.ImageUrls.ToList()))
+                .ForMember(dest => dest.Tour, opt => opt.MapFrom(src => src.Tour));
         }
     }
 }

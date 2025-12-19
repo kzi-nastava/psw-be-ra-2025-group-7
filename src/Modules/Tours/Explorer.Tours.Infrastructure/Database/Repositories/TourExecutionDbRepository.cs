@@ -93,6 +93,10 @@ public class TourExecutionDbRepository : ITourExecutionRepository
             DbContext.Entry(existingExecution).Property("_unlockedKeyPointIndices")
                 .CurrentValue = execution.UnlockedKeyPointIndices.ToList();
 
+            // Ažuriraj _keyPointUnlockTimes dictionary
+            DbContext.Entry(existingExecution).Property("_keyPointUnlockTimes")
+                .CurrentValue = new Dictionary<int, DateTime>(execution.KeyPointUnlockTimes);
+
             DbContext.SaveChanges();
 
             // Ponovo učitaj sa svim Include-ovima

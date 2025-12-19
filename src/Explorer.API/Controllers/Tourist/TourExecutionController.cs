@@ -51,6 +51,30 @@ public class TourExecutionController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("{executionId:long}/check-proximity")]
+    public ActionResult<KeyPointProximityCheckResultDto> CheckKeyPointProximity(long executionId, [FromBody] CheckKeyPointProximityDto dto)
+    {
+        var touristId = User.PersonId();
+        var result = _tourExecutionService.CheckKeyPointProximity(touristId, executionId, dto);
+        return Ok(result);
+    }
+
+    [HttpPut("{executionId:long}/update-activity")]
+    public ActionResult<TourExecutionDto> UpdateLastActivity(long executionId)
+    {
+        var touristId = User.PersonId();
+        var result = _tourExecutionService.UpdateLastActivity(touristId, executionId);
+        return Ok(result);
+    }
+
+    [HttpGet("{executionId:long}/progress")]
+    public ActionResult<object> GetProgressPercentage(long executionId)
+    {
+        var touristId = User.PersonId();
+        var progressPercentage = _tourExecutionService.GetProgressPercentage(touristId, executionId);
+        return Ok(new { executionId, progressPercentage });
+    }
+
     [HttpGet("active/{tourId:long}")]
     public ActionResult<TourExecutionDto> GetActiveExecution(long tourId)
     {
@@ -60,7 +84,7 @@ public class TourExecutionController : ControllerBase
     }
 
     [HttpGet("history")]
-    public ActionResult<PagedResult<TourExecutionDto>> GetExecutionHistory([FromQuery] int page, [FromQuery] int pageSize)
+    public ActionResult<PagedResult<TourExecutionDto>> GetExecutionHistory([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         var touristId = User.PersonId();
         var result = _tourExecutionService.GetExecutionHistory(touristId, page, pageSize);
