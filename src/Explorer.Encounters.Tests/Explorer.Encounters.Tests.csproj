@@ -10,6 +10,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="TestData\a-delete.sql" />
+    <None Remove="TestData\b-insert-encounters.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestData\a-delete.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\b-insert-encounters.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
 	  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
 	  <PackageReference Include="xunit" Version="2.9.3" />
 	  <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
@@ -24,11 +38,6 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Integration\" />
-    <Folder Include="TestData\" />
   </ItemGroup>
 
 </Project>
