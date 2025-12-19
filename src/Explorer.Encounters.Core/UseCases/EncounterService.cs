@@ -38,11 +38,10 @@ namespace Explorer.Encounters.Core.UseCases
             var encounter = _repo.Get(id) ?? throw new KeyNotFoundException("Encounter not found.");
 
             var type = ParseType(dto.Type);
-            var status = ParseStatus(dto.Status);
             var location = new GeoLocation(dto.Latitude, dto.Longitude);
 
             encounter.Update(dto.Name, dto.Description, location, dto.Xp, type);
-            encounter.ChangeStatus(status);
+           
 
             _repo.Update(encounter);
             return _mapper.Map<EncounterDto>(encounter);
