@@ -37,9 +37,23 @@ namespace Explorer.API.Controllers.Administrator.Administration
         public ActionResult<EncounterDto> ChangeStatus(long id, [FromBody] ChangeEncounterStatusDto dto)
             => Ok(_service.ChangeStatus(id, dto.Status));
 
+        /* [HttpGet("{id:long}")]
+         public ActionResult<EncounterDto> Get(long id)
+             => Ok(_service.Get(id));*/
+
+
         [HttpGet("{id:long}")]
-        public ActionResult<EncounterDto> Get(long id)
-            => Ok(_service.Get(id));
+        public ActionResult Get(long id)
+        {
+            try
+            {
+                return Ok(_service.Get(id));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
 
         [HttpGet]
         public ActionResult<IEnumerable<EncounterDto>> Get([FromQuery] string? status, [FromQuery] string? type)
