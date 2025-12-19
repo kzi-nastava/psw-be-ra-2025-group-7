@@ -21,7 +21,6 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Facility> Facility { get; set; }
         public DbSet<TourProblem> TourProblems { get; set; }
         public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
-        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<AnnualAward> AnnualAwards { get; set; }
 
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
@@ -252,46 +251,6 @@ namespace Explorer.Tours.Infrastructure.Database
                 b.HasIndex(tpt => tpt.UserId);
             });
 
-            // ===== ShoppingCart konfiguracija =====
-            modelBuilder.Entity<ShoppingCart>(b =>
-            {
-                b.ToTable("ShoppingCarts");
-                b.HasKey(sc => sc.Id);
-
-                b.Property(sc => sc.TouristId)
-                    .IsRequired();
-
-                b.Property(sc => sc.TotalPrice)
-                    .IsRequired()
-                    .HasColumnType("decimal(18,2)");
-
-                b.HasIndex(sc => sc.TouristId)
-                    .IsUnique();
-
-                b.HasMany(sc => sc.Items)
-                    .WithOne()
-                    .HasForeignKey("ShoppingCartId")
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            // ===== OrderItem konfiguracija =====
-            modelBuilder.Entity<OrderItem>(b =>
-            {
-                b.ToTable("OrderItems");
-                b.HasKey(oi => oi.Id);
-
-                b.Property(oi => oi.TourId)
-                    .IsRequired();
-
-                b.Property(oi => oi.TourName)
-                    .IsRequired()
-                    .HasMaxLength(100);
-
-                b.Property(oi => oi.Price)
-                    .IsRequired()
-                    .HasColumnType("decimal(18,2)");
-            });
-
             // ===== PublicPointRequest konfiguracija =====
             modelBuilder.Entity<PublicPointRequest>(b =>
             {
@@ -310,9 +269,6 @@ namespace Explorer.Tours.Infrastructure.Database
             });
 
             // ===== TourProblem konfiguracija =====
-
-            // Ostale entitete (Facility, TourProblem, ...) rade drugi u svojim karticama.
-
 
             modelBuilder.Entity<Tour>().HasKey(t => t.Id);
             modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),

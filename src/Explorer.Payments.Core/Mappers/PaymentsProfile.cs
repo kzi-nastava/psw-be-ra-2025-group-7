@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.Core.Domain;
 
 namespace Explorer.Payments.Core.Mappers
 {
@@ -11,7 +8,9 @@ namespace Explorer.Payments.Core.Mappers
     {
         public PaymentsProfile()
         {
-            // Definišemo mape između domena i DTO-ova ili drugih objekata
+            // Shopping Cart mapovi
+            CreateMap<OrderItem, OrderItemDto>().ReverseMap();
+            CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Shopping;
+using Explorer.Payments.Core.Domain;
+using Explorer.Payments.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using PaymentsDto = Explorer.Payments.API.Dtos;
+using ToursDto = Explorer.Tours.API.Dtos;
 
-namespace Explorer.Tours.Core.UseCases.Shopping
+namespace Explorer.Payments.Core.UseCases
 {
-    public class ShoppingCartService : IShoppingCartService
+    public class ShoppingCartService : Explorer.Payments.API.Public.IShoppingCartService
     {
         private readonly IShoppingCartRepository _cartRepository;
         private readonly ITourRepository _tourRepository;
@@ -25,13 +27,13 @@ namespace Explorer.Tours.Core.UseCases.Shopping
             _mapper = mapper;
         }
 
-        public ShoppingCartDto GetByTouristId(long touristId)
+        public PaymentsDto.ShoppingCartDto GetByTouristId(long touristId)
         {
             var cart = GetOrCreateCart(touristId);
-            return _mapper.Map<ShoppingCartDto>(cart);
+            return _mapper.Map<PaymentsDto.ShoppingCartDto>(cart);
         }
 
-        public ShoppingCartDto AddToCart(long touristId, long tourId)
+        public PaymentsDto.ShoppingCartDto AddToCart(long touristId, long tourId)
         {
             var tour = _tourRepository.Get(tourId);
 
@@ -46,17 +48,17 @@ namespace Explorer.Tours.Core.UseCases.Shopping
             cart.AddItem(tour.Id, tour.Name, tour.Price);
 
             var updated = _cartRepository.Update(cart);
-            return _mapper.Map<ShoppingCartDto>(updated);
+            return _mapper.Map<PaymentsDto.ShoppingCartDto>(updated);
         }
 
-        public ShoppingCartDto RemoveFromCart(long touristId, long orderItemId)
+        public PaymentsDto.ShoppingCartDto RemoveFromCart(long touristId, long orderItemId)
         {
             var cart = GetOrCreateCart(touristId);
 
             cart.RemoveItem(orderItemId);
 
             var updated = _cartRepository.Update(cart);
-            return _mapper.Map<ShoppingCartDto>(updated);
+            return _mapper.Map<PaymentsDto.ShoppingCartDto>(updated);
         }
 
         public void ClearCart(long touristId)
@@ -73,7 +75,7 @@ namespace Explorer.Tours.Core.UseCases.Shopping
         /// Uses domain-driven design: the ShoppingCart aggregate validates the purchase,
         /// then we create tokens for each tour, and finally clear the cart.
         /// </summary>
-        public List<TourPurchaseTokenDto> PurchaseCart(long touristId)
+        public List<object> PurchaseCart(long touristId)
         {
             var cart = GetOrCreateCart(touristId);
 
@@ -107,7 +109,7 @@ namespace Explorer.Tours.Core.UseCases.Shopping
             _cartRepository.Update(cart);
 
             // Return DTOs
-            return _mapper.Map<List<TourPurchaseTokenDto>>(createdTokens);
+            return _mapper.Map<List<ToursDto.TourPurchaseTokenDto>>(createdTokens).Cast<object>().ToList();
         }
 
         private ShoppingCart GetOrCreateCart(long touristId)

@@ -1,5 +1,10 @@
 ﻿using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Payments.API.Public;
+using Explorer.Payments.Core.Domain.RepositoryInterfaces;
 using Explorer.Payments.Core.Mappers;
+using Explorer.Payments.Core.UseCases;
+using Explorer.Payments.Infrastructure.Database;
+using Explorer.Payments.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -10,7 +15,7 @@ namespace Explorer.Payments.Infrastructure
     {
         public static IServiceCollection ConfigurePaymentsModule(this IServiceCollection services)
         {
-            services.AddAutoMapper(typeof(PaymentsProfile).Assembly); // Preduslov da imamo ovu liniju koda je da smo definisali već Profile klasu u Core/Mappers
+            services.AddAutoMapper(typeof(PaymentsProfile).Assembly);
             SetupCore(services);
             SetupInfrastructure(services);
             return services;
@@ -18,12 +23,19 @@ namespace Explorer.Payments.Infrastructure
 
         private static void SetupCore(IServiceCollection services)
         {
-            // Ovde registrujemo sve servise koje imamo u Core sloju
+            services.AddScoped<IShoppingCartService, ShoppingCartService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
         {
-            // Ovde registrujemo sve repozitorijume koje imamo u Infrastructure sloju
+            services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
+
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("payments"));
+            dataSourceBuilder.EnableDynamicJson();
+            var dataSource = dataSourceBuilder.Build();
+            services.AddDbContext<PaymentsContext>(opt =>
+                opt.UseNpgsql(dataSource,
+                    x => x.MigrationsHistoryTable("__EFMigrationsHistory", "payments")));
         }
     }
 }

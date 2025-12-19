@@ -1,6 +1,6 @@
-﻿using Explorer.Tours.API.Dtos;
+﻿using Explorer.Payments.API.Dtos;
 
-namespace Explorer.Tours.API.Public.Shopping
+namespace Explorer.Payments.API.Public
 {
     public interface IShoppingCartService
     {
@@ -8,6 +8,6 @@ namespace Explorer.Tours.API.Public.Shopping
         ShoppingCartDto AddToCart(long touristId, long tourId);
         ShoppingCartDto RemoveFromCart(long touristId, long orderItemId);
         void ClearCart(long touristId);
-        List<TourPurchaseTokenDto> PurchaseCart(long touristId);
+        List<object> PurchaseCart(long touristId);
     }
 }
