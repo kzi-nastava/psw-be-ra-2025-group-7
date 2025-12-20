@@ -28,6 +28,12 @@ namespace Explorer.Encounters.Core.UseCases
             var location = new GeoLocation(dto.Latitude, dto.Longitude);
 
             var encounter = new Encounter(dto.Name, dto.Description, location, dto.Xp, type); // default Draft
+
+            if (!string.IsNullOrWhiteSpace(dto.Status))
+            {
+                encounter.ChangeStatus(ParseStatus(dto.Status));
+            }
+
             _repo.Create(encounter);
 
             return _mapper.Map<EncounterDto>(encounter);
@@ -35,17 +41,38 @@ namespace Explorer.Encounters.Core.UseCases
 
         public EncounterDto Update(long id, UpdateEncounterDto dto)
         {
-            var encounter = _repo.Get(id) ?? throw new KeyNotFoundException("Encounter not found.");
+            var encounter = _repo.Get(id)
+                ?? throw new KeyNotFoundException("Encounter not found.");
 
-            var type = ParseType(dto.Type);
-            var location = new GeoLocation(dto.Latitude, dto.Longitude);
-
-            encounter.Update(dto.Name, dto.Description, location, dto.Xp, type);
            
+            var name = dto.Name ?? encounter.Name;
+            var description = dto.Description ?? encounter.Description;
+
+           
+            var latitude = dto.Latitude ?? encounter.Location.Latitude;
+            var longitude = dto.Longitude ?? encounter.Location.Longitude;
+            var location = new GeoLocation(latitude, longitude);
+
+           
+            var xp = dto.Xp ?? encounter.Xp;
+
+            
+            var type = string.IsNullOrWhiteSpace(dto.Type)
+                ? encounter.Type
+                : ParseType(dto.Type);
+
+            encounter.Update(name, description, location, xp, type);
+
+            
+            if (!string.IsNullOrWhiteSpace(dto.Status))
+            {
+                encounter.ChangeStatus(ParseStatus(dto.Status));
+            }
 
             _repo.Update(encounter);
             return _mapper.Map<EncounterDto>(encounter);
         }
+
 
         public void Delete(long id) => _repo.Delete(id);
 
