@@ -17,9 +17,18 @@ namespace Explorer.Encounters.Core.Mappers
                 .ForMember(d => d.Latitude, o => o.MapFrom(s => s.Location.Latitude))
                 .ForMember(d => d.Longitude, o => o.MapFrom(s => s.Location.Longitude))
                 .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToString().ToLower()))
-                .ForMember(d => d.Type, o => o.MapFrom(s => s.Type.ToString().ToLower()));
+                .ForMember(d => d.Type, o => o.MapFrom(s => s.Type.ToString().ToLower()))
+                .ForMember(d => d.HiddenLocation, o => o.MapFrom(s => s.HiddenLocationDetails));
 
-           
+            CreateMap<HiddenLocationEncounter, HiddenLocationEncounterDto>()
+                .ForMember(d => d.ImageUrl, o => o.MapFrom(s => s.ImageUrl))
+                .ForMember(d => d.ActivationLatitude, o => o.MapFrom(s => s.ActivationLocation.Latitude))
+                .ForMember(d => d.ActivationLongitude, o => o.MapFrom(s => s.ActivationLocation.Longitude))
+                .ForMember(d => d.ActivationRadiusMeters, o => o.MapFrom(s => s.ActivationRadiusMeters))
+                .ForMember(d => d.PhotoLatitude, o => o.MapFrom(s => s.PhotoLocation.Latitude))
+                .ForMember(d => d.PhotoLongitude, o => o.MapFrom(s => s.PhotoLocation.Longitude));
+
+
         }
     }
 

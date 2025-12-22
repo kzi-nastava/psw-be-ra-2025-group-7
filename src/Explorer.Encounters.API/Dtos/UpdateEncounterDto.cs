@@ -14,6 +14,7 @@ namespace Explorer.Encounters.API.Dtos
         public double? Longitude { get; set; }
         public int? Xp { get; set; }
         public string? Type { get; set; }     
-        public string? Status { get; set; }   
+        public string? Status { get; set; }
+        public CreateHiddenLocationEncounterDto? HiddenLocation { get; set; }
     }
 }

@@ -1,32 +1,46 @@
-﻿using System;
+﻿using Explorer.BuildingBlocks.Core.Domain;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Explorer.BuildingBlocks.Core.Domain;
+using System.Xml.Linq;
 
 namespace Explorer.Encounters.Core.Domain
 {
     public class Encounter : AggregateRoot
     {
+        public int CreatorId { get; init; }
         public string Name { get; private set; }
         public string Description { get; private set; }
         public GeoLocation Location { get; private set; }
         public int Xp { get; private set; }
         public EncounterStatus Status { get; private set; }
         public EncounterType Type { get; private set; }
-
+        public HiddenLocationEncounter? HiddenLocationDetails { get; private set; }
         private Encounter() { } // EF
 
-        public Encounter(string name, string description, GeoLocation location, int xp, EncounterType type)
+        public Encounter(int creatorId,string name, string description, GeoLocation location, int xp, EncounterType type)
         {
+            CreatorId = creatorId;
             SetBasics(name, description, location, xp, type);
             Status = EncounterStatus.Draft; //default
+
         }
 
-        public void Update(string name, string description, GeoLocation location, int xp, EncounterType type)
+        public void Update(int creatorId,string name, string description, GeoLocation location, int xp, EncounterType type)
         {
+            if (creatorId != CreatorId)
+                throw new InvalidOperationException("Only the creator can update the encounter.");
+
+            var previousType = Type;
             SetBasics(name, description, location, xp, type);
+            // Ako više NIJE location challenge → brišemo hidden config
+            
+            if (previousType == EncounterType.Location && type != EncounterType.Location)
+            {
+                HiddenLocationDetails = null;
+            }
         }
 
         public void ChangeStatus(EncounterStatus newStatus)
@@ -61,6 +75,14 @@ namespace Explorer.Encounters.Core.Domain
             Xp = xp;
             Type = type;
         }
+        public void SetHiddenLocationDetails(HiddenLocationEncounter details)
+        {
+            if (Type != EncounterType.Location)
+                throw new InvalidOperationException("Hidden location is allowed only for Location encounters.");
+
+            HiddenLocationDetails = details ?? throw new ArgumentNullException(nameof(details));
+        }
+
     }
 
 }

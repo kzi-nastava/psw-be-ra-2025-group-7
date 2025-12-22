@@ -22,59 +22,79 @@ namespace Explorer.Encounters.Core.UseCases
             _mapper = mapper;
         }
 
-        public EncounterDto Create(CreateEncounterDto dto)
+        public EncounterDto Create(int creatorId,CreateEncounterDto dto)
         {
             var type = ParseType(dto.Type);
             var location = new GeoLocation(dto.Latitude, dto.Longitude);
 
-            var encounter = new Encounter(dto.Name, dto.Description, location, dto.Xp, type); // default Draft
+            var encounter = new Encounter(creatorId,dto.Name, dto.Description, location, dto.Xp, type); // default Draft
 
-            if (!string.IsNullOrWhiteSpace(dto.Status))
+            // opcionalni HiddenLocation
+            if (type == EncounterType.Location && dto.HiddenLocation != null)
             {
-                encounter.ChangeStatus(ParseStatus(dto.Status));
+                var hl = dto.HiddenLocation;
+                var hiddenConfig = new HiddenLocationEncounter(
+                    hl.ImageUrl,
+                    new GeoLocation(hl.ActivationLatitude, hl.ActivationLongitude),
+                    hl.ActivationRadiusMeters,
+                    new GeoLocation(hl.PhotoLatitude, hl.PhotoLongitude)
+                );
+                encounter.SetHiddenLocationDetails(hiddenConfig);
             }
 
-            _repo.Create(encounter);
+            if (!string.IsNullOrWhiteSpace(dto.Status))
+                encounter.ChangeStatus(ParseStatus(dto.Status));
 
+            _repo.Create(encounter);
             return _mapper.Map<EncounterDto>(encounter);
         }
 
-        public EncounterDto Update(long id, UpdateEncounterDto dto)
-        {
-            var encounter = _repo.Get(id)
-                ?? throw new KeyNotFoundException("Encounter not found.");
 
-           
+        public EncounterDto Update(long id,int creatorId, UpdateEncounterDto dto)
+        {
+            var encounter = _repo.Get(id) ?? throw new KeyNotFoundException("Encounter not found.");
+
             var name = dto.Name ?? encounter.Name;
             var description = dto.Description ?? encounter.Description;
-
-           
             var latitude = dto.Latitude ?? encounter.Location.Latitude;
             var longitude = dto.Longitude ?? encounter.Location.Longitude;
             var location = new GeoLocation(latitude, longitude);
-
-           
             var xp = dto.Xp ?? encounter.Xp;
+            var type = string.IsNullOrWhiteSpace(dto.Type) ? encounter.Type : ParseType(dto.Type);
 
-            
-            var type = string.IsNullOrWhiteSpace(dto.Type)
-                ? encounter.Type
-                : ParseType(dto.Type);
+            encounter.Update(creatorId, name, description, location, xp, type);
 
-            encounter.Update(name, description, location, xp, type);
-
-            
-            if (!string.IsNullOrWhiteSpace(dto.Status))
+            if (type == EncounterType.Location && dto.HiddenLocation != null)
             {
-                encounter.ChangeStatus(ParseStatus(dto.Status));
+                var hl = dto.HiddenLocation;
+                var hiddenConfig = new HiddenLocationEncounter(
+                    hl.ImageUrl,
+                    new GeoLocation(hl.ActivationLatitude, hl.ActivationLongitude),
+                    hl.ActivationRadiusMeters,
+                    new GeoLocation(hl.PhotoLatitude, hl.PhotoLongitude)
+                );
+                encounter.SetHiddenLocationDetails(hiddenConfig);
             }
+
+            if (!string.IsNullOrWhiteSpace(dto.Status))
+                encounter.ChangeStatus(ParseStatus(dto.Status));
 
             _repo.Update(encounter);
             return _mapper.Map<EncounterDto>(encounter);
         }
 
 
-        public void Delete(long id) => _repo.Delete(id);
+
+        public void Delete(long id, int creatorId)
+        {
+            var encounter = _repo.Get(id) ?? throw new KeyNotFoundException("Encounter not found.");
+
+            if (encounter.CreatorId != creatorId)
+                throw new InvalidOperationException("Only the creator can delete the encounter.");
+
+            _repo.Delete(id);
+        }
+
 
         public EncounterDto Get(long id)
         {
@@ -120,6 +140,7 @@ namespace Explorer.Encounters.Core.UseCases
                 _ => throw new ArgumentException("Invalid type.")
             };
         }
+
     }
 
 }
