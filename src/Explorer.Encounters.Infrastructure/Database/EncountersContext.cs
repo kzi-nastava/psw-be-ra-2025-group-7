@@ -44,7 +44,7 @@ public class EncountersContext : DbContext
                 
                 loc.ToJson();
 
-                
+                loc.Property(p => p.Radius).HasColumnName("radius");
                 loc.Property(p => p.Latitude).HasColumnName("latitude");
                 loc.Property(p => p.Longitude).HasColumnName("longitude");
             });

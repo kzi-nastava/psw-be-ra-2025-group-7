@@ -12,6 +12,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public string? Motto { get; private set; }
         public double? CurrentLatitude { get; private set; }
         public double? CurrentLongitude { get; private set; }
+        public List<int>? FinishedEncounters { get; set; }
 
 
         public UserProfile(long userId, string firstName, string lastName,
