@@ -15,11 +15,7 @@ namespace Explorer.Notes.Infrastructure
     {
         public static IServiceCollection ConfigureNotesModule(this IServiceCollection services)
         {
-            services.AddAutoMapper(cfg =>
-            {
-                cfg.AddProfile<NoteProfile>();
-            });
-
+            services.AddAutoMapper(typeof(NoteProfile).Assembly);
             SetupCore(services);
             SetupInfrastructure(services);
             return services;

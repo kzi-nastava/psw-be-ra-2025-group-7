@@ -25,7 +25,6 @@
     <ProjectReference Include="..\Modules\Notes\Explorer.Notes.API\Explorer.Notes.API.csproj" />
     <ProjectReference Include="..\Modules\Notes\Explorer.Notes.Core\Explorer.Notes.Core.csproj" />
     <ProjectReference Include="..\Modules\Notes\Explorer.Notes.Infrastructure\Explorer.Notes.Infrastructure.csproj" />
-    <ProjectReference Include="..\Modules\Notes\Explorer.Notes.Tests\Explorer.Notes.Tests.csproj" />
     <ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
     <ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.Infrastructure\Explorer.Stakeholders.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
