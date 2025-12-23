@@ -9,7 +9,10 @@ namespace Explorer.Tours.API.Public.Tourist
 {
     public interface IEnhancedReviewService
     {
-        Task CreateReview(long tourId, EnhancedReviewDto dto, long touristId);
+        Task CreateReview(long tourId, EnhancedReviewDto dto, long touristId, List<EnhancedReviewImageDto> images);
         Task<List<EnhancedReviewDto>> GetReviews(long tourId);
+        Task<int> ToggleHelpful(long reviewId, long touristId);
+        Task<ReviewSummaryDto> GetSummary(long tourId);
+
     }
 }

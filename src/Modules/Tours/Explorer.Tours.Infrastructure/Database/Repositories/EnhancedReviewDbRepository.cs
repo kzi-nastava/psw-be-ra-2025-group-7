@@ -35,9 +35,38 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
                 .Include(r => r.Cons)
                 .Include(r => r.SentimentTags)
                 .Include(r => r.Images)
+                .Include(r => r.HelpfulVotes)
                 .Where(r => r.TourId == tourId)
-                .OrderByDescending(r => r.CreatedAt)
+                .OrderByDescending(r => r.HelpfulVotes.Count)
+                .ThenByDescending(r => r.CreatedAt)
                 .ToList();
+
         }
+
+        public EnhancedReview Get(long reviewId)
+        {
+            return _dbSet
+                .Include(r => r.HelpfulVotes)
+                .First(r => r.Id == reviewId);
+        }
+
+        public int ToggleHelpful(long reviewId, long touristId)
+        {
+            var review = _dbSet
+                .Include(r => r.HelpfulVotes)
+                .First(r => r.Id == reviewId);
+
+            var existing = review.HelpfulVotes.FirstOrDefault(v => v.TouristId == touristId);
+
+            if (existing != null)
+                _dbContext.Remove(existing);
+            else
+                review.HelpfulVotes.Add(new EnhancedReviewHelpfulVote { TouristId = touristId });
+
+            _dbContext.SaveChanges();
+
+            return review.HelpfulVotes.Count;
+        }
+
     }
 }

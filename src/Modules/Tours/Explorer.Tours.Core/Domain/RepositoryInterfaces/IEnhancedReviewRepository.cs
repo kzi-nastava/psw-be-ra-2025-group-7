@@ -12,5 +12,8 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
         EnhancedReview Create(EnhancedReview review);
         bool Exists(long tourId, long touristId);
         List<EnhancedReview> GetByTour(long tourId);
+        int ToggleHelpful(long reviewId, long touristId);
+        EnhancedReview Get(long reviewId);
+
     }
 }

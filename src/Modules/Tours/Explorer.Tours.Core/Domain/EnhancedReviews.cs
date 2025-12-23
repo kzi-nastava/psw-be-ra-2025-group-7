@@ -28,6 +28,8 @@ namespace Explorer.Tours.Core.Domain
         public ICollection<EnhancedReviewCon> Cons { get; private set; } = new List<EnhancedReviewCon>();
         public ICollection<EnhancedReviewTag> SentimentTags { get; private set; } = new List<EnhancedReviewTag>();
         public ICollection<EnhancedReviewImage> Images { get; private set; } = new List<EnhancedReviewImage>();
+        public ICollection<EnhancedReviewHelpfulVote> HelpfulVotes { get; private set; } = new List<EnhancedReviewHelpfulVote>();
+
 
         public EnhancedReview(
             long tourId,
@@ -90,6 +92,14 @@ namespace Explorer.Tours.Core.Domain
         public long Id { get; set; }
         public long EnhancedReviewId { get; set; }
         public ReviewSentimentTag Tag { get; set; }
+    }
+
+    public class EnhancedReviewHelpfulVote
+    {
+        public long Id { get; set; }
+        public long EnhancedReviewId { get; set; }
+        public long TouristId { get; set; }
+        public DateTime VotedAt { get; set; } = DateTime.UtcNow;
     }
 
 }

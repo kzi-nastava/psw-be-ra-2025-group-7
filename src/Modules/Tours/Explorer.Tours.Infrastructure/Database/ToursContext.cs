@@ -29,6 +29,8 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<EnhancedReviewCon> EnhancedReviewCons { get; set; }
         public DbSet<EnhancedReviewTag> EnhancedReviewTags { get; set; }
         public DbSet<EnhancedReviewImage> EnhancedReviewImages { get; set; }
+        public DbSet<EnhancedReviewHelpfulVote> EnhancedReviewHelpfulVotes { get; set; }
+
 
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
@@ -376,6 +378,13 @@ namespace Explorer.Tours.Infrastructure.Database
                     .WithOne()
                     .HasForeignKey(i => i.EnhancedReviewId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                // HelpfulVotes
+                b.HasMany(x => x.HelpfulVotes)
+                    .WithOne()
+                    .HasForeignKey(v => v.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
             });
 
             modelBuilder.Entity<EnhancedReviewPro>(b =>
@@ -410,6 +419,13 @@ namespace Explorer.Tours.Infrastructure.Database
                 b.Property(x => x.SizeBytes).IsRequired();
             });
 
+            modelBuilder.Entity<EnhancedReviewHelpfulVote>(b =>
+            {
+                b.ToTable("EnhancedReviewHelpfulVotes");
+                b.HasKey(x => x.Id);
+
+                b.HasIndex(x => new { x.EnhancedReviewId, x.TouristId }).IsUnique();
+            });
 
 
             // Ostale entitete (Facility, TourProblem, ...) rade drugi u svojim karticama.
