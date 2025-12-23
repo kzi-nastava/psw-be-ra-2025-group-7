@@ -29,11 +29,9 @@ public class EncountersContext : DbContext
                 .IsRequired()
                 .HasMaxLength(200);
 
-            e.Property(x => x.Description)
-                .IsRequired();
+            e.Property(x => x.Description).IsRequired();
 
-            e.Property(x => x.Xp)
-                .IsRequired();
+            e.Property(x => x.Xp).IsRequired();
 
             e.Property(x => x.Status)
                 .IsRequired()
@@ -43,7 +41,9 @@ public class EncountersContext : DbContext
                 .IsRequired()
                 .HasConversion<int>();
 
+            // -----------------------------
             // GeoLocation (VALUE OBJECT)
+            // -----------------------------
             e.OwnsOne(x => x.Location, loc =>
             {
                 loc.ToJson();
@@ -52,29 +52,49 @@ public class EncountersContext : DbContext
                 loc.Property(p => p.Longitude).HasColumnName("longitude");
             });
 
+            // ---------------------------------------------
             // HiddenLocationEncounter (VALUE OBJECT, OPTIONAL)
+            // ---------------------------------------------
             e.OwnsOne(x => x.HiddenLocationDetails, hl =>
             {
                 hl.ToJson();
-
-                hl.Property(p => p.ImageUrl)
-                    .HasColumnName("imageUrl")
-                    .IsRequired();
 
                 hl.Property(p => p.ActivationRadiusMeters)
                     .HasColumnName("activationRadiusMeters")
                     .IsRequired();
 
-                hl.OwnsOne(p => p.ActivationLocation, al =>
+                // -----------------------------
+                // EncounterImage (VALUE OBJECT)
+                // -----------------------------
+                hl.OwnsOne(p => p.Image, img =>
                 {
-                    al.Property(p => p.Latitude).HasColumnName("activationLatitude");
-                    al.Property(p => p.Longitude).HasColumnName("activationLongitude");
+                    img.Property(i => i.Url)
+                       .HasColumnName("imageUrl")
+                       .IsRequired();
                 });
 
+                // -----------------------------
+                // ActivationLocation
+                // -----------------------------
+                hl.OwnsOne(p => p.ActivationLocation, al =>
+                {
+                    al.Property(p => p.Latitude)
+                      .HasColumnName("activationLatitude");
+
+                    al.Property(p => p.Longitude)
+                      .HasColumnName("activationLongitude");
+                });
+
+                // -----------------------------
+                // PhotoLocation
+                // -----------------------------
                 hl.OwnsOne(p => p.PhotoLocation, pl =>
                 {
-                    pl.Property(p => p.Latitude).HasColumnName("photoLatitude");
-                    pl.Property(p => p.Longitude).HasColumnName("photoLongitude");
+                    pl.Property(p => p.Latitude)
+                      .HasColumnName("photoLatitude");
+
+                    pl.Property(p => p.Longitude)
+                      .HasColumnName("photoLongitude");
                 });
             });
         });

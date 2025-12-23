@@ -34,7 +34,7 @@ namespace Explorer.Encounters.Core.UseCases
             {
                 var hl = dto.HiddenLocation;
                 var hiddenConfig = new HiddenLocationEncounter(
-                    hl.ImageUrl,
+                    new EncounterImage(hl.ImageUrl),
                     new GeoLocation(hl.ActivationLatitude, hl.ActivationLongitude),
                     hl.ActivationRadiusMeters,
                     new GeoLocation(hl.PhotoLatitude, hl.PhotoLongitude)
@@ -68,7 +68,7 @@ namespace Explorer.Encounters.Core.UseCases
             {
                 var hl = dto.HiddenLocation;
                 var hiddenConfig = new HiddenLocationEncounter(
-                    hl.ImageUrl,
+                    new EncounterImage(hl.ImageUrl),
                     new GeoLocation(hl.ActivationLatitude, hl.ActivationLongitude),
                     hl.ActivationRadiusMeters,
                     new GeoLocation(hl.PhotoLatitude, hl.PhotoLongitude)

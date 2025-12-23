@@ -10,7 +10,7 @@ namespace Explorer.Encounters.Core.Domain
 {
     public class HiddenLocationEncounter : ValueObject
     {
-        public string ImageUrl { get; private set; }
+        public EncounterImage Image { get; }
         public GeoLocation ActivationLocation { get; private set; }
         public double ActivationRadiusMeters { get; private set; }
         public GeoLocation PhotoLocation { get; private set; }
@@ -18,20 +18,19 @@ namespace Explorer.Encounters.Core.Domain
         public int DistanceMeters { get; private set; } = 5;
         public HiddenLocationEncounter() { }
         [JsonConstructor]
-        public HiddenLocationEncounter(string imageUrl, GeoLocation activationLocation, double activationRadiusMeters, GeoLocation photoLocation)
+        public HiddenLocationEncounter(EncounterImage image, GeoLocation activationLocation, double activationRadiusMeters, GeoLocation photoLocation)
         {
-            if (string.IsNullOrWhiteSpace(imageUrl))
-                throw new ArgumentException("ImageUrl is required.", nameof(imageUrl));
+        
             if (activationRadiusMeters <= 0)
                 throw new ArgumentOutOfRangeException(nameof(activationRadiusMeters), "ActivationRadiusMeters must be > 0.");
-            ImageUrl = imageUrl.Trim();
+            Image = image ?? throw new ArgumentNullException(nameof(image));
             ActivationLocation = activationLocation ?? throw new ArgumentNullException(nameof(activationLocation));
             ActivationRadiusMeters = activationRadiusMeters;
             PhotoLocation = photoLocation ?? throw new ArgumentNullException(nameof(photoLocation));
         }
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return ImageUrl;
+            yield return Image;
             yield return ActivationLocation;
             yield return ActivationRadiusMeters;
             yield return PhotoLocation;
