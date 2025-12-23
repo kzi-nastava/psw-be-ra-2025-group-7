@@ -21,8 +21,8 @@ namespace Explorer.Notes.Core.Domain
 
         public Note(long userId, string title, string content, NoteType type, List<string>? tags = null)
         {
-            if (userId <= 0)
-                throw new ArgumentException("UserId must be a positive number.", nameof(userId));
+            if (userId == 0)
+                throw new ArgumentException("UserId not valid.", nameof(userId));
 
             UserId = userId;
             IsPinned = false;
