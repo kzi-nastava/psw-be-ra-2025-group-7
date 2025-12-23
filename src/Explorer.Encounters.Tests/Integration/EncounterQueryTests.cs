@@ -121,10 +121,10 @@ namespace Explorer.Encounters.Tests.Integration
 
             var identity = new ClaimsIdentity(new[]
             {
-                new Claim("id", userId),
-                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim("personId", userId), // 👈 OVO JE KLJUČNO
                 new Claim(ClaimTypes.Role, "administrator")
             }, "test");
+
 
             ctx.HttpContext.User = new ClaimsPrincipal(identity);
             controller.ControllerContext = ctx;

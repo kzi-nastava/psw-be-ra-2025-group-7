@@ -29,6 +29,11 @@ namespace Explorer.Encounters.Core.UseCases
 
             var encounter = new Encounter(creatorId,dto.Name, dto.Description, location, dto.Xp, type); // default Draft
 
+            if (dto.HiddenLocation != null && type != EncounterType.Location)
+            {
+                throw new InvalidOperationException(
+                    "Hidden location is allowed only for Location encounters.");
+            }
             // opcionalni HiddenLocation
             if (type == EncounterType.Location && dto.HiddenLocation != null)
             {

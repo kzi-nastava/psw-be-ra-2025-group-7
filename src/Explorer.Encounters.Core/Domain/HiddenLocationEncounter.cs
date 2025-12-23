@@ -10,7 +10,7 @@ namespace Explorer.Encounters.Core.Domain
 {
     public class HiddenLocationEncounter : ValueObject
     {
-        public EncounterImage Image { get; }
+        public EncounterImage Image { get; private set; }
         public GeoLocation ActivationLocation { get; private set; }
         public double ActivationRadiusMeters { get; private set; }
         public GeoLocation PhotoLocation { get; private set; }

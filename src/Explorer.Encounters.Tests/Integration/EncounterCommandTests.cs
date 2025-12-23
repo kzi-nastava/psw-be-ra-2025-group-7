@@ -86,6 +86,180 @@ namespace Explorer.Encounters.Tests.Integration
             list!.Count().ShouldBe(1);
             list.First().Id.ShouldBe(e1.Id);
         }
+        [Fact]
+        public void Cannot_create_hidden_location_for_social_encounter()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateAdminController(scope, "1");
+
+            var dto = new CreateEncounterDto
+            {
+                Name = "Invalid Hidden",
+                Description = "Should fail",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 5,
+                Type = "social",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://example.com/x.png",
+                    ActivationLatitude = 45.1,
+                    ActivationLongitude = 19.1,
+                    ActivationRadiusMeters = 5,
+                    PhotoLatitude = 45.2,
+                    PhotoLongitude = 19.2
+                }
+            };
+
+            Should.Throw<InvalidOperationException>(() => controller.Create(dto));
+        }
+        [Fact]
+        public void Changing_type_from_location_removes_hidden_location()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<EncountersContext>();
+            var controller = CreateAdminController(scope, "1");
+
+            var createDto = new CreateEncounterDto
+            {
+                Name = "Hidden",
+                Description = "Hidden",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://example.com/a.png",
+                    ActivationLatitude = 45.1,
+                    ActivationLongitude = 19.1,
+                    ActivationRadiusMeters = 5,
+                    PhotoLatitude = 45.2,
+                    PhotoLongitude = 19.2
+                }
+            };
+
+            var created = (controller.Create(createDto).Result as OkObjectResult)!.Value as EncounterDto;
+
+            var updateDto = new UpdateEncounterDto
+            {
+                Type = "social"
+            };
+
+            controller.Update(created!.Id, updateDto);
+
+            var stored = dbContext.Encounters.First(x => x.Id == created.Id);
+            stored.HiddenLocationDetails.ShouldBeNull();
+        }
+        [Fact]
+        public void Update_without_hidden_location_keeps_existing_hidden_location()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<EncountersContext>();
+            var controller = CreateAdminController(scope, "1");
+
+            var createDto = new CreateEncounterDto
+            {
+                Name = "Hidden",
+                Description = "Hidden",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://example.com/a.png",
+                    ActivationLatitude = 45.1,
+                    ActivationLongitude = 19.1,
+                    ActivationRadiusMeters = 5,
+                    PhotoLatitude = 45.2,
+                    PhotoLongitude = 19.2
+                }
+            };
+
+            var created = (controller.Create(createDto).Result as OkObjectResult)!.Value as EncounterDto;
+
+            controller.Update(created!.Id, new UpdateEncounterDto
+            {
+                Name = "Updated name"
+            });
+
+            var stored = dbContext.Encounters.First(x => x.Id == created.Id);
+            stored.HiddenLocationDetails.ShouldNotBeNull();
+            stored.HiddenLocationDetails!.Image.Url.ShouldBe("https://example.com/a.png");
+        }
+        [Fact]
+        public void Non_creator_cannot_update_hidden_location()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var creatorController = CreateAdminController(scope, "1");
+            var otherController = CreateAdminController(scope, "2");
+
+            var createDto = new CreateEncounterDto
+            {
+                Name = "Hidden",
+                Description = "Hidden",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://example.com/a.png",
+                    ActivationLatitude = 45.1,
+                    ActivationLongitude = 19.1,
+                    ActivationRadiusMeters = 5,
+                    PhotoLatitude = 45.2,
+                    PhotoLongitude = 19.2
+                }
+            };
+
+            var created = (creatorController.Create(createDto).Result as OkObjectResult)!.Value as EncounterDto;
+
+            var updateDto = new UpdateEncounterDto
+            {
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://example.com/hacked.png",
+                    ActivationLatitude = 0,
+                    ActivationLongitude = 0,
+                    ActivationRadiusMeters = 1,
+                    PhotoLatitude = 0,
+                    PhotoLongitude = 0
+                }
+            };
+
+            Should.Throw<InvalidOperationException>(() =>
+                otherController.Update(created!.Id, updateDto));
+        }
+        [Fact]
+        public void Creating_hidden_location_with_empty_image_url_throws()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateAdminController(scope, "1");
+
+            var dto = new CreateEncounterDto
+            {
+                Name = "Hidden",
+                Description = "Hidden",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "",
+                    ActivationLatitude = 45.1,
+                    ActivationLongitude = 19.1,
+                    ActivationRadiusMeters = 5,
+                    PhotoLatitude = 45.2,
+                    PhotoLongitude = 19.2
+                }
+            };
+
+            Should.Throw<ArgumentException>(() => controller.Create(dto));
+        }
 
         private static EncounterDto CreateEncounter(EncountersController controller, string name, string type)
         {
@@ -115,11 +289,11 @@ namespace Explorer.Encounters.Tests.Integration
             var ctx = BuildContext(userId);
 
             var identity = new ClaimsIdentity(new[]
-            {
-            new Claim("id", userId),
-            new Claim(ClaimTypes.NameIdentifier, userId),
-            new Claim(ClaimTypes.Role, "administrator")
-        }, "test");
+{
+                new Claim("personId", userId), // 👈 OVO JE KLJUČNO
+                new Claim(ClaimTypes.Role, "administrator")
+            }, "test");
+
 
             ctx.HttpContext.User = new ClaimsPrincipal(identity);
             controller.ControllerContext = ctx;
