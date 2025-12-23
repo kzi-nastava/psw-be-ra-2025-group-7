@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Explorer.Encounters.API.Dtos;
+using Explorer.Encounters.API.Public;
 using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
-using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.API.Public;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,20 +13,20 @@ using static Explorer.Encounters.Core.Domain.EncounterProgress;
 
 namespace Explorer.Encounters.Core.UseCases
 {
-    public class EncounterProgressService
+    public class EncounterProgressService : IEncounterProgressService
     {
         private readonly IEncounterProgressRepository _repo;
         private readonly IEncounterRepository _encounterRepo;
         private readonly IMapper _mapper;
-        private readonly IUserProfileRepository _userProfileRepo;
+        private readonly IUserLocationService _userLocationService;
         private List<int> users;
 
-        public EncounterProgressService(IEncounterProgressRepository repo, IMapper mapper, IEncounterRepository encounterRepo, IUserProfileRepository userProfileRepo)
+        public EncounterProgressService(IEncounterProgressRepository repo, IMapper mapper, IEncounterRepository encounterRepo, IUserLocationService userLocationService)
         {
             _repo = repo;
             _mapper = mapper;
             _encounterRepo = encounterRepo;
-            _userProfileRepo = userProfileRepo;
+            _userLocationService = userLocationService;
 
         }
 
@@ -75,27 +75,30 @@ namespace Explorer.Encounters.Core.UseCases
 
         public List<int> CheckParticipantsLocation(List<EncounterProgress> encounterProgresses, Encounter encounter)
         {
-            var users = new List<int>();
+            var usersInRadius = new List<int>();
 
-            foreach (var e in encounterProgresses)
+            foreach (var ep in encounterProgresses)
             {
-                var user = _userProfileRepo.GetByUserId(e.UserId);
+                var userLocation = _userLocationService.GetLocation(ep.UserId);
+
+                if (userLocation.Latitude == null || userLocation.Longitude == null)
+                    continue;
 
                 bool isInside = GeoDistanceCalculator.IsWithinRadius(
                     encounter.Location.Latitude,
                     encounter.Location.Longitude,
                     encounter.Location.Radius ?? 0,
-                    user.CurrentLatitude ?? 0,
-                    user.CurrentLongitude ?? 0
+                    userLocation.Latitude.Value,
+                    userLocation.Longitude.Value
                 );
 
                 if (isInside)
                 {
-                    users.Add(e.UserId);
+                    usersInRadius.Add(ep.UserId);
                 }
             }
 
-            return users;
+            return usersInRadius;
         }
         public void FinishEncounterProgress(List<EncounterProgress> encounterProgresses, List<int> users)
         {

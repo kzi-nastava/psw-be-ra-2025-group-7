@@ -12,7 +12,9 @@ namespace Explorer.Encounters.API.Public
     {
         EncounterProgressDto Create(EncounterProgressDto dto);
         EncounterDto Update(long id);
-        EncounterProgressDto Delete(long id);
+        void Delete(long id);
         bool CheckEncounterProgress(long encounterId);
+        //List<int> CheckParticipantsLocation(long encounterId);
+        //void FinishEncounterProgress(long encounterId, List<int> users);
     }
 }

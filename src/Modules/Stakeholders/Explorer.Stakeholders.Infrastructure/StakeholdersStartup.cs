@@ -40,6 +40,7 @@ public static class StakeholdersStartup
         services.AddScoped<IFollowerMessageService, FollowerMessageService>();
         services.AddScoped<IClubMessageService, ClubMessageService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IUserLocationService, UserLocationService>();
 
 
     }
