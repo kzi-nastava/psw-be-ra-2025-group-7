@@ -1,8 +1,8 @@
-﻿using Explorer.Tours.Core.Domain;
+﻿using Explorer.Payments.Core.Domain;
 using Shouldly;
 using Xunit;
 
-namespace Explorer.Tours.Tests.Unit
+namespace Explorer.Payments.Tests.Unit
 {
     public class ShoppingCartTests
     {
