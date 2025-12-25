@@ -1,15 +1,16 @@
 ﻿-- ============================================================
 -- d-shopping-cart.sql
--- Testni podaci za ShoppingCart funkcionalnost
+-- Testni podaci za Tour funkcionalnost koji se koriste u Shopping Cart testovima
+-- NAPOMENA: ShoppingCart tabele su sada u payments schema!
 -- ============================================================
 
 -- ------------------------------------------------------------
 -- 1. Dodatne Published ture za testiranje Shopping Cart-a
 -- ------------------------------------------------------------
--- Tura -3 ve? postoji kao Published (Price: 100)
--- Tura -5 ve? postoji kao Published (Price: 120)
+-- Tura -3 već postoji kao Published (Price: 100)
+-- Tura -5 već postoji kao Published (Price: 120)
 
--- Dodajemo još jednu Published turu sa razli?itom cenom
+-- Dodajemo još jednu Published turu sa različitom cenom
 INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt", "LengthInKm")
 VALUES 
     (-10, 'Test Tour Published - For Cart', 'Published tour specifically for shopping cart tests', 1, 'test,shopping', 1, 75.50, -1, '2024-01-20 12:00:00', NULL, 0);
@@ -47,21 +48,7 @@ VALUES
     (-561, 45.2650, 19.8350, 'KP2 Draft Tour', 'Second key point for draft tour', NULL, 'secret_draft2', -101);
 
 -- ------------------------------------------------------------
--- 4. Shopping Carts za testiranje
--- ------------------------------------------------------------
--- Shopping cart za turistu ID=1 sa stavkama (za testiranje GetMyCart)
-INSERT INTO tours."ShoppingCarts" ("Id", "TouristId", "TotalPrice")
-VALUES 
-    (-1, 1, 220.00);
-
--- Stavke u korpi za turistu 1
-INSERT INTO tours."OrderItems" ("Id", "TourId", "TourName", "Price", "ShoppingCartId")
-VALUES 
-    (-1, -3, 'Test Tour 3 - Published', 100.00, -1),
-    (-2, -5, 'Test Tour 5 - Published for Reactivate', 120.00, -1);
-
--- ------------------------------------------------------------
--- 5. Dodatne Published ture sa cenom 0 za testiranje
+-- 4. Dodatne Published ture sa cenom 0 za testiranje
 -- ------------------------------------------------------------
 -- Za testiranje da korpa radi ispravno sa besplatnim turama
 INSERT INTO tours."Tours" ("Id", "Name", "Description", "Difficulty", "Tags", "Status", "Price", "AuthorId", "PublishedAt", "ArchivedAt", "LengthInKm")
@@ -77,7 +64,10 @@ VALUES
 -- ------------------------------------------------------------
 -- NAPOMENA ZA TESTOVE:
 -- ------------------------------------------------------------
--- Testovi koriste slede?e TouristId-jeve: 1, 2, 3, 4, 5, 6, 7
+-- ShoppingCart i OrderItems tabele su PREBAČENE u payments schema!
+-- Pogledaj Explorer.Payments.Tests\TestData\d-shopping-cart.sql za test podatke korpe.
+-- 
+-- Testovi koriste sledeće TouristId-jeve: 1, 2, 3, 4, 5, 6, 7
 -- Published ture dostupne za dodavanje u korpu: -3, -5, -10, -11
 -- Arhivirana tura (ne može u korpu): -100
 -- Draft tura (ne može u korpu): -101
