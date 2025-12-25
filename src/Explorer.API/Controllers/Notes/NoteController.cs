@@ -33,7 +33,6 @@ namespace Explorer.API.Controllers.Tourist.Notes
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
-
             var notes = _noteService.GetByUserId(userId);
             return Ok(notes);
         }
@@ -44,7 +43,6 @@ namespace Explorer.API.Controllers.Tourist.Notes
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
-
             var note = _noteService.Get(id, userId);
             return Ok(note);
         }
@@ -55,7 +53,6 @@ namespace Explorer.API.Controllers.Tourist.Notes
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
-
             var created = _noteService.Create(userId, dto);
             return Ok(created);
         }
@@ -66,7 +63,6 @@ namespace Explorer.API.Controllers.Tourist.Notes
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
-
             dto.Id = id;
             var updated = _noteService.Update(userId, dto);
             return Ok(updated);
@@ -78,9 +74,18 @@ namespace Explorer.API.Controllers.Tourist.Notes
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
-
             _noteService.Delete(id, userId);
             return Ok(new { message = "Note deleted successfully." });
+        }
+
+        [HttpPut("{id}/pin")]
+        public ActionResult<NoteDto> TogglePin(long id)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
+            var result = _noteService.TogglePin(id, userId);
+            return Ok(result);
         }
     }
 }
