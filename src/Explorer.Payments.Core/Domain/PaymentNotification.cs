@@ -7,28 +7,26 @@ using System.Threading.Tasks;
 
 namespace Explorer.Payments.Core.Domain
 {
-    public class Wallet : Entity
+    public class PaymentNotification : Entity
     {
-        //public long Id { get; private set; }
         public long UserId { get; private set; }
-        public decimal Balance { get; private set; }
+        public string Content { get; private set; }
         public DateTime CreatedAt { get; private set; }
+        public bool IsRead { get; private set; }
 
-        protected Wallet() { } 
+        protected PaymentNotification() { }
 
-        public Wallet(long userId)
+        public PaymentNotification(long userId, string message)
         {
             UserId = userId;
-            Balance = 0;
+            Content = message;
             CreatedAt = DateTime.UtcNow;
+            IsRead = false;
         }
 
-        public void AddFunds(decimal amount)
+        public void MarkAsRead()
         {
-            if (amount <= 0)
-                throw new ArgumentException("Amount must be greater than zero.");
-
-            Balance += amount;
+            IsRead = true;
         }
     }
 }

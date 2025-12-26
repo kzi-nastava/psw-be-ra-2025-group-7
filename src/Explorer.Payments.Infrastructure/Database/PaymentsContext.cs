@@ -8,6 +8,8 @@ namespace Explorer.Payments.Infrastructure.Database
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<PaymentNotification> PaymentNotifications { get; set; }
+
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -74,6 +76,31 @@ namespace Explorer.Payments.Infrastructure.Database
                 builder.HasIndex(w => w.UserId)
                        .IsUnique();
             });
+
+            // ===== PaymentNotification konfiguracija =====
+            modelBuilder.Entity<PaymentNotification>(builder =>
+            {
+                builder.ToTable("PaymentNotifications");
+
+                builder.HasKey(n => n.Id);
+
+                builder.Property(n => n.UserId)
+                       .IsRequired();
+
+                builder.Property(n => n.Content)
+                       .IsRequired()
+                       .HasMaxLength(500);
+
+                builder.Property(n => n.CreatedAt)
+                       .IsRequired()
+                       .HasColumnType("timestamp with time zone");
+
+                builder.Property(n => n.IsRead)
+                       .IsRequired();
+
+                builder.HasIndex(n => n.UserId);
+            });
+
         }
     }
 }
