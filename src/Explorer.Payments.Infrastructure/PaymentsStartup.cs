@@ -27,12 +27,15 @@ namespace Explorer.Payments.Infrastructure
             services.AddScoped<IShoppingCartService, ShoppingCartService>();
             services.AddScoped<IWalletInternalService, WalletInternalService>();
             services.AddScoped<IWalletService, WalletService>();
+            services.AddScoped<Explorer.Payments.Core.UseCases.PaymentInternalService>();
+            services.AddScoped<IPaymentInternalService>(sp => sp.GetRequiredService<Explorer.Payments.Core.UseCases.PaymentInternalService>());
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
         {
             services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
             services.AddScoped<IWalletRepository, WalletRepository>();
+            services.AddScoped<IPaymentRecordRepository, PaymentRecordRepository>();
 
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("payments"));
             dataSourceBuilder.EnableDynamicJson();

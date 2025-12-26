@@ -25,9 +25,37 @@ VALUES
     (2, 1, 'Niška tvrđava', FALSE, 'Netačno, ova tvrđava je u Nišu.'),
     (3, 2, 'EXIT festival', TRUE, 'Tačno! EXIT je najveći muzički festival u regionu.'),
     (4, 2, 'Beer Fest', FALSE, 'Ne, Beer Fest se održava u Beogradu.');
-
     
+-- Add wallets for tourists in payments schema
+INSERT INTO payments."Wallets" ("Id", "UserId", "Balance", "CreatedAt")
+VALUES
+    (-1, -21, 10000.00, NOW()),
+    (-2, -22, 500.00, NOW()),
+    (-3, -23, 0.00, NOW())
+ON CONFLICT ("Id") DO NOTHING;
+
+-- Add PaymentRecords table (if not exists)
+CREATE TABLE IF NOT EXISTS payments."PaymentRecords" (
+    "Id" bigserial PRIMARY KEY,
+    "UserId" bigint NOT NULL,
+    "TourId" bigint NULL,
+    "BundleId" bigint NULL,
+    "Amount" numeric(18,2) NOT NULL,
+    "CreatedAt" timestamp with time zone NOT NULL,
+    "Description" text NULL
+);
+
+-- Seed sample payment records (empty initially)
+INSERT INTO payments."PaymentRecords" ("UserId", "TourId", "BundleId", "Amount", "CreatedAt", "Description")
+VALUES 
+    (-21, -1, NULL, 1500, NOW(), 'Obilazak Petrovaradinske tvrđave - Detaljan obilazak sa vodičem.'),
+    (-22, -2, NULL, 2500, NOW(), 'Fruška gora - planinarski izlet kroz nacionalni park.'),
+    (-23, -3, NULL, 3500, NOW(), 'Dunav - vožnja brodom - Romantična večernja vožnja sa uključenom večerom.')
+ON CONFLICT DO NOTHING;
+
 SELECT * FROM tours."Tours";
 SELECT * FROM tours."Quizzes";
 SELECT * FROM tours."Questions";
 SELECT * FROM tours."Option";
+SELECT * FROM payments."Wallets";
+SELECT * FROM payments."PaymentRecords";

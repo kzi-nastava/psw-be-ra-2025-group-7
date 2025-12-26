@@ -318,6 +318,15 @@ namespace Explorer.Tours.Core.Domain
             if (Status != TourStatus.Published)
                 throw new InvalidOperationException("Only published tours can be purchased.");
         }
+
+       
+        public void SetPrice(decimal price)
+        {
+            if (price < 0)
+                throw new ArgumentException("Price must be non-negative.");
+
+            Price = price;
+        }
     }
 
     public enum TourDifficulty
