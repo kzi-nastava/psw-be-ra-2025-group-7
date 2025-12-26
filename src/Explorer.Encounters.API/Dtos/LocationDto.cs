@@ -4,17 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Explorer.Stakeholders.API.Dtos
+namespace Explorer.Encounters.API.Dtos
 {
-    public class UserLocationDto
+    public class LocationDto
     {
-        public int UserId { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
-        public UserLocationDto(int userId, double? latitude, double? longitude)
+        public LocationDto(double? latitude, double? longitude)
         {
-            UserId = userId;
             Latitude = latitude;
             Longitude = longitude;
         }

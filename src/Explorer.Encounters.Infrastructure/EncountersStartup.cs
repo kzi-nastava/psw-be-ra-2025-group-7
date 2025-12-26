@@ -34,7 +34,8 @@ public static class EncountersStartup
     {
        
         services.AddScoped<IEncounterService, EncounterService>();
-        services.AddScoped<IEncounterProgressService, EncounterProgressService>();
+        //services.AddScoped<IEncounterProgressService, EncounterProgressService>();
+        //services.AddScoped<IUserLocationService, UserLocationService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

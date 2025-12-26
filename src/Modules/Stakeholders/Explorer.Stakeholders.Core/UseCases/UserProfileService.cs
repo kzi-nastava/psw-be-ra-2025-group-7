@@ -39,10 +39,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             }
 
             var user = _userRepositoy.GetById(userId);
-            if(user.Role == UserRole.Tourist)
-            {
-                profile.FinishedEncounters = new List<int>();
-            }
 
             return profile;
         }

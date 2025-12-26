@@ -22,6 +22,11 @@ public class UserProfileDbRepository : IUserProfileRepository
         return _dbSet.FirstOrDefault(up => up.UserId == userId);
     }
 
+    public UserProfile GetById(long userId)
+    {
+        return _dbSet.FirstOrDefault(up => up.UserId == userId);
+    }
+
     public UserProfile Create(UserProfile profile)
     {
         _dbSet.Add(profile);

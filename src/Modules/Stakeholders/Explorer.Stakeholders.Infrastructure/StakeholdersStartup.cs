@@ -1,4 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.API.Public.Tourist;
 using Explorer.Stakeholders.API.Services;
@@ -40,7 +41,7 @@ public static class StakeholdersStartup
         services.AddScoped<IFollowerMessageService, FollowerMessageService>();
         services.AddScoped<IClubMessageService, ClubMessageService>();
         services.AddScoped<INotificationService, NotificationService>();
-        services.AddScoped<IUserLocationService, UserLocationService>();
+        services.AddScoped<IUserProfileLocationService, UserProfileLocationService>();
 
 
     }
