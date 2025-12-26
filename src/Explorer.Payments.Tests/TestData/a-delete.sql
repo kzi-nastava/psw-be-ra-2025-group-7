@@ -8,3 +8,5 @@ DELETE FROM payments."OrderItems";
 
 -- Delete all ShoppingCarts
 DELETE FROM payments."ShoppingCarts";
+
+DELETE FROM payments."Wallets";

@@ -7,7 +7,7 @@ namespace Explorer.Payments.Infrastructure.Database
     {
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
-
+        public DbSet<Wallet> Wallets { get; set; }
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -52,6 +52,27 @@ namespace Explorer.Payments.Infrastructure.Database
                 b.Property(oi => oi.Price)
                     .IsRequired()
                     .HasColumnType("decimal(18,2)");
+            });
+
+            // Wallet
+            modelBuilder.Entity<Wallet>(builder =>
+            {
+                builder.ToTable("Wallets");
+
+                builder.HasKey(w => w.Id);
+
+                builder.Property(w => w.UserId)
+                       .IsRequired();
+
+                builder.Property(w => w.Balance)
+                       .HasPrecision(18, 2)
+                       .IsRequired();
+
+                builder.Property(w => w.CreatedAt)
+                       .IsRequired();
+
+                builder.HasIndex(w => w.UserId)
+                       .IsUnique();
             });
         }
     }
