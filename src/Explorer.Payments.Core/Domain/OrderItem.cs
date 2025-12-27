@@ -19,7 +19,7 @@ namespace Explorer.Payments.Core.Domain
                 throw new ArgumentException("Tour name is required.", nameof(tourName));
 
             if (price < 0)
-                throw new ArgumentException("Price cannot be negative.", nameof(price));
+                throw new ArgumentException("Price must be non-negative.", nameof(price));
 
             TourId = tourId;
             TourName = tourName.Trim();
