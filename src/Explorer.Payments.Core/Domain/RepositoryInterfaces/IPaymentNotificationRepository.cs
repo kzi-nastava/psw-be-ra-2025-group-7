@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Explorer.Payments.Core.Domain.RepositoryInterfaces
+{
+    public interface IPaymentNotificationRepository
+    {
+        void Create(PaymentNotification notification);
+        List<PaymentNotification> GetUnreadByUser(long userId);
+        List<PaymentNotification> GetAllByUser(long userId);
+
+        PaymentNotification Get(long id);
+        void Update(PaymentNotification notification);
+    }
+}

@@ -13,10 +13,12 @@ namespace Explorer.Payments.Core.UseCases
     public class WalletService : IWalletService
     {
         private readonly IWalletRepository _walletRepository;
+        private readonly IPaymentNotificationRepository _paymentNotificationRepository;
 
-        public WalletService(IWalletRepository walletRepository)
+        public WalletService(IWalletRepository walletRepository, IPaymentNotificationRepository paymentNotificationRepository)
         {
             _walletRepository = walletRepository;
+            _paymentNotificationRepository = paymentNotificationRepository;
         }
 
         public void CreateWallet(long userId)
@@ -37,6 +39,13 @@ namespace Explorer.Payments.Core.UseCases
             var wallet = _walletRepository.GetByUserId(touristUserId);
             wallet.AddFunds(amount);
             _walletRepository.Update(wallet);
+
+            var notification = new PaymentNotification(
+                touristUserId,
+                $"Uplaćeno {amount} AC. Trenutno stanje: {wallet.Balance} AC."
+            );
+
+            _paymentNotificationRepository.Create(notification);
         }
 
         public WalletDto GetWallet(long userId)
