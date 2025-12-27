@@ -8,7 +8,6 @@ namespace Explorer.Payments.Infrastructure.Database
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
-        public DbSet<PaymentRecord> PaymentRecords { get; set; }
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -74,18 +73,6 @@ namespace Explorer.Payments.Infrastructure.Database
 
                 builder.HasIndex(w => w.UserId)
                        .IsUnique();
-            });
-
-            // PaymentRecords
-            modelBuilder.Entity<PaymentRecord>(b =>
-            {
-                b.ToTable("PaymentRecords");
-                b.HasKey(pr => pr.Id);
-
-                b.Property(pr => pr.UserId).IsRequired();
-                b.Property(pr => pr.Amount).HasPrecision(18,2).IsRequired();
-                b.Property(pr => pr.CreatedAt).IsRequired();
-                b.Property(pr => pr.Description).IsRequired(false);
             });
         }
     }

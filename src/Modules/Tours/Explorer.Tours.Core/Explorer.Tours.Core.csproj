@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Explorer.Tours.API\Explorer.Tours.API.csproj" />
-    <ProjectReference Include="..\..\..\Explorer.Payments.API\Explorer.Payments.API.csproj" />
   </ItemGroup>
 
 </Project>
