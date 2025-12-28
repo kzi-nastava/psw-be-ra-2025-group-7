@@ -106,8 +106,7 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "https://example.com/x.png",
-                    ActivationLatitude = 45.1,
-                    ActivationLongitude = 19.1,
+          
                     ActivationRadiusMeters = 5,
                     PhotoLatitude = 45.2,
                     PhotoLongitude = 19.2
@@ -134,8 +133,6 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "https://example.com/a.png",
-                    ActivationLatitude = 45.1,
-                    ActivationLongitude = 19.1,
                     ActivationRadiusMeters = 5,
                     PhotoLatitude = 45.2,
                     PhotoLongitude = 19.2
@@ -172,8 +169,7 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "https://example.com/a.png",
-                    ActivationLatitude = 45.1,
-                    ActivationLongitude = 19.1,
+                
                     ActivationRadiusMeters = 5,
                     PhotoLatitude = 45.2,
                     PhotoLongitude = 19.2
@@ -210,8 +206,7 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "https://example.com/a.png",
-                    ActivationLatitude = 45.1,
-                    ActivationLongitude = 19.1,
+                 
                     ActivationRadiusMeters = 5,
                     PhotoLatitude = 45.2,
                     PhotoLongitude = 19.2
@@ -225,8 +220,7 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "https://example.com/hacked.png",
-                    ActivationLatitude = 0,
-                    ActivationLongitude = 0,
+              
                     ActivationRadiusMeters = 1,
                     PhotoLatitude = 0,
                     PhotoLongitude = 0
@@ -253,8 +247,7 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "",
-                    ActivationLatitude = 45.1,
-                    ActivationLongitude = 19.1,
+            
                     ActivationRadiusMeters = 5,
                     PhotoLatitude = 45.2,
                     PhotoLongitude = 19.2
@@ -314,16 +307,17 @@ namespace Explorer.Encounters.Tests.Integration
             var dbContext = scope.ServiceProvider.GetRequiredService<EncountersContext>();
 
             // 1️⃣ Kreiraj SOCIAL encounter
-            var encounter = encounterService.Create(new CreateEncounterDto
+            var encounter = encounterService.Create(-1,new CreateEncounterDto
             {
+                
                 Name = "Social test",
                 Description = "Group up",
                 Latitude = 45.0,
                 Longitude = 19.0,
-                Radius = 50,                 // 👈 BITNO
-                RequiredParticipants = 2,    // 👈 BITNO
+                Radius = 50,    // 👈 BITNO
                 Xp = 10,
-                Type = "social"
+                Type = "social",
+                RequiredParticipants = 2
             });
 
             encounterService.ChangeStatus(encounter.Id, "active");

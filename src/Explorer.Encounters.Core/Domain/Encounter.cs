@@ -22,29 +22,23 @@ namespace Explorer.Encounters.Core.Domain
         public HiddenLocationEncounter? HiddenLocationDetails { get; private set; }
         private Encounter() { } // EF
 
-        public Encounter(int creatorId, string name, string description, GeoLocation location, int xp, EncounterType type)
+
+        public Encounter(int creatorId,string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
         {
             CreatorId = creatorId;
-            SetBasics(name, description, location, xp, type);
-            Status = EncounterStatus.Draft; //default
-        }
-
-        public Encounter(string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
-        {
             SetBasics(name, description, location, xp, type, requiredParticipants);
             Status = EncounterStatus.Draft;
         }
 
-        public void Update(string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
-        { SetBasics(name, description, location, xp, type, requiredParticipants); }
-        public void Update(int creatorId,string name, string description, GeoLocation location, int xp, EncounterType type)
+       
+        public void Update(int creatorId,string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
         {
             
             if (creatorId != CreatorId)
                 throw new InvalidOperationException("Only the creator can update the encounter.");
 
             var previousType = Type;
-            SetBasics(name, description, location, xp, type);
+            SetBasics(name, description, location, xp, type, requiredParticipants);
             // Ako više NIJE location challenge → brišemo hidden config
             
             if (previousType == EncounterType.Location && type != EncounterType.Location)

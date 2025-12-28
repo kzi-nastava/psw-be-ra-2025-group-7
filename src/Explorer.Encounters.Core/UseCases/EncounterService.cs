@@ -26,22 +26,21 @@ namespace Explorer.Encounters.Core.UseCases
         {
             var type = ParseType(dto.Type);
             var location = new GeoLocation(dto.Latitude, dto.Longitude, dto.Radius);
-
-            var encounter = new Encounter(dto.Name, dto.Description, location, dto.Xp, type, dto.RequiredParticipants); // default Draft
-            var encounter = new Encounter(creatorId,dto.Name, dto.Description, location, dto.Xp, type); // default Draft
-
             if (dto.HiddenLocation != null && type != EncounterType.Location)
             {
                 throw new InvalidOperationException(
                     "Hidden location is allowed only for Location encounters.");
             }
+            var encounter = new Encounter(creatorId,dto.Name, dto.Description, location, dto.Xp, type, dto.RequiredParticipants); // default Draft
+            
+
+            
             // opcionalni HiddenLocation
             if (type == EncounterType.Location && dto.HiddenLocation != null)
             {
                 var hl = dto.HiddenLocation;
                 var hiddenConfig = new HiddenLocationEncounter(
                     new EncounterImage(hl.ImageUrl),
-                    new GeoLocation(hl.ActivationLatitude, hl.ActivationLongitude),
                     hl.ActivationRadiusMeters,
                     new GeoLocation(hl.PhotoLatitude, hl.PhotoLongitude)
                 );
@@ -66,28 +65,32 @@ namespace Explorer.Encounters.Core.UseCases
             var longitude = dto.Longitude ?? encounter.Location.Longitude;
             var radius = dto.Radius ?? encounter.Location.Radius;
             var requiredParticipants = dto.RequiredParticipants ?? encounter.RequiredParticipants;
-
-
-            var location = new GeoLocation(latitude, longitude);
             var xp = dto.Xp ?? encounter.Xp;
             var type = string.IsNullOrWhiteSpace(dto.Type) ? encounter.Type : ParseType(dto.Type);
+            GeoLocation location;
 
-            encounter.Update(creatorId, name, description, location, xp, type);
+            if (type == EncounterType.Location)
+            {
+                location = new GeoLocation(latitude, longitude);
+            }
+            else
+            {
+                location = new GeoLocation(latitude, longitude, radius);
+            }
+            encounter.Update(creatorId, name, description, location, xp, type,requiredParticipants);
             if(type != EncounterType.Social)
             {
                 requiredParticipants = null;
                 radius = null;
             }
-            var location = new GeoLocation(latitude, longitude, radius);
-
-            encounter.Update(name, description, location, xp, type, requiredParticipants);
+            
+         
 
             if (type == EncounterType.Location && dto.HiddenLocation != null)
             {
                 var hl = dto.HiddenLocation;
                 var hiddenConfig = new HiddenLocationEncounter(
                     new EncounterImage(hl.ImageUrl),
-                    new GeoLocation(hl.ActivationLatitude, hl.ActivationLongitude),
                     hl.ActivationRadiusMeters,
                     new GeoLocation(hl.PhotoLatitude, hl.PhotoLongitude)
                 );

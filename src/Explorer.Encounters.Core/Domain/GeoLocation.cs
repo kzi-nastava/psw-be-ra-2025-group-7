@@ -27,12 +27,23 @@ namespace Explorer.Encounters.Core.Domain
             Longitude = longitude;
             Radius = radius;
         }
+        public GeoLocation(double latitude, double longitude)
+        {
+
+            if (latitude < -90 || latitude > 90) throw new ArgumentOutOfRangeException(nameof(latitude));
+            if (longitude < -180 || longitude > 180) throw new ArgumentOutOfRangeException(nameof(longitude));
+
+            Latitude = latitude;
+            Longitude = longitude;
+            Radius = null;
+        }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return Radius;
+            
             yield return Latitude;
             yield return Longitude;
+            yield return Radius;
         }
     }
 

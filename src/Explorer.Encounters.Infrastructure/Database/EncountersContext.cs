@@ -31,7 +31,6 @@ public class EncountersContext : DbContext
                 .HasMaxLength(200);
 
             e.Property(x => x.Description).IsRequired();
-
             e.Property(x => x.Xp).IsRequired();
 
             e.Property(x => x.Status)
@@ -49,47 +48,40 @@ public class EncountersContext : DbContext
             {
                 loc.ToJson();
 
-                loc.Property(p => p.Radius).HasColumnName("radius");
-                loc.Property(p => p.Latitude).HasColumnName("latitude");
-                loc.Property(p => p.Longitude).HasColumnName("longitude");
+                loc.Property(p => p.Latitude)
+                   .HasColumnName("latitude")
+                   .IsRequired();
+
+                loc.Property(p => p.Longitude)
+                   .HasColumnName("longitude")
+                   .IsRequired();
+
+                // Radius MORA biti nullable
+                loc.Property(p => p.Radius)
+                   .HasColumnName("radius")
+                   .IsRequired(false);
             });
 
             // ---------------------------------------------
-            // HiddenLocationEncounter (VALUE OBJECT, OPTIONAL)
+            // HiddenLocationDetails (OPTIONAL)
             // ---------------------------------------------
             e.OwnsOne(x => x.HiddenLocationDetails, hl =>
             {
                 hl.ToJson();
 
                 hl.Property(p => p.ActivationRadiusMeters)
-                    .HasColumnName("activationRadiusMeters")
-                    .IsRequired();
+                  .HasColumnName("activationRadiusMeters")
+                  .IsRequired();
 
-                // -----------------------------
-                // EncounterImage (VALUE OBJECT)
-                // -----------------------------
                 hl.OwnsOne(p => p.Image, img =>
                 {
                     img.Property(i => i.Url)
                        .HasColumnName("imageUrl")
-                       .IsRequired();
+                       .IsRequired(false);
                 });
 
-                // -----------------------------
-                // ActivationLocation
-                // -----------------------------
-                hl.OwnsOne(p => p.ActivationLocation, al =>
-                {
-                    al.Property(p => p.Latitude)
-                      .HasColumnName("activationLatitude");
+             
 
-                    al.Property(p => p.Longitude)
-                      .HasColumnName("activationLongitude");
-                });
-
-                // -----------------------------
-                // PhotoLocation
-                // -----------------------------
                 hl.OwnsOne(p => p.PhotoLocation, pl =>
                 {
                     pl.Property(p => p.Latitude)
@@ -100,22 +92,18 @@ public class EncountersContext : DbContext
                 });
             });
         });
-        });
 
         modelBuilder.Entity<EncounterProgress>(ep =>
         {
             ep.ToTable("EncounterProgresses");
             ep.HasKey(x => x.Id);
+
             ep.Property(x => x.UserId).IsRequired();
             ep.Property(x => x.EncounterId).IsRequired();
+
             ep.Property(x => x.Status)
-                .IsRequired()
-                .HasConversion<int>();
+              .IsRequired()
+              .HasConversion<int>();
         });
     }
-
-
-
 }
-
-

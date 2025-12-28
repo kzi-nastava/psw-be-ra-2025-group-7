@@ -11,13 +11,13 @@ namespace Explorer.API.Controllers.Administrator.Administration
     public class EncountersController : ControllerBase
     {
         private readonly IEncounterService _service;
+        private readonly IEncounterProgressService _encounterProgressService;
 
         public EncountersController(IEncounterService service)
         {
             _service = service;
         }
 
-        [HttpPost]
         [HttpPost]
         public ActionResult<EncounterDto> Create([FromBody] CreateEncounterDto dto)
         {
@@ -71,6 +71,7 @@ namespace Explorer.API.Controllers.Administrator.Administration
             var result = _service.Get(status, type);
             return Ok(result);
         }
+     
 
     }
 }

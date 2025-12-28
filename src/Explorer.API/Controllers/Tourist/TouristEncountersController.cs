@@ -1,5 +1,7 @@
 ﻿using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Core.UseCases;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +12,7 @@ namespace Explorer.API.Controllers.Tourist
     public class TouristEncountersController : ControllerBase
     {
         private readonly IEncounterService _service;
-
+        private readonly IEncounterProgressService _encounterProgressService;
         public TouristEncountersController(IEncounterService service)
         {
             _service = service;
@@ -27,6 +29,24 @@ namespace Explorer.API.Controllers.Tourist
             catch (Exception ex)
             {
                 return StatusCode(500, "Failed to load active encounters.");
+            }
+        }
+        [HttpPost("{encounterId:long}/activate-hidden-location")]
+        public IActionResult ActivateHiddenLocation(long encounterId)
+        {
+            try
+            {
+                var userId = (int)User.PersonId(); // uzima trenutno ulogovanog korisnika
+                _encounterProgressService.ActivateHiddenLocationForUser(encounterId, userId);
+                return Ok();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }
