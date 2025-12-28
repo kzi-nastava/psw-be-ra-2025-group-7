@@ -13,6 +13,7 @@ public class EncountersContext : DbContext
     public EncountersContext(DbContextOptions<EncountersContext> options) : base(options) { }
 
     public DbSet<Encounter> Encounters { get; set; }
+    public DbSet<EncounterProgress> EncounterProgresses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,10 +45,21 @@ public class EncountersContext : DbContext
                 
                 loc.ToJson();
 
-                
+                loc.Property(p => p.Radius).HasColumnName("radius");
                 loc.Property(p => p.Latitude).HasColumnName("latitude");
                 loc.Property(p => p.Longitude).HasColumnName("longitude");
             });
+        });
+
+        modelBuilder.Entity<EncounterProgress>(ep =>
+        {
+            ep.ToTable("EncounterProgresses");
+            ep.HasKey(x => x.Id);
+            ep.Property(x => x.UserId).IsRequired();
+            ep.Property(x => x.EncounterId).IsRequired();
+            ep.Property(x => x.Status)
+                .IsRequired()
+                .HasConversion<int>();
         });
     }
 

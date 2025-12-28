@@ -25,9 +25,9 @@ namespace Explorer.Encounters.Core.UseCases
         public EncounterDto Create(CreateEncounterDto dto)
         {
             var type = ParseType(dto.Type);
-            var location = new GeoLocation(dto.Latitude, dto.Longitude);
+            var location = new GeoLocation(dto.Latitude, dto.Longitude, dto.Radius);
 
-            var encounter = new Encounter(dto.Name, dto.Description, location, dto.Xp, type); // default Draft
+            var encounter = new Encounter(dto.Name, dto.Description, location, dto.Xp, type, dto.RequiredParticipants); // default Draft
 
             if (!string.IsNullOrWhiteSpace(dto.Status))
             {
@@ -51,9 +51,10 @@ namespace Explorer.Encounters.Core.UseCases
            
             var latitude = dto.Latitude ?? encounter.Location.Latitude;
             var longitude = dto.Longitude ?? encounter.Location.Longitude;
-            var location = new GeoLocation(latitude, longitude);
+            var radius = dto.Radius ?? encounter.Location.Radius;
+            var requiredParticipants = dto.RequiredParticipants ?? encounter.RequiredParticipants;
 
-           
+
             var xp = dto.Xp ?? encounter.Xp;
 
             
@@ -61,7 +62,14 @@ namespace Explorer.Encounters.Core.UseCases
                 ? encounter.Type
                 : ParseType(dto.Type);
 
-            encounter.Update(name, description, location, xp, type);
+            if(type != EncounterType.Social)
+            {
+                requiredParticipants = null;
+                radius = null;
+            }
+            var location = new GeoLocation(latitude, longitude, radius);
+
+            encounter.Update(name, description, location, xp, type, requiredParticipants);
 
             
             if (!string.IsNullOrWhiteSpace(dto.Status))

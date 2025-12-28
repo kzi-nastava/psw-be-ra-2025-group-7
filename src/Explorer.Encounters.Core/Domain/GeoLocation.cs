@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Explorer.BuildingBlocks.Core.Domain;
 
@@ -11,10 +12,12 @@ namespace Explorer.Encounters.Core.Domain
     {
         public double Latitude { get; private set; }
         public double Longitude { get; private set; }
+        public double? Radius { get; set; }
 
         private GeoLocation() { } // EF
 
-        public GeoLocation(double latitude, double longitude)
+        [JsonConstructor]
+        public GeoLocation(double latitude, double longitude, double? radius)
         {
 
             if (latitude < -90 || latitude > 90) throw new ArgumentOutOfRangeException(nameof(latitude));
@@ -22,10 +25,12 @@ namespace Explorer.Encounters.Core.Domain
 
             Latitude = latitude;
             Longitude = longitude;
+            Radius = radius;
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
+            yield return Radius;
             yield return Latitude;
             yield return Longitude;
         }

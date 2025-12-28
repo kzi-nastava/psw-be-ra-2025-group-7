@@ -1,7 +1,10 @@
 ﻿using Explorer.API.Controllers.Administrator.Administration;
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
+using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Encounters.Core.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -125,6 +128,60 @@ namespace Explorer.Encounters.Tests.Integration
             controller.ControllerContext = ctx;
             return controller;
         }
+
+        [Fact]
+        public void Social_encounter_completes_when_enough_users_are_in_radius()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+            var progressRepo = scope.ServiceProvider.GetRequiredService<IEncounterProgressRepository>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<EncountersContext>();
+
+            // 1️⃣ Kreiraj SOCIAL encounter
+            var encounter = encounterService.Create(new CreateEncounterDto
+            {
+                Name = "Social test",
+                Description = "Group up",
+                Latitude = 45.0,
+                Longitude = 19.0,
+                Radius = 50,                 // 👈 BITNO
+                RequiredParticipants = 2,    // 👈 BITNO
+                Xp = 10,
+                Type = "social"
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            // 2️⃣ Kreiraj progress za 2 korisnika
+            progressService.Create(new EncounterProgressDto
+            {
+                EncounterId = encounter.Id,
+                UserId = 1
+            });
+
+            progressService.Create(new EncounterProgressDto
+            {
+                EncounterId = encounter.Id,
+                UserId = 2
+            });
+
+            // 3️⃣ Act – simulacija "ticka"
+            var completed = progressService.CheckEncounterProgress(encounter.Id);
+
+            // 4️⃣ Assert
+            completed.ShouldBeTrue();
+
+            var progresses = progressRepo.GetAll()
+                .Where(p => p.EncounterId == encounter.Id)
+                .ToList();
+
+            progresses.Count.ShouldBe(2);
+            progresses.All(p => p.Status == EncounterProgress.EncounterProgressStatus.Completed)
+                .ShouldBeTrue();
+        }
+
     }
 
 }
