@@ -17,19 +17,29 @@ namespace Explorer.Encounters.Core.Domain
         public int Xp { get; private set; }
         public EncounterStatus Status { get; private set; }
         public EncounterType Type { get; private set; }
+        public int? RequiredParticipants { get; private set; }
+
         public HiddenLocationEncounter? HiddenLocationDetails { get; private set; }
         private Encounter() { } // EF
 
-        public Encounter(int creatorId,string name, string description, GeoLocation location, int xp, EncounterType type)
+        public Encounter(int creatorId, string name, string description, GeoLocation location, int xp, EncounterType type)
         {
             CreatorId = creatorId;
             SetBasics(name, description, location, xp, type);
             Status = EncounterStatus.Draft; //default
-
         }
 
+        public Encounter(string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
+        {
+            SetBasics(name, description, location, xp, type, requiredParticipants);
+            Status = EncounterStatus.Draft;
+        }
+
+        public void Update(string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
+        { SetBasics(name, description, location, xp, type, requiredParticipants); }
         public void Update(int creatorId,string name, string description, GeoLocation location, int xp, EncounterType type)
         {
+            
             if (creatorId != CreatorId)
                 throw new InvalidOperationException("Only the creator can update the encounter.");
 
@@ -61,7 +71,7 @@ namespace Explorer.Encounters.Core.Domain
             Status = newStatus;
         }
 
-        private void SetBasics(string name, string description, GeoLocation location, int xp, EncounterType type)
+        private void SetBasics(string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name is required.", nameof(name));
@@ -74,6 +84,13 @@ namespace Explorer.Encounters.Core.Domain
             Location = location ?? throw new ArgumentNullException(nameof(location));
             Xp = xp;
             Type = type;
+            if(Type == EncounterType.Social)
+            {
+                RequiredParticipants = requiredParticipants;
+            } else
+            {
+                RequiredParticipants = null;
+            }
         }
         public void SetHiddenLocationDetails(HiddenLocationEncounter details)
         {

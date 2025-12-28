@@ -10,11 +10,13 @@ namespace Explorer.Stakeholders.Core.UseCases
     {
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly IMapper _mapper;
+        private readonly IUserRepository _userRepositoy;
 
-        public UserProfileService(IUserProfileRepository userProfileRepository, IMapper mapper)
+        public UserProfileService(IUserProfileRepository userProfileRepository, IMapper mapper, IUserRepository userRepositoy)
         {
             _userProfileRepository = userProfileRepository;
             _mapper = mapper;
+            _userRepositoy = userRepositoy;
         }
 
         // Helper: kreira profil ako ne postoji
@@ -35,6 +37,8 @@ namespace Explorer.Stakeholders.Core.UseCases
 
                 _userProfileRepository.Create(profile);
             }
+
+            var user = _userRepositoy.GetById(userId);
 
             return profile;
         }

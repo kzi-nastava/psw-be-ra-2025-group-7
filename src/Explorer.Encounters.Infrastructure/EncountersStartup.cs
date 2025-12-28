@@ -24,8 +24,6 @@ public static class EncountersStartup
         
         services.AddAutoMapper(typeof(EncountersProfile).Assembly);   // Preduslov da imamo ovu liniju koda je da smo definisali već Profile klasu u Core/Mappers
         SetupCore(services);
-
-        SetupCore(services);
         SetupInfrastructure(services);
         return services;
     }
@@ -34,6 +32,7 @@ public static class EncountersStartup
     {
        
         services.AddScoped<IEncounterService, EncounterService>();
+        services.AddScoped<IEncounterProgressService, EncounterProgressService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -48,6 +47,6 @@ public static class EncountersStartup
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "encounters")));
 
         services.AddScoped<IEncounterRepository, EncounterRepository>();
-
+        services.AddScoped<IEncounterProgressRepository, EncounterProgressRepository>();
     }
 }
