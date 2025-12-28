@@ -20,7 +20,10 @@ namespace Explorer.Encounters.Core.Mappers
                 .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToString().ToLower()))
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.Type.ToString().ToLower()));
 
-           
+            CreateMap<EncounterProgress, EncounterProgressDto>();
+            CreateMap<EncounterProgressDto, EncounterProgress>();
+
+
         }
     }
 

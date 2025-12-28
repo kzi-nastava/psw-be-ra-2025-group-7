@@ -1,5 +1,6 @@
 ﻿using Explorer.BuildingBlocks.Tests;
 using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Stakeholders.API.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -19,6 +20,14 @@ public class EncountersTestFactory : BaseTestFactory<EncountersContext>
 
         services.Remove(descriptor!);
         services.AddDbContext<EncountersContext>(SetupTestContext());
+
+        var locationDescriptor = services.SingleOrDefault(d =>
+        d.ServiceType == typeof(IUserProfileLocationService));
+
+        if (locationDescriptor != null)
+            services.Remove(locationDescriptor);
+
+        services.AddScoped<IUserProfileLocationService, FakeUserProfileLocationService>();
 
         return services;
     }

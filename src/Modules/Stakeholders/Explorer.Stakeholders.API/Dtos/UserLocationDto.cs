@@ -18,5 +18,7 @@ namespace Explorer.Stakeholders.API.Dtos
             Latitude = latitude;
             Longitude = longitude;
         }
+
+        public UserLocationDto() { }
     }
 }

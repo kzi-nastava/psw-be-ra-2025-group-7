@@ -6,6 +6,7 @@ using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.API.Internal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -100,18 +101,15 @@ namespace Explorer.Encounters.Core.UseCases
             return usersInRadius;
         }
 
-        public List<int> GetParticipants(int encounterId)
+        public int GetActiveParticipants(int encounterId)
         {
             List<int> participants = new List<int>();
             var encounterProgresses = _repo.GetAll()
                 .Where(ep => ep.EncounterId == encounterId && ep.Status == EncounterProgressStatus.Active)
                 .ToList();
-            foreach (var ep in encounterProgresses)
-            {
-                participants.Add(ep.UserId);
-            }
-            return participants;
+            return encounterProgresses.Count;
         }
+
         public void FinishEncounterProgress(List<EncounterProgress> encounterProgresses, List<int> users)
         {
             foreach (var ep in encounterProgresses)
