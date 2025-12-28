@@ -29,6 +29,7 @@ namespace Explorer.Payments.Core.UseCases
         {
             return _repository.GetUnreadByUser(userId)
                 .Select(n => new PaymentNotificationDto(
+                    n.Id,
                     n.Content,
                     n.CreatedAt,
                     n.IsRead))
