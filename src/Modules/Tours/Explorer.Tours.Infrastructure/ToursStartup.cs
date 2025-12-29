@@ -3,12 +3,10 @@ using Explorer.Notifications.API.Public;
 using Explorer.Notifications.Infrastructure;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Administration;
-using Explorer.Tours.API.Public.Shopping;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
 using Explorer.Tours.Core.UseCases.Administration;
-using Explorer.Tours.Core.UseCases.Shopping;
 using Explorer.Tours.Core.UseCases.Tourist;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
@@ -46,7 +44,6 @@ public static class ToursStartup
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
         services.AddScoped<ITourBrowsingService, TourBrowsingService>();
-        services.AddScoped<IShoppingCartService, ShoppingCartService>();
         services.AddScoped<IAnnualAwardService, AnnualAwardService>();
         services.AddScoped<ITouristToursService, TouristToursService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
@@ -70,7 +67,6 @@ public static class ToursStartup
         services.AddScoped<IQuizRepository, QuizRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
-        services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
