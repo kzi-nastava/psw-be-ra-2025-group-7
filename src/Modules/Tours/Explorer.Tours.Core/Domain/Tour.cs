@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Explorer.Tours.Core.Domain
 {
@@ -24,6 +25,8 @@ namespace Explorer.Tours.Core.Domain
 
         public List<Equipment> RequiredEquipment { get; private set; } = new();
 
+        public List<TourImage> Images { get; private set; } = new();
+
         // Kartica 4 – ukupna dužina ture u kilometrima (računata na osnovu KeyPoint-ova)
         public double LengthInKm { get; private set; }
 
@@ -34,6 +37,7 @@ namespace Explorer.Tours.Core.Domain
             TourDurations = new List<TourDuration>();
             RequiredEquipment = new List<Equipment>();
             LengthInKm = 0;
+            Images = new List<TourImage>();
         }
 
         public Tour(long authorId, string name, string description, TourDifficulty difficulty, List<string> tags)
@@ -52,6 +56,8 @@ namespace Explorer.Tours.Core.Domain
             TourDurations = new List<TourDuration>();
             RequiredEquipment = new List<Equipment>();
             LengthInKm = 0;
+
+            Images = new List<TourImage>();
 
             Validate();
         }
@@ -318,6 +324,15 @@ namespace Explorer.Tours.Core.Domain
             if (Status != TourStatus.Published)
                 throw new InvalidOperationException("Only published tours can be purchased.");
         }
+
+
+        public void SetImages(IEnumerable<TourImage>? images)
+        {
+            Images.Clear();
+            if (images != null) Images.AddRange(images);
+        }
+
+
     }
 
     public enum TourDifficulty
@@ -333,4 +348,5 @@ namespace Explorer.Tours.Core.Domain
         Published,
         Archived
     }
+
 }
