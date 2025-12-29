@@ -26,6 +26,7 @@ const string corsPolicy = "_corsPolicy";
 builder.Services.ConfigureCors(corsPolicy);
 builder.Services.ConfigureAuth();
 
+
 builder.Services.RegisterModules();
 
 
