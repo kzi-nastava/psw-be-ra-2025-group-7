@@ -1,6 +1,7 @@
 ﻿using Explorer.Stakeholders.Infrastructure.Authentication;
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.API.Public;
 using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Shopping;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
