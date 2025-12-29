@@ -39,6 +39,18 @@ namespace Explorer.Encounters.Core.UseCases
             return _mapper.Map<EncounterDto>(encounter);
         }
 
+        public EncounterDto CreateByTourist(CreateEncounterDto dto)
+        {
+            var type = ParseType(dto.Type);
+            var location = new GeoLocation(dto.Latitude, dto.Longitude, dto.Radius);
+
+            var encounter = new Encounter(dto.Name, dto.Description, location, dto.Xp, type, dto.RequiredParticipants, EncounterStatus.Pending);
+
+            _repo.Create(encounter);
+
+            return _mapper.Map<EncounterDto>(encounter);
+        }
+
         public EncounterDto Update(long id, UpdateEncounterDto dto)
         {
             var encounter = _repo.Get(id)
@@ -81,6 +93,14 @@ namespace Explorer.Encounters.Core.UseCases
             return _mapper.Map<EncounterDto>(encounter);
         }
 
+        public void DeclineEncounter(long id)
+        {
+            var encounter = _repo.Get(id)
+                ?? throw new KeyNotFoundException("Encounter not found.");
+            encounter.ChangeStatus(EncounterStatus.Declined);
+            _repo.Update(encounter);
+        }
+
 
         public void Delete(long id) => _repo.Delete(id);
 
@@ -114,6 +134,7 @@ namespace Explorer.Encounters.Core.UseCases
                 "draft" => EncounterStatus.Draft,
                 "active" => EncounterStatus.Active,
                 "archived" => EncounterStatus.Archived,
+                "pending" => EncounterStatus.Pending,
                 _ => throw new ArgumentException("Invalid status.")
             };
         }

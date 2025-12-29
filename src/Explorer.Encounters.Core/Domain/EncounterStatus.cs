@@ -10,6 +10,8 @@ namespace Explorer.Encounters.Core.Domain
     {
         Draft = 0,
         Active = 1,
-        Archived = 2
+        Archived = 2,
+        Pending = 3,
+        Declined = 4
     }
 }
