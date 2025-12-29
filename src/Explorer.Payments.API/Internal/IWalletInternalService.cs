@@ -10,5 +10,6 @@ namespace Explorer.Payments.API.Internal
     {
         void CreateWallet(long userId);
         decimal GetBalance(long userId);
+        void Withdraw(long userId, decimal amount);
     }
 }

@@ -30,5 +30,16 @@ namespace Explorer.Payments.Core.Domain
 
             Balance += amount;
         }
+
+        public void Withdraw(decimal amount)
+        {
+            if (amount <= 0)
+                throw new ArgumentException("Amount must be greater than zero.");
+
+            if (Balance < amount)
+                throw new InvalidOperationException("Insufficient funds.");
+
+            Balance -= amount;
+        }
     }
 }

@@ -5,6 +5,7 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using PaymentsDto = Explorer.Payments.API.Dtos;
 using ToursDto = Explorer.Tours.API.Dtos;
+using Explorer.Payments.API.Internal;
 
 namespace Explorer.Payments.Core.UseCases
 {
@@ -14,17 +15,20 @@ namespace Explorer.Payments.Core.UseCases
         private readonly ITourRepository _tourRepository;
         private readonly ITourPurchaseTokenRepository _tokenRepository;
         private readonly IMapper _mapper;
+        private readonly IWalletInternalService _walletInternalService;
 
         public ShoppingCartService(
             IShoppingCartRepository cartRepository,
             ITourRepository tourRepository,
             ITourPurchaseTokenRepository tokenRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IWalletInternalService walletInternalService)
         {
             _cartRepository = cartRepository;
             _tourRepository = tourRepository;
             _tokenRepository = tokenRepository;
             _mapper = mapper;
+            _walletInternalService = walletInternalService;
         }
 
         public PaymentsDto.ShoppingCartDto GetByTouristId(long touristId)
@@ -42,6 +46,12 @@ namespace Explorer.Payments.Core.UseCases
 
             if (tour.Status != TourStatus.Published)
                 throw new InvalidOperationException("Only published tours can be added to cart.");
+
+            // Prevent adding a tour that the user already purchased
+            if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
+            {
+                throw new InvalidOperationException("You have already purchased this tour.");
+            }
 
             var cart = GetOrCreateCart(touristId);
 
@@ -82,23 +92,37 @@ namespace Explorer.Payments.Core.UseCases
             // Validates that cart can be purchased and returns tour IDs
             var tourIds = cart.PreparePurchase();
 
+            // New: check if any tour was already purchased by the user BEFORE charging wallet
+            foreach (var tourId in tourIds)
+            {
+                if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
+                {
+                    throw new InvalidOperationException($"Tour with ID {tourId} has already been purchased.");
+                }
+            }
+
+            // New: Check wallet balance against total cart price
+            var total = cart.TotalPrice;
+            var balance = _walletInternalService.GetBalance(touristId);
+            if (balance < total)
+            {
+                throw new InvalidOperationException("Insufficient funds");
+            }
+
+            // Deduct total amount from wallet before creating tokens
+            _walletInternalService.Withdraw(touristId, total);
+
             var createdTokens = new List<TourPurchaseToken>();
 
             // Create tokens for each tour in the cart
             foreach (var tourId in tourIds)
             {
-                // Check if user already purchased this tour
-                if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
-                {
-                    throw new InvalidOperationException($"Tour with ID {tourId} has already been purchased.");
-                }
-
                 // Get the tour to validate purchase rules
                 var tour = _tourRepository.Get(tourId);
-                
+
                 // Use factory method to create token with all business rules enforced
                 var token = TourPurchaseToken.CreateForTour(touristId, tour);
-                
+
                 // Persist the token
                 var createdToken = _tokenRepository.Create(token);
                 createdTokens.Add(createdToken);
