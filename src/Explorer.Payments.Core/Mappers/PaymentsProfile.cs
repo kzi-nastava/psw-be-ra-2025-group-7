@@ -11,6 +11,11 @@ namespace Explorer.Payments.Core.Mappers
             // Shopping Cart mapovi
             CreateMap<OrderItem, OrderItemDto>().ReverseMap();
             CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
+
+            // Bundle mapovi
+            CreateMap<Bundle, BundleDto>()
+                .ForMember(d => d.TourIds, opt => opt.MapFrom(s => s.Items.Select(i => i.TourId).ToList()))
+                .ForMember(d => d.Status, opt => opt.MapFrom(s => (int)s.Status));
         }
     }
 }

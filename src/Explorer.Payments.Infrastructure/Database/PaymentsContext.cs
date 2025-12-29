@@ -10,6 +10,10 @@ namespace Explorer.Payments.Infrastructure.Database
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<PaymentNotification> PaymentNotifications { get; set; }
 
+        // NEW
+        public DbSet<Bundle> Bundles { get; set; }
+        public DbSet<BundleItem> BundleItems { get; set; }
+
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -101,6 +105,51 @@ namespace Explorer.Payments.Infrastructure.Database
                 builder.HasIndex(n => n.UserId);
             });
 
+            // ===== Bundle konfiguracija =====
+            modelBuilder.Entity<Bundle>(b =>
+            {
+                b.ToTable("Bundles");
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.AuthorId).IsRequired();
+
+                b.Property(x => x.Name)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                b.Property(x => x.Price)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property(x => x.Status)
+                    .IsRequired();
+
+                b.Property(x => x.CreatedAt)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(x => x.UpdatedAt)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.HasIndex(x => x.AuthorId);
+
+                b.HasMany(x => x.Items)
+                    .WithOne()
+                    .HasForeignKey("BundleId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<BundleItem>(b =>
+            {
+                b.ToTable("BundleItems");
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.TourId).IsRequired();
+
+                b.HasIndex("BundleId", nameof(BundleItem.TourId))
+                    .IsUnique();
+            });
         }
     }
 }
