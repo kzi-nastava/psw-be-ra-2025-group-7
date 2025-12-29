@@ -47,6 +47,12 @@ namespace Explorer.Payments.Core.UseCases
             if (tour.Status != TourStatus.Published)
                 throw new InvalidOperationException("Only published tours can be added to cart.");
 
+            // Prevent adding a tour that the user already purchased
+            if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
+            {
+                throw new InvalidOperationException("You have already purchased this tour.");
+            }
+
             var cart = GetOrCreateCart(touristId);
 
             cart.AddItem(tour.Id, tour.Name, tour.Price);
@@ -86,6 +92,15 @@ namespace Explorer.Payments.Core.UseCases
             // Validates that cart can be purchased and returns tour IDs
             var tourIds = cart.PreparePurchase();
 
+            // New: check if any tour was already purchased by the user BEFORE charging wallet
+            foreach (var tourId in tourIds)
+            {
+                if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
+                {
+                    throw new InvalidOperationException($"Tour with ID {tourId} has already been purchased.");
+                }
+            }
+
             // New: Check wallet balance against total cart price
             var total = cart.TotalPrice;
             var balance = _walletInternalService.GetBalance(touristId);
@@ -102,12 +117,6 @@ namespace Explorer.Payments.Core.UseCases
             // Create tokens for each tour in the cart
             foreach (var tourId in tourIds)
             {
-                // Check if user already purchased this tour
-                if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
-                {
-                    throw new InvalidOperationException($"Tour with ID {tourId} has already been purchased.");
-                }
-
                 // Get the tour to validate purchase rules
                 var tour = _tourRepository.Get(tourId);
 
