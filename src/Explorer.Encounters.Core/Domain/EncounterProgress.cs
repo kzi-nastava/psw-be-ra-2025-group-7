@@ -16,6 +16,7 @@ namespace Explorer.Encounters.Core.Domain
         }
         public long EncounterId { get; private set; }
         public int UserId { get; private set; }
+        public DateTime? FinishedAt { get; set; }
 
         public EncounterProgressStatus Status { get; private set; }
 
@@ -26,11 +27,13 @@ namespace Explorer.Encounters.Core.Domain
             EncounterId = encounterId;
             UserId = userId;
             Status = status;
+            FinishedAt = null;
         }
 
         public void SetCompleted()
         {
             Status = EncounterProgressStatus.Completed;
+            FinishedAt = DateTime.UtcNow;
         }
     }
 }

@@ -15,6 +15,8 @@ namespace Explorer.Stakeholders.API.Dtos
         public string? ProfilePicture { get; set; }
         public string? Biography { get; set; }
         public string? Motto { get; set; }
+        public int? XP { get; set; }
+        public int? Level { get; set; }
 
-    }
+}
 }
