@@ -13,9 +13,12 @@ namespace Explorer.API.Controllers.Tourist
     {
         private readonly IEncounterService _service;
         private readonly IEncounterProgressService _encounterProgressService;
-        public TouristEncountersController(IEncounterService service)
-        {
+        public TouristEncountersController(
+            IEncounterService service,
+            IEncounterProgressService encounterProgressService)
+         {
             _service = service;
+            _encounterProgressService = encounterProgressService;
         }
 
         [HttpGet]
@@ -36,7 +39,7 @@ namespace Explorer.API.Controllers.Tourist
         {
             try
             {
-                var userId = (int)User.PersonId(); // uzima trenutno ulogovanog korisnika
+                var userId = User.PersonId();
                 _encounterProgressService.ActivateHiddenLocationForUser(encounterId, userId);
                 return Ok();
             }

@@ -32,8 +32,31 @@ namespace Explorer.Encounters.Core.UseCases
 
         public EncounterProgressDto Create(EncounterProgressDto dto)
         {
-            var status = EncounterProgressStatus.Active;
-            var encounterProgress = new EncounterProgress(dto.EncounterId, dto.UserId, status);
+            if (_repo.GetAll().Any(ep => ep.EncounterId == dto.EncounterId && ep.UserId == dto.UserId && ep.Status == EncounterProgressStatus.Active))
+            {
+                throw new InvalidOperationException("EncounterProgress already exists for this user and encounter.");
+            }
+            var encounter = _encounterRepo.Get(dto.EncounterId)
+        ?? throw new KeyNotFoundException("Encounter not found.");
+
+            EncounterProgress encounterProgress;
+
+            if (encounter.Type == EncounterType.Location)
+            {
+                encounterProgress = new EncounterProgress(
+                    dto.EncounterId,
+                    dto.UserId,
+                    dto.EnteredPhotoRadiusAt ?? DateTime.UtcNow
+                );
+            }
+            else
+            {
+                var status = EncounterProgressStatus.Active;
+                 encounterProgress = new EncounterProgress(dto.EncounterId, dto.UserId, status);
+            }
+
+
+           
             _repo.Create(encounterProgress);
             return _mapper.Map<EncounterProgressDto>(encounterProgress);
         }
@@ -79,7 +102,7 @@ namespace Explorer.Encounters.Core.UseCases
 
             foreach (var ep in encounterProgresses)
             {
-                var user = _userProfileLocService.GetLocation(ep.UserId);
+                var user = _userProfileLocService.GetLocation((int)ep.UserId);
 
                 if (user.Latitude == null || user.Longitude == null)
                     continue;
@@ -94,7 +117,7 @@ namespace Explorer.Encounters.Core.UseCases
 
                 if (isInside)
                 {
-                    usersInRadius.Add(ep.UserId);
+                    usersInRadius.Add((int)ep.UserId);
                 }
             }
 
@@ -109,7 +132,7 @@ namespace Explorer.Encounters.Core.UseCases
                 .ToList();
             return encounterProgresses.Count;
         }
-        public void ActivateHiddenLocationForUser(long encounterId, int userId)
+        public void ActivateHiddenLocationForUser(long encounterId, long userId)
         {
             bool alreadyActive = _repo.GetAll().Any(p =>
                 p.EncounterId == encounterId &&
@@ -128,7 +151,7 @@ namespace Explorer.Encounters.Core.UseCases
             var hidden = encounter.HiddenLocationDetails
                 ?? throw new InvalidOperationException("Hidden location not configured.");
 
-            var userLocationDto = _userProfileLocService.GetLocation(userId);
+            var userLocationDto = _userProfileLocService.GetLocation((int)userId);
 
             if (userLocationDto.Latitude == null || userLocationDto.Longitude == null)
                 throw new InvalidOperationException("User location not available.");
@@ -145,11 +168,11 @@ namespace Explorer.Encounters.Core.UseCases
                 throw new InvalidOperationException("You are too far to activate this encounter.");
 
             var status = EncounterProgressStatus.Active;
-            var encounterProgress = new EncounterProgress(encounterId, userId, status);
+            var encounterProgress = new EncounterProgress(encounterId, (int)userId, status);
 
             _repo.Create(encounterProgress);
         }
-        public void OnUserLocationChanged(int userId)
+        public void OnUserLocationChanged(long userId)
         {
             var activeProgresses = _repo.GetAll()
                 .Where(p => p.UserId == userId && p.Status == EncounterProgressStatus.Active)
@@ -158,10 +181,11 @@ namespace Explorer.Encounters.Core.UseCases
             foreach (var progress in activeProgresses)
             {
                 var encounter = _encounterRepo.Get(progress.EncounterId);
+                if (encounter.Type != EncounterType.Location) continue;
                 var hidden = encounter.HiddenLocationDetails;
                 if (hidden == null) continue;
 
-                var userLoc = _userProfileLocService.GetLocation(userId);
+                var userLoc = _userProfileLocService.GetLocation((int)userId);
                 if (userLoc.Latitude == null || userLoc.Longitude == null) continue;
 
                 bool inPhotoRadius = GeoDistanceCalculator.IsWithinRadius(
@@ -196,7 +220,7 @@ namespace Explorer.Encounters.Core.UseCases
         {
             foreach (var ep in encounterProgresses)
             {
-                if (users.Contains(ep.UserId))
+                if (users.Contains((int)ep.UserId))
                 {
                     ep.SetCompleted();
                     _repo.Update(ep);

@@ -256,6 +256,51 @@ namespace Explorer.Encounters.Tests.Integration
 
             Should.Throw<ArgumentException>(() => controller.Create(dto));
         }
+        private static readonly DateTime FixedNow =
+        new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+
+        [Fact]
+        public void Location_encounter_completes_when_user_stays_30_seconds_in_radius()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+            var progressRepo = scope.ServiceProvider.GetRequiredService<IEncounterProgressRepository>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Location test",
+                Description = "User is close",
+                Latitude = 45.0,
+                Longitude = 19.0,
+                Radius = 100,
+                Xp = 20,
+                Type = "location"
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            
+            progressService.Create(new EncounterProgressDto
+            {
+                EncounterId = encounter.Id,
+                UserId = 42,
+                EnteredPhotoRadiusAt = FixedNow.AddSeconds(-31)
+            });
+
+            // Act
+            var completed = progressService.CheckEncounterProgress(encounter.Id);
+
+            // Assert
+            completed.ShouldBeTrue();
+
+            var progress = progressRepo.GetAll()
+                .Single(p => p.EncounterId == encounter.Id && p.UserId == 42);
+
+            progress.Status.ShouldBe(EncounterProgress.EncounterProgressStatus.Completed);
+        }
+
 
         private static EncounterDto CreateEncounter(EncountersController controller, string name, string type)
         {

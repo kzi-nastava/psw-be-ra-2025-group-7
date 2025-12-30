@@ -134,7 +134,8 @@ namespace Explorer.Encounters.Tests.Integration
         private static TouristEncountersController CreateTouristController(IServiceScope scope, string userId)
         {
             var controller = new TouristEncountersController(
-                scope.ServiceProvider.GetRequiredService<IEncounterService>());
+                scope.ServiceProvider.GetRequiredService<IEncounterService>(),
+                scope.ServiceProvider.GetRequiredService<IEncounterProgressService>());
 
             var ctx = BuildContext(userId);
 

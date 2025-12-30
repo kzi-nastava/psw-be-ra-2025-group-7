@@ -13,8 +13,8 @@ namespace Explorer.Encounters.Core.Domain
         public EncounterImage Image { get; private set; }
         public double ActivationRadiusMeters { get;  set; }
         public GeoLocation PhotoLocation { get; private set; }
-        public int SecondsToViewPhoto { get; private set; } = 30;
-        public int DistanceMeters { get; private set; } = 5;
+        public int SecondsToViewPhoto { get; private set; } = 15;
+        public int DistanceMeters { get; private set; } = 100;
         public HiddenLocationEncounter() { }
         [JsonConstructor]
         public HiddenLocationEncounter(EncounterImage image, double activationRadiusMeters, GeoLocation photoLocation)

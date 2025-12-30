@@ -1,4 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Encounters.API.Internal;
 using Explorer.Encounters.API.Public;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Encounters.Core.Mappers;
@@ -10,10 +11,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Explorer.Encounters.Infrastructure;
 
@@ -33,6 +30,8 @@ public static class EncountersStartup
        
         services.AddScoped<IEncounterService, EncounterService>();
         services.AddScoped<IEncounterProgressService, EncounterProgressService>();
+        services.AddScoped<IUserLocationChangedNotifier, UserLocationChangedNotifier>();
+      
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -48,5 +47,9 @@ public static class EncountersStartup
 
         services.AddScoped<IEncounterRepository, EncounterRepository>();
         services.AddScoped<IEncounterProgressRepository, EncounterProgressRepository>();
+        services.AddScoped<IUserLocationChangedNotifier, UserLocationChangedNotifier>();
+        
+
+
     }
 }

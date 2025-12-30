@@ -15,7 +15,7 @@ namespace Explorer.Encounters.Core.Domain
             Completed
         }
         public long EncounterId { get; private set; }
-        public int UserId { get; private set; }
+        public long UserId { get; private set; }
 
         public EncounterProgressStatus Status { get; private set; }
         public DateTime? EnteredPhotoRadiusAt { get; private set; }
@@ -27,6 +27,13 @@ namespace Explorer.Encounters.Core.Domain
             EncounterId = encounterId;
             UserId = userId;
             Status = status;
+        }
+        public EncounterProgress(long encounterId, long userId,DateTime dateTime)
+        {
+            EncounterId = encounterId;
+            UserId = userId;
+            Status = EncounterProgressStatus.Active;
+            EnteredPhotoRadiusAt = dateTime;
         }
         public void EnterPhotoRadius(DateTime now)
         {
@@ -46,6 +53,7 @@ namespace Explorer.Encounters.Core.Domain
         }
         public void SetCompleted()
         {
+            if (Status == EncounterProgressStatus.Completed) return;
             Status = EncounterProgressStatus.Completed;
         }
     }
