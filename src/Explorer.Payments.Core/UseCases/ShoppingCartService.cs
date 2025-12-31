@@ -6,6 +6,7 @@ using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using PaymentsDto = Explorer.Payments.API.Dtos;
 using ToursDto = Explorer.Tours.API.Dtos;
 using Explorer.Payments.API.Internal;
+using Explorer.Payments.API.Public;
 
 namespace Explorer.Payments.Core.UseCases
 {
@@ -17,18 +18,24 @@ namespace Explorer.Payments.Core.UseCases
         private readonly IMapper _mapper;
         private readonly IWalletInternalService _walletInternalService;
 
+        // NEW
+        private readonly IPurchaseNotificationService _purchaseNotificationService;
+
         public ShoppingCartService(
             IShoppingCartRepository cartRepository,
             ITourRepository tourRepository,
             ITourPurchaseTokenRepository tokenRepository,
             IMapper mapper,
-            IWalletInternalService walletInternalService)
+            IWalletInternalService walletInternalService,
+            IPurchaseNotificationService purchaseNotificationService) // NEW
         {
             _cartRepository = cartRepository;
             _tourRepository = tourRepository;
             _tokenRepository = tokenRepository;
             _mapper = mapper;
             _walletInternalService = walletInternalService;
+
+            _purchaseNotificationService = purchaseNotificationService; // NEW
         }
 
         public PaymentsDto.ShoppingCartDto GetByTouristId(long touristId)
@@ -47,7 +54,6 @@ namespace Explorer.Payments.Core.UseCases
             if (tour.Status != TourStatus.Published)
                 throw new InvalidOperationException("Only published tours can be added to cart.");
 
-            // Prevent adding a tour that the user already purchased
             if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
             {
                 throw new InvalidOperationException("You have already purchased this tour.");
@@ -82,17 +88,13 @@ namespace Explorer.Payments.Core.UseCases
 
         /// <summary>
         /// Purchases all items in the cart by creating TourPurchaseTokens for each item.
-        /// Uses domain-driven design: the ShoppingCart aggregate validates the purchase,
-        /// then we create tokens for each tour, and finally clear the cart.
         /// </summary>
         public List<object> PurchaseCart(long touristId)
         {
             var cart = GetOrCreateCart(touristId);
 
-            // Validates that cart can be purchased and returns tour IDs
             var tourIds = cart.PreparePurchase();
 
-            // New: check if any tour was already purchased by the user BEFORE charging wallet
             foreach (var tourId in tourIds)
             {
                 if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
@@ -101,7 +103,6 @@ namespace Explorer.Payments.Core.UseCases
                 }
             }
 
-            // New: Check wallet balance against total cart price
             var total = cart.TotalPrice;
             var balance = _walletInternalService.GetBalance(touristId);
             if (balance < total)
@@ -109,30 +110,29 @@ namespace Explorer.Payments.Core.UseCases
                 throw new InvalidOperationException("Insufficient funds");
             }
 
-            // Deduct total amount from wallet before creating tokens
             _walletInternalService.Withdraw(touristId, total);
 
             var createdTokens = new List<TourPurchaseToken>();
+            var purchasedTourNames = new List<string>(); // NEW
 
-            // Create tokens for each tour in the cart
             foreach (var tourId in tourIds)
             {
-                // Get the tour to validate purchase rules
                 var tour = _tourRepository.Get(tourId);
 
-                // Use factory method to create token with all business rules enforced
+                purchasedTourNames.Add(tour.Name); // NEW
+
                 var token = TourPurchaseToken.CreateForTour(touristId, tour);
 
-                // Persist the token
                 var createdToken = _tokenRepository.Create(token);
                 createdTokens.Add(createdToken);
             }
 
-            // Clear the cart after successful purchase (domain method)
             cart.ClearAfterPurchase();
             _cartRepository.Update(cart);
 
-            // Return DTOs
+            // NEW: notifikacija nakon uspešne kupovine
+            _purchaseNotificationService.NotifyPurchaseSuccess(touristId, purchasedTourNames);
+
             return _mapper.Map<List<ToursDto.TourPurchaseTokenDto>>(createdTokens).Cast<object>().ToList();
         }
 
