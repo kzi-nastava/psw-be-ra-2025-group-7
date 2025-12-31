@@ -10,10 +10,13 @@ namespace Explorer.Payments.Infrastructure.Database
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<PaymentNotification> PaymentNotifications { get; set; }
 
-        // NEW
+        // NEW (bundle)
         public DbSet<Bundle> Bundles { get; set; }
         public DbSet<BundleItem> BundleItems { get; set; }
         public DbSet<BundlePurchase> BundlePurchase { get; set; }
+
+        // NEW (purchase notifications)
+        public DbSet<PurchaseNotification> PurchaseNotifications { get; set; }
 
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
@@ -61,7 +64,7 @@ namespace Explorer.Payments.Infrastructure.Database
                     .HasColumnType("decimal(18,2)");
             });
 
-            // Wallet
+            // ===== Wallet konfiguracija =====
             modelBuilder.Entity<Wallet>(builder =>
             {
                 builder.ToTable("Wallets");
@@ -104,6 +107,30 @@ namespace Explorer.Payments.Infrastructure.Database
                        .IsRequired();
 
                 builder.HasIndex(n => n.UserId);
+            });
+
+            // ===== PurchaseNotification konfiguracija (NEW) =====
+            modelBuilder.Entity<PurchaseNotification>(builder =>
+            {
+                builder.ToTable("PurchaseNotifications");
+
+                builder.HasKey(n => n.Id);
+
+                builder.Property(n => n.TouristId)
+                       .IsRequired();
+
+                builder.Property(n => n.Message)
+                       .IsRequired()
+                       .HasMaxLength(500);
+
+                builder.Property(n => n.CreatedAt)
+                       .IsRequired()
+                       .HasColumnType("timestamp with time zone");
+
+                builder.Property(n => n.IsRead)
+                       .IsRequired();
+
+                builder.HasIndex(n => n.TouristId);
             });
 
             // ===== Bundle konfiguracija =====
