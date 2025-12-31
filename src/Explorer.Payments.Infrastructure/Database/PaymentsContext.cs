@@ -13,6 +13,7 @@ namespace Explorer.Payments.Infrastructure.Database
         // NEW
         public DbSet<Bundle> Bundles { get; set; }
         public DbSet<BundleItem> BundleItems { get; set; }
+        public DbSet<BundlePurchase> BundlePurchase { get; set; }
 
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
@@ -150,6 +151,31 @@ namespace Explorer.Payments.Infrastructure.Database
                 b.HasIndex("BundleId", nameof(BundleItem.TourId))
                     .IsUnique();
             });
+
+            modelBuilder.Entity<BundlePurchase>(b =>
+            {
+                b.ToTable("BundlePurchases");
+
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.TouristId)
+                    .IsRequired();
+
+                b.Property(x => x.BundleId)
+                    .IsRequired();
+
+                b.Property(x => x.Price)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property(x => x.PurchasedAt)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.HasIndex(x => new { x.TouristId, x.BundleId })
+                    .IsUnique();
+            });
+
         }
     }
 }

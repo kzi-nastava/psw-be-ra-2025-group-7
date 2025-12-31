@@ -10,7 +10,9 @@ namespace Explorer.Payments.API.Public
         BundleDto Create(long authorId, CreateBundleDto dto);
         BundleDto Update(long id, long authorId, UpdateBundleDto dto);
         void Delete(long id, long authorId);
-
+        void Publish(long id, long authorId);
+        void Archive(long id, long authorId);
+        List<BundleDto> GetPublished();
         BundlePreviewResponseDto PreviewTotal(long authorId, BundlePreviewRequestDto dto);
     }
 }

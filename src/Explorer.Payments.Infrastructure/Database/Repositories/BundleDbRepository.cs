@@ -99,5 +99,25 @@ namespace Explorer.Payments.Infrastructure.Database.Repositories
             _dbSet.Remove(bundle);
             _dbContext.SaveChanges();
         }
+
+        public void Save(Bundle bundle)
+        {
+            _dbContext.ChangeTracker.Clear();
+
+            _dbSet.Attach(bundle);
+            _dbContext.Entry(bundle).Property(b => b.Status).IsModified = true;
+            _dbContext.Entry(bundle).Property(b => b.UpdatedAt).IsModified = true;
+
+            _dbContext.SaveChanges();
+        }
+
+        public List<Bundle> GetPublished()
+        {
+            return _dbSet
+                .Include(b => b.Items)
+                .Where(b => b.Status == BundleStatus.Published)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToList();
+        }
     }
 }

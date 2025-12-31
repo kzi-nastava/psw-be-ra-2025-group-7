@@ -4,6 +4,7 @@ using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public;
 using Explorer.Payments.Core.Domain;
 using Explorer.Payments.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Payments.Core.UseCases
@@ -83,6 +84,10 @@ namespace Explorer.Payments.Core.UseCases
             var existing = _bundleRepository.Get(id);
             EnsureOwner(existing, authorId);
 
+            if (existing.Status == BundleStatus.Published)
+                throw new InvalidOperationException(
+                    "Published bundle cannot be deleted. It can only be archived.");
+
             _bundleRepository.Delete(id);
         }
 
@@ -133,6 +138,51 @@ namespace Explorer.Payments.Core.UseCases
 
             if (bundle.AuthorId != authorId)
                 throw new InvalidOperationException("You are not allowed to access this bundle.");
+        }
+
+        public void Publish(long id, long authorId)
+        {
+            var bundle = _bundleRepository.Get(id);
+            EnsureOwner(bundle, authorId);
+
+            int publishedCount = 0;
+
+            foreach (var item in bundle.Items)
+            {
+                var tour = _tourRepository.Get(item.TourId);
+                if (tour.Status == TourStatus.Published)
+                    publishedCount++;
+            }
+
+            bundle.Publish(publishedCount);
+
+            _bundleRepository.Save(bundle);
+        }
+
+        public void Archive(long id, long authorId)
+        {
+            var bundle = _bundleRepository.Get(id);
+            EnsureOwner(bundle, authorId);
+
+            bundle.Archive();
+
+            _bundleRepository.Save(bundle); 
+        }
+        public List<BundleDto> GetPublished()
+        {
+            var bundles = _bundleRepository.GetPublished();
+
+            return bundles.Select(b => new BundleDto
+            {
+                Id = b.Id,
+                AuthorId = b.AuthorId,
+                Name = b.Name,
+                Price = b.Price,
+                Status = (int)b.Status,
+                TourIds = b.Items.Select(i => i.TourId).ToList(),
+                CreatedAt = b.CreatedAt,
+                UpdatedAt = b.UpdatedAt
+            }).ToList();
         }
     }
 }

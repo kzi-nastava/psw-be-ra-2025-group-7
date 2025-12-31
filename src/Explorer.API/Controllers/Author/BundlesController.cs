@@ -88,5 +88,32 @@ namespace Explorer.API.Controllers.Author
             catch (ArgumentException e) { return BadRequest(e.Message); }
             catch (InvalidOperationException e) { return BadRequest(e.Message); }
         }
+
+
+        [HttpPut("{id:long}/publish")]
+        public ActionResult Publish(long id)
+        {
+            try
+            {
+                var authorId = User.PersonId();
+                _bundleService.Publish(id, authorId);
+                return Ok();
+            }
+            catch (NotFoundException e) { return NotFound(e.Message); }
+            catch (InvalidOperationException e) { return BadRequest(e.Message); }
+        }
+
+        [HttpPut("{id:long}/archive")]
+        public ActionResult Archive(long id)
+        {
+            try
+            {
+                var authorId = User.PersonId();
+                _bundleService.Archive(id, authorId);
+                return Ok();
+            }
+            catch (NotFoundException e) { return NotFound(e.Message); }
+            catch (InvalidOperationException e) { return BadRequest(e.Message); }
+        }
     }
 }

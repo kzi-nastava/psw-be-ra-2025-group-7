@@ -31,6 +31,7 @@ namespace Explorer.Payments.Infrastructure
 
             // NEW
             services.AddScoped<IBundleService, BundleService>();
+            services.AddScoped<IBundlePurchaseService, BundlePurchaseService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
@@ -41,6 +42,7 @@ namespace Explorer.Payments.Infrastructure
 
             // NEW
             services.AddScoped<IBundleRepository, BundleDbRepository>();
+            services.AddScoped<IBundlePurchaseRepository,BundlePurchaseDbRepository>();
 
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("payments"));
             dataSourceBuilder.EnableDynamicJson();
