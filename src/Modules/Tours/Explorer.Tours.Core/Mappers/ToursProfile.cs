@@ -46,7 +46,8 @@ namespace Explorer.Tours.Core.Mappers
                                ? src.KeyPoints.First() 
                                : null))
                 .ForMember(dest => dest.TourDurations,
-                           opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDuration>()));
+                           opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDuration>()))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price)); ;
 
             // Mapiranje za kreiranje ture (priča člana 1)
             CreateMap<CreateTourDto, Tour>();

@@ -50,16 +50,16 @@ namespace Explorer.Payments.Core.UseCases
 
                 if (tour.Status == TourStatus.Archived)
                     throw new InvalidOperationException(
-                        $"Archived tour {tour.Id} cannot be purchased.");
+                        $"Archived tour {tour.Name} cannot be purchased.");
 
                 if (tour.Status != TourStatus.Published)
                     throw new InvalidOperationException(
-                        $"Tour {tour.Id} is not published.");
+                        $"Tour {tour.Name} is not published.");
 
                 // korisnik već ima token?
                 if (_tokenRepository.HasUserPurchasedTour(touristId, tour.Id))
                     throw new InvalidOperationException(
-                        $"Tour {tour.Id} has already been purchased.");
+                        $"Tour {tour.Name} has already been purchased.");
             }
 
             var balance = _walletInternalService.GetBalance(touristId);
