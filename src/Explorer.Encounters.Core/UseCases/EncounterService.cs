@@ -93,12 +93,55 @@ namespace Explorer.Encounters.Core.UseCases
             return _mapper.Map<EncounterDto>(encounter);
         }
 
-        public void DeclineEncounter(long id)
+        public EncounterDto DeclineEncounter(long id)
         {
             var encounter = _repo.Get(id)
                 ?? throw new KeyNotFoundException("Encounter not found.");
             encounter.ChangeStatus(EncounterStatus.Declined);
             _repo.Update(encounter);
+            return _mapper.Map<EncounterDto>(encounter);
+        }
+
+        public EncounterDto AcceptEncounter(long id, UpdateEncounterDto dto)
+        {
+            var encounter = _repo.Get(id)
+                ?? throw new KeyNotFoundException("Encounter not found.");
+
+
+            var name = dto.Name ?? encounter.Name;
+            var description = dto.Description ?? encounter.Description;
+
+
+            var latitude = dto.Latitude ?? encounter.Location.Latitude;
+            var longitude = dto.Longitude ?? encounter.Location.Longitude;
+            var radius = dto.Radius ?? encounter.Location.Radius;
+            var requiredParticipants = dto.RequiredParticipants ?? encounter.RequiredParticipants;
+
+
+            var xp = dto.Xp ?? encounter.Xp;
+
+
+            var type = string.IsNullOrWhiteSpace(dto.Type)
+                ? encounter.Type
+                : ParseType(dto.Type);
+
+            if (type != EncounterType.Social)
+            {
+                requiredParticipants = null;
+                radius = null;
+            }
+            var location = new GeoLocation(latitude, longitude, radius);
+
+            encounter.Update(name, description, location, xp, type, requiredParticipants);
+
+
+            if (!string.IsNullOrWhiteSpace(dto.Status))
+            {
+                encounter.ChangeStatus(ParseStatus(EncounterStatus.Active.ToString()));
+            }
+
+            _repo.Update(encounter);
+            return _mapper.Map<EncounterDto>(encounter);
         }
 
 
