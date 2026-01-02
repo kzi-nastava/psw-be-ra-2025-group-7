@@ -39,6 +39,7 @@ namespace Explorer.Tours.Core.UseCases.Tourist
                     Description = tour.Description,
                     Difficulty = (int)tour.Difficulty,
                     Tags = tour.Tags.ToList(),
+                    Price = tour.Price,
                     FirstKeyPoint = tour.KeyPoints.Any()
                         ? _mapper.Map<KeyPointDto>(tour.KeyPoints.First())
                         : null

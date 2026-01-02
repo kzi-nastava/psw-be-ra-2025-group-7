@@ -87,5 +87,30 @@ namespace Explorer.Payments.Core.Domain
             if (Items == null || Items.Count == 0)
                 throw new ArgumentException("Bundle must contain at least one tour.");
         }
+
+        public void Publish(int publishedToursCount)
+        {
+            if (Status != BundleStatus.Draft && Status != BundleStatus.Archived)
+                throw new InvalidOperationException(
+                    "Only draft or archived bundles can be published.");
+
+            if (publishedToursCount < 2)
+                throw new InvalidOperationException(
+                    "Bundle must contain at least two published tours to be published.");
+
+            Status = BundleStatus.Published;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void Archive()
+        {
+            if (Status != BundleStatus.Published)
+                throw new InvalidOperationException(
+                    "Only published bundles can be archived.");
+
+            Status = BundleStatus.Archived;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
     }
 }

@@ -31,8 +31,7 @@ namespace Explorer.Payments.Infrastructure
 
             // NEW
             services.AddScoped<IBundleService, BundleService>();
-
-            // NEW (purchase notifications)
+            services.AddScoped<IBundlePurchaseService, BundlePurchaseService>();
             services.AddScoped<IPurchaseNotificationService, PurchaseNotificationService>();
         }
 
@@ -44,6 +43,7 @@ namespace Explorer.Payments.Infrastructure
 
             // NEW
             services.AddScoped<IBundleRepository, BundleDbRepository>();
+            services.AddScoped<IBundlePurchaseRepository,BundlePurchaseDbRepository>();
 
             // NEW (purchase notifications)
             services.AddScoped<IPurchaseNotificationRepository, PurchaseNotificationRepository>();
