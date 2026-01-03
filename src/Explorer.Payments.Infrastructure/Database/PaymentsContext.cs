@@ -18,6 +18,10 @@ namespace Explorer.Payments.Infrastructure.Database
         // NEW (purchase notifications)
         public DbSet<PurchaseNotification> PurchaseNotifications { get; set; }
 
+        // NEW (coupons)
+        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<PaymentRecord> PaymentRecords { get; set; }
+
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -203,6 +207,70 @@ namespace Explorer.Payments.Infrastructure.Database
                     .IsUnique();
             });
 
+            // ===== Coupon konfiguracija =====
+            modelBuilder.Entity<Coupon>(b =>
+            {
+                b.ToTable("Coupons");
+                b.HasKey(c => c.Id);
+
+                b.Property(c => c.Code)
+                    .IsRequired()
+                    .HasMaxLength(8);
+
+                b.Property(c => c.DiscountPercentage)
+                    .IsRequired();
+
+                b.Property(c => c.ExpirationDate)
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(c => c.AuthorId)
+                    .IsRequired();
+
+                b.Property(c => c.TourId);
+
+                b.Property(c => c.IsActive)
+                    .IsRequired();
+
+                b.HasIndex(c => c.Code)
+                    .IsUnique();
+
+                b.HasIndex(c => c.AuthorId);
+            });
+
+            // ===== PaymentRecord konfiguracija =====
+            modelBuilder.Entity<PaymentRecord>(b =>
+            {
+                b.ToTable("PaymentRecords");
+                b.HasKey(pr => pr.Id);
+
+                b.Property(pr => pr.TouristId)
+                    .IsRequired();
+
+                b.Property(pr => pr.TourId);
+
+                b.Property(pr => pr.BundleId);
+
+                b.Property(pr => pr.OriginalPrice)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property(pr => pr.DiscountPercentage)
+                    .IsRequired()
+                    .HasColumnType("decimal(5,2)");
+
+                b.Property(pr => pr.FinalPrice)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property(pr => pr.PurchaseDate)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(pr => pr.CouponCode)
+                    .HasMaxLength(8);
+
+                b.HasIndex(pr => pr.TouristId);
+            });
         }
     }
 }

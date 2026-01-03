@@ -72,12 +72,12 @@ namespace Explorer.API.Controllers.Tourist
         /// All items are converted to purchase tokens and the cart is cleared.
         /// </summary>
         [HttpPost("purchase")]
-        public ActionResult<List<TourPurchaseTokenDto>> PurchaseCart()
+        public ActionResult<List<TourPurchaseTokenDto>> PurchaseCart([FromBody] PurchaseCartWithCouponDto? dto)
         {
             try
             {
                 var touristId = GetTouristIdFromToken();
-                var tokens = _shoppingCartService.PurchaseCart(touristId);
+                var tokens = _shoppingCartService.PurchaseCartWithCoupon(touristId, dto?.CouponCode);
                 return Ok(tokens);
             }
             catch (InvalidOperationException ex)
