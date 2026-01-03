@@ -14,6 +14,9 @@ using Explorer.Tours.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Explorer.Tours.API.Public.Author;
+using Explorer.Tours.Core.UseCases.Author;
+
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -49,6 +52,8 @@ public static class ToursStartup
         services.AddScoped<ITourSearchService, TourSearchService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ITourRequestService, TourRequestService>();
+        services.AddScoped<IAuthorTourRequestService, AuthorTourRequestService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

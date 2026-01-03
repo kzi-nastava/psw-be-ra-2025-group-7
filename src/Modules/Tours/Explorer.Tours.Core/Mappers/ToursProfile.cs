@@ -140,6 +140,27 @@ namespace Explorer.Tours.Core.Mappers
                 .ForMember(dest => dest.AuthorName, opt => opt.Ignore())
                 .ForMember(dest => dest.AuthorAvatar, opt => opt.Ignore())
                 .ForMember(dest => dest.AuthorRating, opt => opt.Ignore());
+
+
+            CreateMap<TourRequest, AuthorTourRequestListItemDto>()
+             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))
+             .ForMember(dest => dest.PreferredDifficulty,
+                 opt => opt.MapFrom(src => src.PreferredDifficulty.HasValue ? (int?)src.PreferredDifficulty.Value : null))
+             .ForMember(dest => dest.ResponseCount, opt => opt.Ignore())
+             .ForMember(dest => dest.AlreadyResponded, opt => opt.Ignore())
+             .ForMember(dest => dest.DaysUntilExpiration, opt => opt.Ignore());
+
+
+            CreateMap<TourRequest, AuthorTourRequestDetailsDto>()
+            .ForMember(d => d.PreferredDifficulty,
+                opt => opt.MapFrom(s => s.PreferredDifficulty.HasValue ? (int?)s.PreferredDifficulty.Value : null))
+            .ForMember(d => d.TouristName, opt => opt.Ignore())
+            .ForMember(d => d.TouristProfilePicture, opt => opt.Ignore())
+            .ForMember(d => d.ContactDisclaimer, opt => opt.Ignore())
+            .ForMember(d => d.ResponseCount, opt => opt.Ignore())
+            .ForMember(d => d.DaysUntilExpiration, opt => opt.Ignore());
+
+
         }
     }
 }
