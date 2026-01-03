@@ -17,9 +17,9 @@ namespace Explorer.Payments.Core.UseCases
         private readonly ITourPurchaseTokenRepository _tokenRepository;
         private readonly IMapper _mapper;
         private readonly IWalletInternalService _walletInternalService;
-
-        // NEW
         private readonly IPurchaseNotificationService _purchaseNotificationService;
+        private readonly ICouponRepository _couponRepository;
+        private readonly IPaymentRecordRepository _paymentRecordRepository;
 
         public ShoppingCartService(
             IShoppingCartRepository cartRepository,
@@ -27,15 +27,18 @@ namespace Explorer.Payments.Core.UseCases
             ITourPurchaseTokenRepository tokenRepository,
             IMapper mapper,
             IWalletInternalService walletInternalService,
-            IPurchaseNotificationService purchaseNotificationService) // NEW
+            IPurchaseNotificationService purchaseNotificationService,
+            ICouponRepository couponRepository,
+            IPaymentRecordRepository paymentRecordRepository)
         {
             _cartRepository = cartRepository;
             _tourRepository = tourRepository;
             _tokenRepository = tokenRepository;
             _mapper = mapper;
             _walletInternalService = walletInternalService;
-
-            _purchaseNotificationService = purchaseNotificationService; // NEW
+            _purchaseNotificationService = purchaseNotificationService;
+            _couponRepository = couponRepository;
+            _paymentRecordRepository = paymentRecordRepository;
         }
 
         public PaymentsDto.ShoppingCartDto GetByTouristId(long touristId)
@@ -86,13 +89,14 @@ namespace Explorer.Payments.Core.UseCases
             }
         }
 
-        /// <summary>
-        /// Purchases all items in the cart by creating TourPurchaseTokens for each item.
-        /// </summary>
         public List<object> PurchaseCart(long touristId)
         {
-            var cart = GetOrCreateCart(touristId);
+            return PurchaseCartWithCoupon(touristId, null);
+        }
 
+        public List<object> PurchaseCartWithCoupon(long touristId, string? couponCode)
+        {
+            var cart = GetOrCreateCart(touristId);
             var tourIds = cart.PreparePurchase();
 
             foreach (var tourId in tourIds)
@@ -103,37 +107,98 @@ namespace Explorer.Payments.Core.UseCases
                 }
             }
 
-            var total = cart.TotalPrice;
+            Coupon? coupon = null;
+            if (!string.IsNullOrWhiteSpace(couponCode))
+            {
+                coupon = _couponRepository.GetByCode(couponCode);
+                if (coupon == null || !coupon.IsValid())
+                    throw new InvalidOperationException("Invalid or expired coupon code.");
+            }
+
+            var tours = tourIds.Select(id => _tourRepository.Get(id)).ToList();
+            var totalBeforeDiscount = cart.TotalPrice;
+            var totalAfterDiscount = totalBeforeDiscount;
+            var discountPercentage = 0m;
+
+            if (coupon != null)
+            {
+                if (coupon.TourId.HasValue)
+                {
+                    var targetTour = tours.FirstOrDefault(t => t.Id == coupon.TourId.Value && t.AuthorId == coupon.AuthorId);
+                    if (targetTour == null)
+                        throw new InvalidOperationException("Coupon does not apply to any tour in the cart.");
+
+                    var discount = targetTour.Price * (coupon.DiscountPercentage / 100m);
+                    totalAfterDiscount -= discount;
+                    discountPercentage = (discount / totalBeforeDiscount) * 100m;
+                }
+                else
+                {
+                    var authorTours = tours.Where(t => t.AuthorId == coupon.AuthorId).ToList();
+                    if (!authorTours.Any())
+                        throw new InvalidOperationException("Coupon does not apply to any tour in the cart.");
+
+                    var mostExpensiveTour = authorTours.OrderByDescending(t => t.Price).First();
+                    var discount = mostExpensiveTour.Price * (coupon.DiscountPercentage / 100m);
+                    totalAfterDiscount -= discount;
+                    discountPercentage = (discount / totalBeforeDiscount) * 100m;
+                }
+            }
+
             var balance = _walletInternalService.GetBalance(touristId);
-            if (balance < total)
+            if (balance < totalAfterDiscount)
             {
                 throw new InvalidOperationException("Insufficient funds");
             }
 
-            _walletInternalService.Withdraw(touristId, total);
+            _walletInternalService.Withdraw(touristId, totalAfterDiscount);
 
-            var createdTokens = new List<TourPurchaseToken>();
-            var purchasedTourNames = new List<string>(); // NEW
+            var createdTokenDtos = new List<ToursDto.TourPurchaseTokenDto>();
+            var purchasedTourNames = new List<string>();
 
-            foreach (var tourId in tourIds)
+            foreach (var tour in tours)
             {
-                var tour = _tourRepository.Get(tourId);
+                purchasedTourNames.Add(tour.Name);
 
-                purchasedTourNames.Add(tour.Name); // NEW
+                // Check if this specific tour got a discount
+                var tourDiscountPercentage = 0m;
+                var tourFinalPrice = tour.Price;
+
+                if (coupon != null && coupon.AppliesTo(tour.Id, tour.AuthorId))
+                {
+                    tourDiscountPercentage = coupon.DiscountPercentage;
+                    tourFinalPrice = tour.Price * (1 - tourDiscountPercentage / 100m);
+                }
 
                 var token = TourPurchaseToken.CreateForTour(touristId, tour);
-
                 var createdToken = _tokenRepository.Create(token);
-                createdTokens.Add(createdToken);
+
+                // Map to DTO and add payment information
+                var tokenDto = _mapper.Map<ToursDto.TourPurchaseTokenDto>(createdToken);
+                tokenDto.OriginalPrice = tour.Price;
+                tokenDto.DiscountPercentage = tourDiscountPercentage;
+                tokenDto.FinalPrice = tourFinalPrice;
+                tokenDto.CouponCode = coupon != null && coupon.AppliesTo(tour.Id, tour.AuthorId) ? couponCode : null;
+
+                createdTokenDtos.Add(tokenDto);
+
+                var paymentRecord = new PaymentRecord(
+                    touristId,
+                    tour.Id,
+                    null,
+                    tour.Price,
+                    tourDiscountPercentage,
+                    coupon != null && coupon.AppliesTo(tour.Id, tour.AuthorId) ? couponCode : null
+                );
+                _paymentRecordRepository.Create(paymentRecord);
             }
 
             cart.ClearAfterPurchase();
             _cartRepository.Update(cart);
 
-            // NEW: notifikacija nakon uspešne kupovine
             _purchaseNotificationService.NotifyPurchaseSuccess(touristId, purchasedTourNames);
 
-            return _mapper.Map<List<ToursDto.TourPurchaseTokenDto>>(createdTokens).Cast<object>().ToList();
+            return createdTokenDtos.Cast<object>().ToList();
         }
 
         private ShoppingCart GetOrCreateCart(long touristId)
