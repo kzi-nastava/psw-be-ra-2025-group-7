@@ -16,13 +16,23 @@ namespace Explorer.Payments.Tests
     {
         protected override IServiceCollection ReplaceNeededDbContexts(IServiceCollection services)
         {
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<PaymentsContext>));
-            services.Remove(descriptor!);
+            // Replace PaymentsContext
+            var paymentsDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<PaymentsContext>));
+            services.Remove(paymentsDescriptor!);
             services.AddDbContext<PaymentsContext>(SetupTestContext());
 
-            descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<StakeholdersContext>));
-            services.Remove(descriptor!);
+            // Replace StakeholdersContext
+            var stakeholdersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<StakeholdersContext>));
+            services.Remove(stakeholdersDescriptor!);
             services.AddDbContext<StakeholdersContext>(SetupTestContext());
+
+            // Replace ToursContext (needed for tour validation in shopping cart)
+            var toursDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ToursContext>));
+            if (toursDescriptor != null)
+            {
+                services.Remove(toursDescriptor);
+            }
+            services.AddDbContext<ToursContext>(SetupTestContext());
 
             return services;
         }

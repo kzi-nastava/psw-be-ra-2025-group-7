@@ -10,6 +10,18 @@ namespace Explorer.Payments.Infrastructure.Database
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<PaymentNotification> PaymentNotifications { get; set; }
 
+        // NEW (bundle)
+        public DbSet<Bundle> Bundles { get; set; }
+        public DbSet<BundleItem> BundleItems { get; set; }
+        public DbSet<BundlePurchase> BundlePurchase { get; set; }
+
+        // NEW (purchase notifications)
+        public DbSet<PurchaseNotification> PurchaseNotifications { get; set; }
+
+        // NEW (coupons)
+        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<PaymentRecord> PaymentRecords { get; set; }
+
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -56,7 +68,7 @@ namespace Explorer.Payments.Infrastructure.Database
                     .HasColumnType("decimal(18,2)");
             });
 
-            // Wallet
+            // ===== Wallet konfiguracija =====
             modelBuilder.Entity<Wallet>(builder =>
             {
                 builder.ToTable("Wallets");
@@ -101,6 +113,164 @@ namespace Explorer.Payments.Infrastructure.Database
                 builder.HasIndex(n => n.UserId);
             });
 
+            // ===== PurchaseNotification konfiguracija (NEW) =====
+            modelBuilder.Entity<PurchaseNotification>(builder =>
+            {
+                builder.ToTable("PurchaseNotifications");
+
+                builder.HasKey(n => n.Id);
+
+                builder.Property(n => n.TouristId)
+                       .IsRequired();
+
+                builder.Property(n => n.Message)
+                       .IsRequired()
+                       .HasMaxLength(500);
+
+                builder.Property(n => n.CreatedAt)
+                       .IsRequired()
+                       .HasColumnType("timestamp with time zone");
+
+                builder.Property(n => n.IsRead)
+                       .IsRequired();
+
+                builder.HasIndex(n => n.TouristId);
+            });
+
+            // ===== Bundle konfiguracija =====
+            modelBuilder.Entity<Bundle>(b =>
+            {
+                b.ToTable("Bundles");
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.AuthorId).IsRequired();
+
+                b.Property(x => x.Name)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                b.Property(x => x.Price)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property(x => x.Status)
+                    .IsRequired();
+
+                b.Property(x => x.CreatedAt)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(x => x.UpdatedAt)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.HasIndex(x => x.AuthorId);
+
+                b.HasMany(x => x.Items)
+                    .WithOne()
+                    .HasForeignKey("BundleId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<BundleItem>(b =>
+            {
+                b.ToTable("BundleItems");
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.TourId).IsRequired();
+
+                b.HasIndex("BundleId", nameof(BundleItem.TourId))
+                    .IsUnique();
+            });
+
+            modelBuilder.Entity<BundlePurchase>(b =>
+            {
+                b.ToTable("BundlePurchases");
+
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.TouristId)
+                    .IsRequired();
+
+                b.Property(x => x.BundleId)
+                    .IsRequired();
+
+                b.Property(x => x.Price)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property(x => x.PurchasedAt)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.HasIndex(x => new { x.TouristId, x.BundleId })
+                    .IsUnique();
+            });
+
+            // ===== Coupon konfiguracija =====
+            modelBuilder.Entity<Coupon>(b =>
+            {
+                b.ToTable("Coupons");
+                b.HasKey(c => c.Id);
+
+                b.Property(c => c.Code)
+                    .IsRequired()
+                    .HasMaxLength(8);
+
+                b.Property(c => c.DiscountPercentage)
+                    .IsRequired();
+
+                b.Property(c => c.ExpirationDate)
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(c => c.AuthorId)
+                    .IsRequired();
+
+                b.Property(c => c.TourId);
+
+                b.Property(c => c.IsActive)
+                    .IsRequired();
+
+                b.HasIndex(c => c.Code)
+                    .IsUnique();
+
+                b.HasIndex(c => c.AuthorId);
+            });
+
+            // ===== PaymentRecord konfiguracija =====
+            modelBuilder.Entity<PaymentRecord>(b =>
+            {
+                b.ToTable("PaymentRecords");
+                b.HasKey(pr => pr.Id);
+
+                b.Property(pr => pr.TouristId)
+                    .IsRequired();
+
+                b.Property(pr => pr.TourId);
+
+                b.Property(pr => pr.BundleId);
+
+                b.Property(pr => pr.OriginalPrice)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property(pr => pr.DiscountPercentage)
+                    .IsRequired()
+                    .HasColumnType("decimal(5,2)");
+
+                b.Property(pr => pr.FinalPrice)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property(pr => pr.PurchaseDate)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(pr => pr.CouponCode)
+                    .HasMaxLength(8);
+
+                b.HasIndex(pr => pr.TouristId);
+            });
         }
     }
 }
