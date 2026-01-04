@@ -86,7 +86,12 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
 
         public PagedResult<TourRequest> GetOpenRequests(int page, int pageSize)
         {
-            var query = _tourRequests.Where(tr => tr.Status == TourRequestStatus.Open);
+
+               var query = _tourRequests.Where(tr =>
+                tr.Status == TourRequestStatus.Open ||
+                tr.Status == TourRequestStatus.InProgress
+);
+
 
             var totalCount = query.Count();
 
@@ -183,17 +188,61 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
         }
 
 
+        /*  public void AcceptResponse(long responseId, long tourRequestId)
+          {
+              using var transaction = _dbContext.Database.BeginTransaction();
+
+              try
+              {
+                  var acceptedResponse = GetResponse(responseId);
+                  acceptedResponse.Accept();
+
+                  _dbContext.Entry(acceptedResponse).State = EntityState.Modified;
+                  _dbContext.SaveChanges();
+
+                  var otherResponses = _responses
+                      .Where(r => r.TourRequestId == tourRequestId
+                               && r.Id != responseId
+                               && r.Status == ResponseStatus.Pending)
+                      .ToList();
+
+                  foreach (var response in otherResponses)
+                  {
+                      response.Reject();
+                      _dbContext.Entry(response).State = EntityState.Modified;
+                  }
+
+                  _dbContext.SaveChanges();
+
+                  var request = Get(tourRequestId);
+                  request.MarkFulfilled();
+
+                  _dbContext.Entry(request).State = EntityState.Modified;
+                  _dbContext.SaveChanges();
+
+                  transaction.Commit();
+              }
+              catch
+              {
+                  transaction.Rollback();
+                  throw;
+              }
+          }*/
+
         public void AcceptResponse(long responseId, long tourRequestId)
         {
             using var transaction = _dbContext.Database.BeginTransaction();
 
             try
             {
-                var acceptedResponse = GetResponse(responseId);
-                acceptedResponse.Accept();
+                var acceptedResponse = _responses.FirstOrDefault(r => r.Id == responseId);
+                if (acceptedResponse == null)
+                    throw new NotFoundException($"Response with id {responseId} not found.");
 
-                _dbContext.Entry(acceptedResponse).State = EntityState.Modified;
-                _dbContext.SaveChanges();
+                if (acceptedResponse.TourRequestId != tourRequestId)
+                    throw new InvalidOperationException("Response does not belong to this tour request.");
+
+                acceptedResponse.Accept();
 
                 var otherResponses = _responses
                     .Where(r => r.TourRequestId == tourRequestId
@@ -204,24 +253,62 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
                 foreach (var response in otherResponses)
                 {
                     response.Reject();
-                    _dbContext.Entry(response).State = EntityState.Modified;
                 }
 
-                _dbContext.SaveChanges();
+                var request = _tourRequests.FirstOrDefault(tr => tr.Id == tourRequestId);
+                if (request == null)
+                    throw new NotFoundException($"Tour request with id {tourRequestId} not found.");
 
-                var request = Get(tourRequestId);
                 request.MarkFulfilled();
 
-                _dbContext.Entry(request).State = EntityState.Modified;
                 _dbContext.SaveChanges();
 
                 transaction.Commit();
             }
-            catch
+            catch (Exception ex)
             {
                 transaction.Rollback();
-                throw;
+                throw new InvalidOperationException($"Error accepting response: {ex.Message}", ex);
             }
         }
+
+
+
+
+        public PagedResult<TourRequest> GetOpenRequestsFiltered(int page, int pageSize, decimal? minBudget, decimal? maxBudget)
+        {
+            var query = _tourRequests.Where(tr =>
+                tr.Status == TourRequestStatus.Open || tr.Status == TourRequestStatus.InProgress
+            );
+
+            if (minBudget.HasValue) query = query.Where(tr => tr.Budget >= minBudget.Value);
+            if (maxBudget.HasValue) query = query.Where(tr => tr.Budget <= maxBudget.Value);
+
+            var totalCount = query.Count();
+
+            var items = query
+                .OrderByDescending(tr => tr.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<TourRequest>(items, totalCount);
+        }
+
+
+
+
+        public List<TourRequestResponse> GetResponsesByAuthor(long authorId)
+        {
+            return _responses
+                .AsNoTracking()
+                .Where(r => r.AuthorId == authorId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+        }
+
+
+
+
     }
 }
