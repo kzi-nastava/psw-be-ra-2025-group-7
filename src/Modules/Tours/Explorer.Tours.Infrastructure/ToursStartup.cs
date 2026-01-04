@@ -14,6 +14,9 @@ using Explorer.Tours.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Explorer.Tours.API.Public.Author;
+using Explorer.Tours.Core.UseCases.Author;
+
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -48,6 +51,9 @@ public static class ToursStartup
         services.AddScoped<ITouristToursService, TouristToursService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<ITourRequestService, TourRequestService>();
+        services.AddScoped<IAuthorTourRequestService, AuthorTourRequestService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -67,6 +73,8 @@ public static class ToursStartup
         services.AddScoped<IQuizRepository, QuizRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
+        services.AddScoped<ITourRequestRepository, TourRequestDbRepository>();
+
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

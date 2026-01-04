@@ -1,4 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Payments.API.Internal;
 using Explorer.Payments.API.Public;
 using Explorer.Payments.Core.Domain.RepositoryInterfaces;
 using Explorer.Payments.Core.Mappers;
@@ -24,11 +25,33 @@ namespace Explorer.Payments.Infrastructure
         private static void SetupCore(IServiceCollection services)
         {
             services.AddScoped<IShoppingCartService, ShoppingCartService>();
+            services.AddScoped<IWalletInternalService, WalletInternalService>();
+            services.AddScoped<IWalletService, WalletService>();
+            services.AddScoped<IPaymentNotificationService, PaymentNotificationService>();
+
+            // NEW
+            services.AddScoped<IBundleService, BundleService>();
+            services.AddScoped<IBundlePurchaseService, BundlePurchaseService>();
+            services.AddScoped<IPurchaseNotificationService, PurchaseNotificationService>();
+            services.AddScoped<ICouponService, CouponService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
         {
             services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
+            services.AddScoped<IWalletRepository, WalletRepository>();
+            services.AddScoped<IPaymentNotificationRepository, PaymentNotificationRepository>();
+
+            // NEW
+            services.AddScoped<IBundleRepository, BundleDbRepository>();
+            services.AddScoped<IBundlePurchaseRepository,BundlePurchaseDbRepository>();
+
+            // NEW (purchase notifications)
+            services.AddScoped<IPurchaseNotificationRepository, PurchaseNotificationRepository>();
+
+            // NEW (coupons)
+            services.AddScoped<ICouponRepository, CouponDbRepository>();
+            services.AddScoped<IPaymentRecordRepository, PaymentRecordDbRepository>();
 
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("payments"));
             dataSourceBuilder.EnableDynamicJson();

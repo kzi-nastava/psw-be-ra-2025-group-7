@@ -9,5 +9,6 @@ namespace Explorer.Payments.API.Public
         ShoppingCartDto RemoveFromCart(long touristId, long orderItemId);
         void ClearCart(long touristId);
         List<object> PurchaseCart(long touristId);
+        List<object> PurchaseCartWithCoupon(long touristId, string? couponCode);
     }
 }

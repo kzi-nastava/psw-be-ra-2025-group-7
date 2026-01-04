@@ -12,8 +12,4 @@
     <ProjectReference Include="..\Modules\Tours\Explorer.Tours.Core\Explorer.Tours.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UseCases\" />
-  </ItemGroup>
-
 </Project>
