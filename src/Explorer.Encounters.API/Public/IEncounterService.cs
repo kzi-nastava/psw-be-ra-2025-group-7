@@ -9,9 +9,9 @@ namespace Explorer.Encounters.API.Public
 {
     public interface IEncounterService
     {
-        EncounterDto Create(CreateEncounterDto dto);
-        EncounterDto Update(long id, UpdateEncounterDto dto);
-        void Delete(long id);
+        EncounterDto Create(int creatorId,CreateEncounterDto dto);
+        EncounterDto Update(long id,int creatorId, UpdateEncounterDto dto);
+        void Delete(long id,int creatorId);
 
         EncounterDto Get(long id);
         IEnumerable<EncounterDto> Get(string? status, string? type);

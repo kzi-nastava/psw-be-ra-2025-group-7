@@ -14,6 +14,9 @@ namespace Explorer.Encounters.API.Public
         EncounterDto Update(long id);
         void Delete(long id);
         bool CheckEncounterProgress(long encounterId);
+        void ActivateHiddenLocationForUser(long encounterId, long userId);
+        void OnUserLocationChanged(long userId);
+        HiddenLocationProgressDto GetHiddenLocationProgress(long encounterId, long userId);
         //List<int> CheckParticipantsLocation(long encounterId);
         //void FinishEncounterProgress(long encounterId, List<int> users);
     }

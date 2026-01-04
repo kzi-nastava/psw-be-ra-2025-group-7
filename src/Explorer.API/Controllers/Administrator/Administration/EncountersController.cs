@@ -1,6 +1,7 @@
 ﻿using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
 using Explorer.Encounters.Core.UseCases;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers.Administrator.Administration
@@ -10,6 +11,7 @@ namespace Explorer.API.Controllers.Administrator.Administration
     public class EncountersController : ControllerBase
     {
         private readonly IEncounterService _service;
+        private readonly IEncounterProgressService _encounterProgressService;
 
         public EncountersController(IEncounterService service)
         {
@@ -18,17 +20,25 @@ namespace Explorer.API.Controllers.Administrator.Administration
 
         [HttpPost]
         public ActionResult<EncounterDto> Create([FromBody] CreateEncounterDto dto)
-            => Ok(_service.Create(dto));
+        {
+            var creatorId = (int)User.PersonId();
+            var encounter = _service.Create(creatorId, dto);
+            return Ok(encounter);
+        }
 
         [HttpPut("{id:long}")]
         public ActionResult<EncounterDto> Update(long id, [FromBody] UpdateEncounterDto dto)
-            => Ok(_service.Update(id, dto));
+        {
+            int creatorId = (int)User.PersonId();
+            var encounter = _service.Update(id, creatorId, dto);
+            return Ok(encounter);
+        }
 
         [HttpDelete("{id:long}")]
-
         public IActionResult Delete(long id)
         {
-            _service.Delete(id);
+            int creatorId = (int)User.PersonId();
+            _service.Delete(id, creatorId);
             return NoContent();
         }
 
@@ -61,6 +71,7 @@ namespace Explorer.API.Controllers.Administrator.Administration
             var result = _service.Get(status, type);
             return Ok(result);
         }
+     
 
     }
 }

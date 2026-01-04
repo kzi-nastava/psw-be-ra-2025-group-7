@@ -11,5 +11,7 @@ namespace Explorer.Encounters.API.Dtos
         public long Id { get; set; }
         public long EncounterId { get; set; }
         public int UserId { get; set; }
+
+        public DateTime? EnteredPhotoRadiusAt { get; set; } 
     }
 }

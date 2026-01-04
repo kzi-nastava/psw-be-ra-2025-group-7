@@ -35,5 +35,9 @@ public class StakeholderProfile : Profile
         CreateMap<ClubMessageDto, ClubMessage>()
             .ForMember(dest => dest.ResourceType, opt => opt.MapFrom(src => 
                 string.IsNullOrEmpty(src.ResourceType) ? (ResourceType?)null : Enum.Parse<ResourceType>(src.ResourceType)));
+        CreateMap<UserProfile, UserLocationDto>()
+            .ForMember(d => d.Latitude, opt => opt.MapFrom(s => s.CurrentLatitude))
+            .ForMember(d => d.Longitude, opt => opt.MapFrom(s => s.CurrentLongitude));
+
     }
 }
