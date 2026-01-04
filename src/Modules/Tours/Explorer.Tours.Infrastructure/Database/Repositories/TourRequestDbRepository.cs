@@ -86,7 +86,12 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
 
         public PagedResult<TourRequest> GetOpenRequests(int page, int pageSize)
         {
-            var query = _tourRequests.Where(tr => tr.Status == TourRequestStatus.Open);
+
+               var query = _tourRequests.Where(tr =>
+                tr.Status == TourRequestStatus.Open ||
+                tr.Status == TourRequestStatus.InProgress
+);
+
 
             var totalCount = query.Count();
 
@@ -223,5 +228,44 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
                 throw;
             }
         }
+
+
+
+
+        public PagedResult<TourRequest> GetOpenRequestsFiltered(int page, int pageSize, decimal? minBudget, decimal? maxBudget)
+        {
+            var query = _tourRequests.Where(tr =>
+                tr.Status == TourRequestStatus.Open || tr.Status == TourRequestStatus.InProgress
+            );
+
+            if (minBudget.HasValue) query = query.Where(tr => tr.Budget >= minBudget.Value);
+            if (maxBudget.HasValue) query = query.Where(tr => tr.Budget <= maxBudget.Value);
+
+            var totalCount = query.Count();
+
+            var items = query
+                .OrderByDescending(tr => tr.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<TourRequest>(items, totalCount);
+        }
+
+
+
+
+        public List<TourRequestResponse> GetResponsesByAuthor(long authorId)
+        {
+            return _responses
+                .AsNoTracking()
+                .Where(r => r.AuthorId == authorId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+        }
+
+
+
+
     }
 }

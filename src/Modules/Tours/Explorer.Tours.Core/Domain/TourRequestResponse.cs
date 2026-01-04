@@ -11,19 +11,25 @@ namespace Explorer.Tours.Core.Domain
 
         public long? TourId { get; private set; }
 
-        public string ProposalDescription { get; private set; }
+        public string? ProposalDescription { get; private set; }
+        public string? Message { get; private set; }
 
         public decimal ProposedPrice { get; private set; }
-        public string Message { get; private set; }  
         public ResponseStatus Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
         private TourRequestResponse() { }
 
-
-        public static TourRequestResponse CreateForExistingTour(long tourRequestId, long authorId, long tourId, decimal proposedPrice,string message = null)
+        public static TourRequestResponse CreateForExistingTour(
+            long tourRequestId,
+            long authorId,
+            long tourId,
+            decimal proposedPrice,
+            string message = null)
         {
             ValidatePrice(proposedPrice);
+
+            
 
             return new TourRequestResponse
             {
@@ -38,7 +44,12 @@ namespace Explorer.Tours.Core.Domain
             };
         }
 
-        public static TourRequestResponse CreateCustomProposal(long tourRequestId, long authorId, string proposalDescription, decimal proposedPrice, string message = null)
+        public static TourRequestResponse CreateCustomProposal(
+            long tourRequestId,
+            long authorId,
+            string proposalDescription,
+            decimal proposedPrice,
+            string message = null)
         {
             ValidateProposalDescription(proposalDescription);
             ValidatePrice(proposedPrice);
@@ -74,6 +85,18 @@ namespace Explorer.Tours.Core.Domain
 
             ValidateProposalDescription(proposalDescription);
             ProposalDescription = proposalDescription.Trim();
+        }
+
+        public void UpdateTour(long tourId)
+        {
+            EnsurePendingStatus();
+
+            if (ResponseType != ResponseType.ExistingTour)
+                throw new InvalidOperationException("Can only update tour for existing tour responses.");
+
+           
+
+            TourId = tourId;
         }
 
         public void Accept()

@@ -21,4 +21,14 @@ public class PersonDbRepository : IPersonRepository
         DbContext.SaveChanges();
         return entity;
     }
+
+
+    public Person GetByUserId(long userId)   
+    {
+        var person = _dbSet.AsNoTracking().FirstOrDefault(p => p.UserId == userId);
+        if (person == null)
+            throw new KeyNotFoundException($"Person not found for userId={userId}");
+
+        return person;
+    }
 }
