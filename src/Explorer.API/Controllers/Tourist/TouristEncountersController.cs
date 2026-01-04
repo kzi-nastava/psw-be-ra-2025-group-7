@@ -52,5 +52,13 @@ namespace Explorer.API.Controllers.Tourist
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("{encounterId:long}/hidden-location-progress")]
+        public ActionResult<HiddenLocationProgressDto> GetHiddenLocationProgress(long encounterId)
+        {
+            var userId = User.PersonId();
+            var progress = _encounterProgressService.GetHiddenLocationProgress(encounterId, userId);
+            return Ok(progress);
+        }
+
     }
 }

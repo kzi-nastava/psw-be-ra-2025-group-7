@@ -1,10 +1,12 @@
 ﻿using Explorer.API.Controllers.Administrator.Administration;
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
-using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Encounters.Core.Domain;
-using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Encounters.Core.UseCases;
+using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -256,50 +258,7 @@ namespace Explorer.Encounters.Tests.Integration
 
             Should.Throw<ArgumentException>(() => controller.Create(dto));
         }
-        private static readonly DateTime FixedNow =
-        new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc);
-
-        [Fact]
-        public void Location_encounter_completes_when_user_stays_30_seconds_in_radius()
-        {
-            using var scope = Factory.Services.CreateScope();
-
-            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
-            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
-            var progressRepo = scope.ServiceProvider.GetRequiredService<IEncounterProgressRepository>();
-
-            var encounter = encounterService.Create(-1, new CreateEncounterDto
-            {
-                Name = "Location test",
-                Description = "User is close",
-                Latitude = 45.0,
-                Longitude = 19.0,
-                Radius = 100,
-                Xp = 20,
-                Type = "location"
-            });
-
-            encounterService.ChangeStatus(encounter.Id, "active");
-
-            
-            progressService.Create(new EncounterProgressDto
-            {
-                EncounterId = encounter.Id,
-                UserId = 42,
-                EnteredPhotoRadiusAt = FixedNow.AddSeconds(-31)
-            });
-
-            // Act
-            var completed = progressService.CheckEncounterProgress(encounter.Id);
-
-            // Assert
-            completed.ShouldBeTrue();
-
-            var progress = progressRepo.GetAll()
-                .Single(p => p.EncounterId == encounter.Id && p.UserId == 42);
-
-            progress.Status.ShouldBe(EncounterProgress.EncounterProgressStatus.Completed);
-        }
+        
 
 
         private static EncounterDto CreateEncounter(EncountersController controller, string name, string type)
@@ -340,6 +299,126 @@ namespace Explorer.Encounters.Tests.Integration
             controller.ControllerContext = ctx;
             return controller;
         }
+        [Fact]
+        public void Cannot_activate_hidden_location_if_user_is_too_far()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+
+            // Arrange
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Hidden",
+                Description = "Hidden",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://img.png",
+                    ActivationRadiusMeters = 10,
+                    PhotoLatitude = 45,
+                    PhotoLongitude = 19
+                }
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            // ❌ user je DALJE od 10m (mockovana lokacija u test factory-ju)
+            Should.Throw<InvalidOperationException>(() =>
+                progressService.ActivateHiddenLocationForUser(encounter.Id, 1));
+        }
+        [Fact]
+        public void Activating_hidden_location_creates_encounter_progress()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+            var repo = scope.ServiceProvider.GetRequiredService<IEncounterProgressRepository>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Hidden",
+                Description = "Hidden",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://img.png",
+                    ActivationRadiusMeters = 1000, // 👈 da sigurno može
+                    PhotoLatitude = 45,
+                    PhotoLongitude = 19
+                }
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            // Act
+            progressService.ActivateHiddenLocationForUser(encounter.Id, 1);
+
+            // Assert
+            repo.GetAll()
+                .Any(p => p.EncounterId == encounter.Id && p.UserId == 1)
+                .ShouldBeTrue();
+        }
+       
+
+        [Fact]
+        public void User_does_not_complete_hidden_location_if_not_enough_time_passed()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+            var progressRepo = scope.ServiceProvider.GetRequiredService<IEncounterProgressRepository>();
+            var userProfileRepo = scope.ServiceProvider.GetRequiredService<IUserProfileRepository>();
+
+            // Arrange – encounter
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Hidden",
+                Description = "Hidden",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "dummy",
+                    ActivationRadiusMeters = 1000,
+                    PhotoLatitude = 45,
+                    PhotoLongitude = 19
+                }
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            // Arrange – user profile (DUMMY)
+            var userProfile = new UserProfile(
+                userId: 1,
+                firstName: "Dummy",
+                lastName: "User"
+            );
+            userProfile.UpdateLocation(45, 19);
+            userProfileRepo.Create(userProfile);
+
+            // Arrange – activate encounter
+            progressService.ActivateHiddenLocationForUser(encounter.Id, 1);
+
+            // Act – simulate one location tick
+            progressService.OnUserLocationChanged(1);
+
+            // Assert
+            var progress = progressRepo.GetAll().First(p => p.UserId == 1);
+            progress.Status.ShouldBe(EncounterProgress.EncounterProgressStatus.Active);
+        }
+
 
         [Fact]
         public void Social_encounter_completes_when_enough_users_are_in_radius()

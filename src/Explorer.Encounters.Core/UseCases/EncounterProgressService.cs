@@ -227,5 +227,56 @@ namespace Explorer.Encounters.Core.UseCases
                 }
             }
         }
+        public HiddenLocationProgressDto GetHiddenLocationProgress(long encounterId, long userId)
+        {
+            var progress = _repo.GetAll()
+                .FirstOrDefault(p =>
+                    p.EncounterId == encounterId &&
+                    p.UserId == userId &&
+                    p.Status == EncounterProgressStatus.Active);
+
+            if (progress == null)
+            {
+                return new HiddenLocationProgressDto
+                {
+                    EncounterId = encounterId,
+                    IsInPhotoRadius = false,
+                    SecondsSpent = 0,
+                    SecondsRequired = 0,
+                    IsCompleted = false,
+                    Message = "Encounter not activated."
+                };
+            }
+
+            var encounter = _encounterRepo.Get(encounterId);
+            var hidden = encounter.HiddenLocationDetails;
+
+            if (hidden == null)
+                throw new InvalidOperationException("Hidden location not configured.");
+
+            int secondsSpent = 0;
+            bool isInRadius = progress.EnteredPhotoRadiusAt != null;
+
+            if (isInRadius)
+            {
+                secondsSpent = (int)(DateTime.UtcNow - progress.EnteredPhotoRadiusAt.Value).TotalSeconds;
+                secondsSpent = Math.Min(secondsSpent, hidden.SecondsToViewPhoto);
+            }
+
+            return new HiddenLocationProgressDto
+            {
+                EncounterId = encounterId,
+                IsInPhotoRadius = isInRadius,
+                SecondsRequired = hidden.SecondsToViewPhoto,
+                SecondsSpent = secondsSpent,
+                IsCompleted = progress.Status == EncounterProgressStatus.Completed,
+                Message = progress.Status == EncounterProgressStatus.Completed
+                    ? "Encounter completed."
+                    : isInRadius
+                        ? $"Stay here: {secondsSpent} / {hidden.SecondsToViewPhoto} seconds"
+                        : "You are too far."
+            };
+        }
+
     }
 }
