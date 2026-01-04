@@ -22,7 +22,8 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<TourProblem> TourProblems { get; set; }
         public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
         public DbSet<AnnualAward> AnnualAwards { get; set; }
-
+        public DbSet<TourRequest> TourRequests { get; set; }
+        public DbSet<TourRequestResponse> TourRequestResponses { get; set; }
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -315,6 +316,52 @@ namespace Explorer.Tours.Infrastructure.Database
                  );
             });
 
+            //Tour Request
+            modelBuilder.Entity<TourRequest>(b =>
+            {
+                b.ToTable("TourRequests");
+                b.HasKey(tr => tr.Id);
+
+                b.Property(tr => tr.TouristId).IsRequired();
+                b.Property(tr => tr.Title).IsRequired().HasMaxLength(100);
+                b.Property(tr => tr.Description).IsRequired();
+
+                b.Property(tr => tr.Latitude).IsRequired(false);
+                b.Property(tr => tr.Longitude).IsRequired(false);
+                b.Property(tr => tr.Radius).IsRequired(false);
+
+                b.Property(tr => tr.Budget).IsRequired().HasColumnType("decimal(18,2)");
+
+                b.Property(tr => tr.PreferredDifficulty).IsRequired(false);
+                b.Property(tr => tr.NumberOfParticipants).IsRequired();
+                b.Property(tr => tr.PreferredDate).IsRequired(false);
+
+                b.Property(tr => tr.Status).IsRequired();
+                b.Property(tr => tr.CreatedAt).IsRequired();
+                b.Property(tr => tr.ExpiresAt).IsRequired();
+            });
+
+            //Tour Request Response
+            modelBuilder.Entity<TourRequestResponse>(b =>
+            {
+                b.ToTable("TourRequestResponses");
+                b.HasKey(trr => trr.Id);
+
+                b.Property(trr => trr.TourRequestId).IsRequired();
+                b.Property(trr => trr.AuthorId).IsRequired();
+                b.Property(trr => trr.ResponseType).IsRequired();
+
+                b.Property(trr => trr.TourId).IsRequired(false);
+                b.Property(trr => trr.ProposalDescription).IsRequired(false);
+
+                b.Property(trr => trr.ProposedPrice).IsRequired().HasColumnType("decimal(18,2)");
+                b.Property(trr => trr.Message).IsRequired(false).HasMaxLength(500);
+                b.Property(trr => trr.Status).IsRequired();
+                b.Property(trr => trr.CreatedAt).IsRequired();
+
+                b.HasOne<TourRequest>().WithMany().HasForeignKey(trr => trr.TourRequestId).OnDelete(DeleteBehavior.Cascade);
+                b.HasOne<Tour>().WithMany().HasForeignKey(trr => trr.TourId).OnDelete(DeleteBehavior.Restrict).IsRequired(false);
+            });
         }
     }
 }

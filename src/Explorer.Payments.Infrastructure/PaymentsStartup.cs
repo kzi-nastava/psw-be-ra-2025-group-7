@@ -28,6 +28,12 @@ namespace Explorer.Payments.Infrastructure
             services.AddScoped<IWalletInternalService, WalletInternalService>();
             services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<IPaymentNotificationService, PaymentNotificationService>();
+
+            // NEW
+            services.AddScoped<IBundleService, BundleService>();
+            services.AddScoped<IBundlePurchaseService, BundlePurchaseService>();
+            services.AddScoped<IPurchaseNotificationService, PurchaseNotificationService>();
+            services.AddScoped<ICouponService, CouponService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
@@ -35,6 +41,17 @@ namespace Explorer.Payments.Infrastructure
             services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
             services.AddScoped<IWalletRepository, WalletRepository>();
             services.AddScoped<IPaymentNotificationRepository, PaymentNotificationRepository>();
+
+            // NEW
+            services.AddScoped<IBundleRepository, BundleDbRepository>();
+            services.AddScoped<IBundlePurchaseRepository,BundlePurchaseDbRepository>();
+
+            // NEW (purchase notifications)
+            services.AddScoped<IPurchaseNotificationRepository, PurchaseNotificationRepository>();
+
+            // NEW (coupons)
+            services.AddScoped<ICouponRepository, CouponDbRepository>();
+            services.AddScoped<IPaymentRecordRepository, PaymentRecordDbRepository>();
 
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("payments"));
             dataSourceBuilder.EnableDynamicJson();

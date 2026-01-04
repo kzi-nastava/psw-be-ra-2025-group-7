@@ -48,6 +48,7 @@ public static class ToursStartup
         services.AddScoped<ITouristToursService, TouristToursService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<ITourRequestService, TourRequestService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -67,6 +68,8 @@ public static class ToursStartup
         services.AddScoped<IQuizRepository, QuizRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
+        services.AddScoped<ITourRequestRepository, TourRequestDbRepository>();
+
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
