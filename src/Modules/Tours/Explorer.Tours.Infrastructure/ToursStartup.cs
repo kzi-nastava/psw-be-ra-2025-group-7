@@ -6,6 +6,7 @@ using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
+using Explorer.Tours.Core.UseCases;
 using Explorer.Tours.Core.UseCases.Administration;
 using Explorer.Tours.Core.UseCases.Tourist;
 using Explorer.Tours.Infrastructure.Database;
@@ -36,8 +37,10 @@ public static class ToursStartup
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<ITourService, TourService>();
+        services.AddScoped<PublicPointRequestService>();
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
         services.AddScoped<IFacilityService, FacilityService>();
+        services.AddScoped<PublicPointRequestAdminService>();
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<ITourJournalService, TourJournalService>();
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();

@@ -98,6 +98,11 @@ namespace Explorer.Tours.Infrastructure.Database
 
                     kp.Property(k => k.ImageUrl);
                     kp.Property(k => k.Secret).IsRequired();
+                    kp.Property(k => k.IsPublic)
+                      .HasColumnName("IsPublic")
+                      .IsRequired()
+                      .HasDefaultValue(false);
+
                 });
 
                 // TourDuration konfiguracija

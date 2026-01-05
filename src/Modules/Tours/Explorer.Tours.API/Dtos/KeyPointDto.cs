@@ -7,7 +7,12 @@
 
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public bool MakePublic { get; set; }   
+
+        // 🔹 koristi autor (checkbox "make public")
+        public bool MakePublic { get; set; }
+
+        // 🔹 koristi turist / map search
+        public bool IsPublic { get; set; }
 
         public string? ImageUrl { get; set; }
 
