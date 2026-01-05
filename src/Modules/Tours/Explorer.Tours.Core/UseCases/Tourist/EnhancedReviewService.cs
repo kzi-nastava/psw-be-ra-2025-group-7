@@ -6,6 +6,9 @@ using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+
+
 
 
 namespace Explorer.Tours.Core.UseCases.Tourist
@@ -21,7 +24,7 @@ namespace Explorer.Tours.Core.UseCases.Tourist
             _enhancedReviewRepository = enhancedReviewRepository;
         }
 
-        public Task CreateReview(long tourId, EnhancedReviewDto dto, long touristId, List<EnhancedReviewImageDto> images)
+        public Task<long> CreateReview(long tourId, EnhancedReviewDto dto, long touristId)
         {
             if (_enhancedReviewRepository.Exists(tourId, touristId))
                 throw new EntityValidationException("You have already reviewed this tour");
@@ -29,6 +32,10 @@ namespace Explorer.Tours.Core.UseCases.Tourist
             if (!_tourPurchaseTokenRepository.HasUserPurchasedTour(touristId, tourId))
                 throw new ForbiddenException("You must complete the tour first");
 
+            if (dto.DimensionRatings == null)
+                throw new EntityValidationException("DimensionRatings is required.");
+
+            // validacije (ostaju)
             ValidateRating(dto.OverallRating, "OverallRating");
             ValidateRating(dto.DimensionRatings.GuideQuality, "GuideQuality");
             ValidateRating(dto.DimensionRatings.ValueForMoney, "ValueForMoney");
@@ -49,8 +56,7 @@ namespace Explorer.Tours.Core.UseCases.Tourist
                 throw new EntityValidationException("TextReview must be <= 2000 characters.");
 
             var review = new EnhancedReview(
-                tourId,
-                touristId,
+                tourId, touristId,
                 dto.OverallRating,
                 dto.DimensionRatings.GuideQuality,
                 dto.DimensionRatings.ValueForMoney,
@@ -63,31 +69,48 @@ namespace Explorer.Tours.Core.UseCases.Tourist
             if (dto.Pros != null)
             {
                 foreach (var p in dto.Pros)
-                    review.Pros.Add(new EnhancedReviewPro { Text = p });
+                {
+                    if (string.IsNullOrWhiteSpace(p)) continue;
+                    var text = p.Trim();
+                    if (text.Length > 200) throw new EntityValidationException("Pro must be <= 200 characters.");
+                    review.Pros.Add(new EnhancedReviewPro { Text = text });
+                }
             }
 
             if (dto.Cons != null)
             {
                 foreach (var c in dto.Cons)
-                    review.Cons.Add(new EnhancedReviewCon { Text = c });
+                {
+                    if (string.IsNullOrWhiteSpace(c)) continue;
+                    var text = c.Trim();
+                    if (text.Length > 200) throw new EntityValidationException("Con must be <= 200 characters.");
+                    review.Cons.Add(new EnhancedReviewCon { Text = text });
+                }
             }
 
-            if (dto.SentimentTags != null)
+
+            foreach (var t in dto.SentimentTags)
+                review.SentimentTags.Add(new EnhancedReviewTag { Tag = ParseTag(t) });
+
+            var created = _enhancedReviewRepository.Create(review);
+            return Task.FromResult(created.Id);
+        }
+
+        public Task AddImages(long reviewId, List<EnhancedReviewImageDto> images)
+        {
+            if (images == null || images.Count == 0) return Task.CompletedTask;
+            if (images.Count > 5) throw new EntityValidationException("Max 5 images allowed.");
+
+            var domainImages = images.Select(i => new EnhancedReviewImage
             {
-                foreach (var t in dto.SentimentTags)
-                    review.SentimentTags.Add(new EnhancedReviewTag { Tag = ParseTag(t) });
-            }
+                Url = i.Url,
+                SizeBytes = i.SizeBytes
+            }).ToList();
 
-            if (images != null)
-            {
-                foreach (var img in images)
-                    review.Images.Add(new EnhancedReviewImage { Url = img.Url, SizeBytes = img.SizeBytes });
-            }
-
-            _enhancedReviewRepository.Create(review);
-
+            _enhancedReviewRepository.AddImages(reviewId, domainImages);
             return Task.CompletedTask;
         }
+
 
 
         public Task<List<EnhancedReviewDto>> GetReviews(long tourId)
@@ -117,7 +140,7 @@ namespace Explorer.Tours.Core.UseCases.Tourist
 
             var summary = new ReviewSummaryDto
             {
-                OverallAverage = reviews.Average(r => r.OverallRating),
+                OverallAverage = Math.Round(reviews.Average(r => r.OverallRating), 2),
                 AverageDimensions = new DimensionRatingsDto
                 {
                     GuideQuality = (int)Math.Round(reviews.Average(r => r.GuideQuality)),

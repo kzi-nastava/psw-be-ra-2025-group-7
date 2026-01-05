@@ -35,5 +35,4 @@ namespace Explorer.Tours.API.Dtos
         public string Url { get; set; } = string.Empty;
         public long SizeBytes { get; set; }
     }
-
 }

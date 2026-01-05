@@ -1,4 +1,5 @@
-﻿using Explorer.Tours.Core.Domain;
+﻿using Explorer.Tours.API.Dtos;
+using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +50,22 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
                 .Include(r => r.HelpfulVotes)
                 .First(r => r.Id == reviewId);
         }
+
+        public int AddImages(long reviewId, List<EnhancedReviewImage> images)
+        {
+            var review = _dbSet.Include(r => r.Images).First(r => r.Id == reviewId);
+
+            if (review.Images.Count + images.Count > 5)
+                throw new Exception("Max 5 images allowed.");
+
+            foreach (var img in images)
+                review.Images.Add(new EnhancedReviewImage { Url = img.Url, SizeBytes = img.SizeBytes });
+
+            _dbContext.SaveChanges();
+            return review.Images.Count;
+        }
+
+
 
         public int ToggleHelpful(long reviewId, long touristId)
         {

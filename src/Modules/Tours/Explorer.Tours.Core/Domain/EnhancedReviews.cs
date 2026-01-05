@@ -30,6 +30,7 @@ namespace Explorer.Tours.Core.Domain
         public ICollection<EnhancedReviewImage> Images { get; private set; } = new List<EnhancedReviewImage>();
         public ICollection<EnhancedReviewHelpfulVote> HelpfulVotes { get; private set; } = new List<EnhancedReviewHelpfulVote>();
 
+        private EnhancedReview() { }
 
         public EnhancedReview(
             long tourId,
