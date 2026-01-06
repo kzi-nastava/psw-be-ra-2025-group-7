@@ -14,7 +14,9 @@ namespace Explorer.Notes.Core.UseCases
         private readonly INoteRepository _noteRepository;
         private readonly IMapper _mapper;
 
-        public NoteService(INoteRepository noteRepository, IMapper mapper)
+        public NoteService(
+            INoteRepository noteRepository,
+            IMapper mapper)
         {
             _noteRepository = noteRepository;
             _mapper = mapper;
@@ -27,6 +29,20 @@ namespace Explorer.Notes.Core.UseCases
                               .ThenByDescending(n => n.UpdatedAt)
                               .ToList();
             return _mapper.Map<List<NoteDto>>(sorted);
+        }
+
+        public List<NoteDto> GetFilteredByUserId(long userId, int? type, string? tag, long? tourId, string? search)
+        {
+            var notes = _noteRepository.GetFilteredByUserId(userId, type, tag, tourId, search);
+            var sorted = notes.OrderByDescending(n => n.IsPinned)
+                              .ThenByDescending(n => n.UpdatedAt)
+                              .ToList();
+            return _mapper.Map<List<NoteDto>>(sorted);
+        }
+
+        public List<string> GetUserTags(long userId)
+        {
+            return _noteRepository.GetUserTags(userId);
         }
 
         public NoteDto Get(long id, long userId)
@@ -43,7 +59,7 @@ namespace Explorer.Notes.Core.UseCases
 
         public NoteDto Create(long userId, CreateNoteDto dto)
         {
-            var note = new Note(userId, dto.Title, dto.Content, (NoteType)dto.Type, dto.Tags);
+            var note = new Note(userId, dto.Title, dto.Content, (NoteType)dto.Type, dto.Tags, dto.TourId);
             var created = _noteRepository.Create(note);
             return _mapper.Map<NoteDto>(created);
         }
@@ -57,8 +73,22 @@ namespace Explorer.Notes.Core.UseCases
             if (existing.UserId != userId)
                 throw new ForbiddenException("You cannot edit this note.");
 
-            existing.Update(dto.Title, dto.Content, (NoteType)dto.Type, dto.Tags);
+            existing.Update(dto.Title, dto.Content, (NoteType)dto.Type, dto.Tags, dto.TourId);
             var updated = _noteRepository.Update(existing);
+            return _mapper.Map<NoteDto>(updated);
+        }
+
+        public NoteDto TogglePin(long id, long userId)
+        {
+            var note = _noteRepository.Get(id);
+            if (note == null)
+                throw new NotFoundException($"Note with ID {id} not found.");
+
+            if (note.UserId != userId)
+                throw new ForbiddenException("You cannot pin this note.");
+
+            note.TogglePin();
+            var updated = _noteRepository.Update(note);
             return _mapper.Map<NoteDto>(updated);
         }
 

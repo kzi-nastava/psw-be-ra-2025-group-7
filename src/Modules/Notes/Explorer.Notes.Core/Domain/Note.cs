@@ -19,7 +19,7 @@ namespace Explorer.Notes.Core.Domain
 
         protected Note() { }
 
-        public Note(long userId, string title, string content, NoteType type, List<string>? tags = null)
+        public Note(long userId, string title, string content, NoteType type, List<string>? tags = null, long? tourId = null)
         {
             if (userId == 0)
                 throw new ArgumentException("UserId not valid.", nameof(userId));
@@ -28,6 +28,7 @@ namespace Explorer.Notes.Core.Domain
             IsPinned = false;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
+            TourId = tourId;
 
             SetTitle(title);
             SetContent(content);
@@ -35,12 +36,13 @@ namespace Explorer.Notes.Core.Domain
             SetTags(tags ?? new List<string>());
         }
 
-        public void Update(string title, string content, NoteType type, List<string> tags)
+        public void Update(string title, string content, NoteType type, List<string> tags, long? tourId)
         {
             SetTitle(title);
             SetContent(content);
             SetType(type);
             SetTags(tags);
+            TourId = tourId;
             UpdatedAt = DateTime.UtcNow;
         }
 
@@ -77,6 +79,16 @@ namespace Explorer.Notes.Core.Domain
         private void SetTags(List<string> tags)
         {
             Tags = tags.Select(t => t.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
+        }
+        public void TogglePin()
+        {
+            IsPinned = !IsPinned;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        public void SetTourId(long? tourId)
+        {
+            TourId = tourId;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }
