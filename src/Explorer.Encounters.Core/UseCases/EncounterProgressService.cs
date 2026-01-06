@@ -32,12 +32,35 @@ namespace Explorer.Encounters.Core.UseCases
 
         public EncounterProgressDto Create(EncounterProgressDto dto)
         {
-            var status = EncounterProgressStatus.Active;
-            var encounterProgress = new EncounterProgress(dto.EncounterId, dto.UserId, status);
+            if (_repo.GetAll().Any(ep => ep.EncounterId == dto.EncounterId && ep.UserId == dto.UserId && ep.Status == EncounterProgressStatus.Active))
+            {
+                throw new InvalidOperationException("EncounterProgress already exists for this user and encounter.");
+            }
+            var encounter = _encounterRepo.Get(dto.EncounterId)
+        ?? throw new KeyNotFoundException("Encounter not found.");
+
+            EncounterProgress encounterProgress;
+
+            if (encounter.Type == EncounterType.Location)
+            {
+                encounterProgress = new EncounterProgress(
+                    dto.EncounterId,
+                    dto.UserId,
+                    dto.EnteredPhotoRadiusAt ?? DateTime.UtcNow
+                );
+            }
+            else
+            {
+                var status = EncounterProgressStatus.Active;
+                 encounterProgress = new EncounterProgress(dto.EncounterId, dto.UserId, status);
+            }
+
+
+           
             _repo.Create(encounterProgress);
             return _mapper.Map<EncounterProgressDto>(encounterProgress);
         }
-
+        
         public EncounterDto Update(long id)
         {
             var encounterProgress = _repo.Get(id)
@@ -79,7 +102,7 @@ namespace Explorer.Encounters.Core.UseCases
 
             foreach (var ep in encounterProgresses)
             {
-                var user = _userProfileLocService.GetLocation(ep.UserId);
+                var user = _userProfileLocService.GetLocation((int)ep.UserId);
 
                 if (user.Latitude == null || user.Longitude == null)
                     continue;
@@ -94,7 +117,7 @@ namespace Explorer.Encounters.Core.UseCases
 
                 if (isInside)
                 {
-                    usersInRadius.Add(ep.UserId);
+                    usersInRadius.Add((int)ep.UserId);
                 }
             }
 
@@ -109,17 +132,151 @@ namespace Explorer.Encounters.Core.UseCases
                 .ToList();
             return encounterProgresses.Count;
         }
+        public void ActivateHiddenLocationForUser(long encounterId, long userId)
+        {
+            bool alreadyActive = _repo.GetAll().Any(p =>
+                p.EncounterId == encounterId &&
+                p.UserId == userId &&
+                p.Status == EncounterProgressStatus.Active);
+
+            if (alreadyActive)
+                throw new InvalidOperationException("Encounter already activated.");
+
+            var encounter = _encounterRepo.Get(encounterId)
+                ?? throw new KeyNotFoundException("Encounter not found.");
+
+            if (encounter.Type != EncounterType.Location)
+                throw new InvalidOperationException("Not a hidden location encounter.");
+
+            var hidden = encounter.HiddenLocationDetails
+                ?? throw new InvalidOperationException("Hidden location not configured.");
+
+            var userLocationDto = _userProfileLocService.GetLocation((int)userId);
+
+            if (userLocationDto.Latitude == null || userLocationDto.Longitude == null)
+                throw new InvalidOperationException("User location not available.");
+
+            bool isWithinActivationRadius = GeoDistanceCalculator.IsWithinRadius(
+                hidden.PhotoLocation.Latitude,
+                hidden.PhotoLocation.Longitude,
+                hidden.ActivationRadiusMeters,
+                userLocationDto.Latitude.Value,
+                userLocationDto.Longitude.Value
+            );
+
+            if (!isWithinActivationRadius)
+                throw new InvalidOperationException("You are too far to activate this encounter.");
+
+            var status = EncounterProgressStatus.Active;
+            var encounterProgress = new EncounterProgress(encounterId, (int)userId, status);
+
+            _repo.Create(encounterProgress);
+        }
+        public void OnUserLocationChanged(long userId)
+        {
+            var activeProgresses = _repo.GetAll()
+                .Where(p => p.UserId == userId && p.Status == EncounterProgressStatus.Active)
+                .ToList();
+
+            foreach (var progress in activeProgresses)
+            {
+                var encounter = _encounterRepo.Get(progress.EncounterId);
+                if (encounter.Type != EncounterType.Location) continue;
+                var hidden = encounter.HiddenLocationDetails;
+                if (hidden == null) continue;
+
+                var userLoc = _userProfileLocService.GetLocation((int)userId);
+                if (userLoc.Latitude == null || userLoc.Longitude == null) continue;
+
+                bool inPhotoRadius = GeoDistanceCalculator.IsWithinRadius(
+                    hidden.PhotoLocation.Latitude,
+                    hidden.PhotoLocation.Longitude,
+                    hidden.DistanceMeters,
+                    userLoc.Latitude.Value,
+                    userLoc.Longitude.Value
+                );
+
+                if (inPhotoRadius)
+                {
+                    progress.EnterPhotoRadius(DateTime.UtcNow);
+
+                    if (progress.HasStayedLongEnough(hidden.SecondsToViewPhoto, DateTime.UtcNow))
+                    {
+                        progress.SetCompleted();
+                    }
+                }
+                else
+                {
+                    progress.ExitPhotoRadius();
+                }
+
+                _repo.Update(progress);
+            }
+        }
+
+
 
         public void FinishEncounterProgress(List<EncounterProgress> encounterProgresses, List<int> users)
         {
             foreach (var ep in encounterProgresses)
             {
-                if (users.Contains(ep.UserId))
+                if (users.Contains((int)ep.UserId))
                 {
                     ep.SetCompleted();
                     _repo.Update(ep);
                 }
             }
         }
+        public HiddenLocationProgressDto GetHiddenLocationProgress(long encounterId, long userId)
+        {
+            var progress = _repo.GetAll()
+                .FirstOrDefault(p =>
+                    p.EncounterId == encounterId &&
+                    p.UserId == userId &&
+                    p.Status == EncounterProgressStatus.Active);
+
+            if (progress == null)
+            {
+                return new HiddenLocationProgressDto
+                {
+                    EncounterId = encounterId,
+                    IsInPhotoRadius = false,
+                    SecondsSpent = 0,
+                    SecondsRequired = 0,
+                    IsCompleted = false,
+                    Message = "Encounter not activated."
+                };
+            }
+
+            var encounter = _encounterRepo.Get(encounterId);
+            var hidden = encounter.HiddenLocationDetails;
+
+            if (hidden == null)
+                throw new InvalidOperationException("Hidden location not configured.");
+
+            int secondsSpent = 0;
+            bool isInRadius = progress.EnteredPhotoRadiusAt != null;
+
+            if (isInRadius)
+            {
+                secondsSpent = (int)(DateTime.UtcNow - progress.EnteredPhotoRadiusAt.Value).TotalSeconds;
+                secondsSpent = Math.Min(secondsSpent, hidden.SecondsToViewPhoto);
+            }
+
+            return new HiddenLocationProgressDto
+            {
+                EncounterId = encounterId,
+                IsInPhotoRadius = isInRadius,
+                SecondsRequired = hidden.SecondsToViewPhoto,
+                SecondsSpent = secondsSpent,
+                IsCompleted = progress.Status == EncounterProgressStatus.Completed,
+                Message = progress.Status == EncounterProgressStatus.Completed
+                    ? "Encounter completed."
+                    : isInRadius
+                        ? $"Stay here: {secondsSpent} / {hidden.SecondsToViewPhoto} seconds"
+                        : "You are too far."
+            };
+        }
+
     }
 }

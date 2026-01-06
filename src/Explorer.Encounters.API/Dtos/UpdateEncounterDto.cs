@@ -16,6 +16,8 @@ namespace Explorer.Encounters.API.Dtos
         public int? Xp { get; set; }
         public string? Type { get; set; }     
         public string? Status { get; set; }
+        public CreateHiddenLocationEncounterDto? HiddenLocation { get; set; }
         public int? RequiredParticipants { get; set; }
+
     }
 }

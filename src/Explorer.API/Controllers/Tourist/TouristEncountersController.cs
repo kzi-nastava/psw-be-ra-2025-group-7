@@ -1,5 +1,7 @@
 ﻿using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Core.UseCases;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +12,13 @@ namespace Explorer.API.Controllers.Tourist
     public class TouristEncountersController : ControllerBase
     {
         private readonly IEncounterService _service;
-
-        public TouristEncountersController(IEncounterService service)
-        {
+        private readonly IEncounterProgressService _encounterProgressService;
+        public TouristEncountersController(
+            IEncounterService service,
+            IEncounterProgressService encounterProgressService)
+         {
             _service = service;
+            _encounterProgressService = encounterProgressService;
         }
 
         [HttpGet]
@@ -29,5 +34,31 @@ namespace Explorer.API.Controllers.Tourist
                 return StatusCode(500, "Failed to load active encounters.");
             }
         }
+        [HttpPost("{encounterId:long}/activate-hidden-location")]
+        public IActionResult ActivateHiddenLocation(long encounterId)
+        {
+            try
+            {
+                var userId = User.PersonId();
+                _encounterProgressService.ActivateHiddenLocationForUser(encounterId, userId);
+                return Ok();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("{encounterId:long}/hidden-location-progress")]
+        public ActionResult<HiddenLocationProgressDto> GetHiddenLocationProgress(long encounterId)
+        {
+            var userId = User.PersonId();
+            var progress = _encounterProgressService.GetHiddenLocationProgress(encounterId, userId);
+            return Ok(progress);
+        }
+
     }
 }
