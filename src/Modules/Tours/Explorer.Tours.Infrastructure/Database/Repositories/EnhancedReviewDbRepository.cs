@@ -1,4 +1,5 @@
-﻿using Explorer.Tours.API.Dtos;
+﻿using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Infrastructure.Database;
@@ -56,7 +57,7 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             var review = _dbSet.Include(r => r.Images).First(r => r.Id == reviewId);
 
             if (review.Images.Count + images.Count > 5)
-                throw new Exception("Max 5 images allowed.");
+                throw new EntityValidationException("Max 5 images allowed.");
 
             foreach (var img in images)
                 review.Images.Add(new EnhancedReviewImage { Url = img.Url, SizeBytes = img.SizeBytes });
