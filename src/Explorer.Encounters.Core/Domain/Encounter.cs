@@ -37,12 +37,9 @@ namespace Explorer.Encounters.Core.Domain
         }
 
       
-        public void Update(int creatorId,string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
+        public void Update(int creatorId, string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
         {
-            
-            if (creatorId != CreatorId)
-                throw new InvalidOperationException("Only the creator can update the encounter.");
-
+           
             var previousType = Type;
             SetBasics(name, description, location, xp, type, requiredParticipants);
             // Ako više NIJE location challenge → brišemo hidden config

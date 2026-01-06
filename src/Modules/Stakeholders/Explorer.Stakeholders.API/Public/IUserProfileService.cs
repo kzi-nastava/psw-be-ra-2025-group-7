@@ -12,5 +12,6 @@ namespace Explorer.Stakeholders.API.Public
         UserProfileDto GetByUserId(long userId);
         UserProfileDto Create(UserProfileDto profile);
         UserProfileDto Update(UserProfileDto profile);
+        void AddXP(long userId, int XP);
     }
 }

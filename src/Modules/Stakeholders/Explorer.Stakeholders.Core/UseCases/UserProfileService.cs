@@ -61,6 +61,13 @@ namespace Explorer.Stakeholders.Core.UseCases
         public void AddXP(long userId, int XP)
         {
             var profile = GetOrCreateProfile(userId);
+
+            if (profile.XP == null)
+            {
+                profile.XP = 0;
+                profile.Level = 1;
+            }
+
             profile.XP += XP;
             CheckLevel(profile);
             _userProfileRepository.Update(profile);

@@ -223,6 +223,8 @@ namespace Explorer.Encounters.Core.UseCases
                 if (users.Contains((int)ep.UserId))
                 {
                     ep.SetCompleted();
+                    var encounter = _encounterRepo.Get(ep.EncounterId);
+                    _userProfileLocService.AddXP((int)ep.UserId, encounter.Xp);
                     _repo.Update(ep);
                 }
             }

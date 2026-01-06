@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,36 @@ namespace Explorer.Stakeholders.Core.UseCases
         {
             var profile = _userProfileRepository.GetByUserId(userId);
             return _mapper.Map<UserLocationDto>(profile);
+        }
+
+        public UserProfile GetById(long userId)
+        {
+            return _userProfileRepository.GetByUserId(userId);
+
+        }
+
+        public void AddXP(long userId, int XP)
+        {
+            var profile = GetById(userId);
+            profile.XP += XP;
+            CheckLevel(profile);
+            _userProfileRepository.Update(profile);
+        }
+
+        public void CheckLevel(UserProfile profile)
+        {
+            int xp = profile.XP ?? 0;
+            int level = 1;
+
+            int xpForNextLevel = 100;
+
+            while (xp >= xpForNextLevel)
+            {
+                level++;
+                xpForNextLevel += level * 100;
+            }
+
+            profile.Level = level;
         }
     }
 }

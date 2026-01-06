@@ -65,7 +65,7 @@ namespace Explorer.Encounters.Core.UseCases
             return _mapper.Map<EncounterDto>(encounter);
         }
 
-        public EncounterDto Update(long id,int creatorId, UpdateEncounterDto dto)
+        public EncounterDto Update(long id, int creatorId, UpdateEncounterDto dto)
         {
             var encounter = _repo.Get(id) ?? throw new KeyNotFoundException("Encounter not found.");
 
@@ -153,7 +153,7 @@ namespace Explorer.Encounters.Core.UseCases
             }
             var location = new GeoLocation(latitude, longitude, radius);
 
-            encounter.Update(name, description, location, xp, type, requiredParticipants);
+            encounter.Update(encounter.CreatorId, name, description, location, xp, type, requiredParticipants);
 
 
             if (!string.IsNullOrWhiteSpace(dto.Status))
