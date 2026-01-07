@@ -101,6 +101,19 @@ namespace Explorer.Tours.Infrastructure.Database
                     kp.Property(k => k.Secret).IsRequired();
                 });
 
+
+                b.OwnsMany(t => t.Images, img =>
+                {
+                    img.ToTable("TourImages");
+                    img.WithOwner().HasForeignKey("TourId");
+
+                    img.Property<int>("Id");   // shadow key za red u tabeli slika
+                    img.HasKey("Id");
+
+                    img.Property(i => i.Url).IsRequired();
+                    img.Property(i => i.Order).IsRequired();
+                });
+
                 // TourDuration konfiguracija
                 b.OwnsMany(t => t.TourDurations, td =>
                 {
