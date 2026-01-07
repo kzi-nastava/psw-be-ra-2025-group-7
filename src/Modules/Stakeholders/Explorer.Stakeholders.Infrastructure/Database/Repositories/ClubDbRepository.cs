@@ -89,5 +89,25 @@ public class ClubDbRepository : IClubRepository
             .ToList();
     }
 
+    public List<long> GetMemberIds(long clubId)
+    {
+        var club = _dbSet
+            .Include(c => c.Members)
+            .SingleOrDefault(c => c.Id == clubId);
+
+        if (club == null)
+        {
+            throw new NotFoundException("Club not found: " + clubId);
+        }
+
+        // Include the club owner in the notification list
+        var memberIds = club.Members.Select(m => m.TouristId).ToList();
+        if (!memberIds.Contains(club.CreatedBy))
+        {
+            memberIds.Add(club.CreatedBy);
+        }
+
+        return memberIds;
+    }
 }
 

@@ -2,7 +2,7 @@
 
 namespace Explorer.Tours.Core.Domain
 {
-    public class KeyPoint : ValueObject
+    public class KeyPoint : Entity
     {
         public double Latitude { get; }
         public double Longitude { get; }
@@ -55,7 +55,7 @@ namespace Explorer.Tours.Core.Domain
             if (string.IsNullOrWhiteSpace(Secret))
                 throw new ArgumentException("Key point secret is required.");
         }
-
+        /*
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Latitude;
@@ -65,5 +65,6 @@ namespace Explorer.Tours.Core.Domain
             yield return ImageUrl ?? string.Empty;
             yield return Secret;
         }
+        */
     }
 }

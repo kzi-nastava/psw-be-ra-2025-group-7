@@ -12,15 +12,18 @@ public class FollowerMessageService : IFollowerMessageService
 {
     private readonly IFollowerMessageRepository _messageRepository;
     private readonly IFollowerRepository _followerRepository;
+    private readonly INotificationService _notificationService;
     private readonly IMapper _mapper;
 
     public FollowerMessageService(
         IFollowerMessageRepository messageRepository,
         IFollowerRepository followerRepository,
+        INotificationService notificationService,
         IMapper mapper)
     {
         _messageRepository = messageRepository;
         _followerRepository = followerRepository;
+        _notificationService = notificationService;
         _mapper = mapper;
     }
 
@@ -44,15 +47,20 @@ public class FollowerMessageService : IFollowerMessageService
         );
 
         var created = _messageRepository.Create(message);
+        var createdDto = _mapper.Map<FollowerMessageDto>(created);
+        
+        // Preserve author info for notification content
+        createdDto.AuthorName = messageDto.AuthorName;
+        createdDto.AuthorSurname = messageDto.AuthorSurname;
 
-        // TODO (taèka 3): Ovde æe se kreirati notifikacije za sve pratioce
-        // var followerIds = _followerRepository.GetFollowerIds(messageDto.AuthorId);
-        // foreach (var followerId in followerIds)
-        // {
-        //     _notificationService.CreateFollowerMessageNotification(followerId, created);
-        // }
+        // Create notifications for all followers
+        var followerIds = _followerRepository.GetFollowerIds(messageDto.AuthorId);
+        if (followerIds.Any())
+        {
+            _notificationService.CreateFollowerMessageNotifications(createdDto, followerIds);
+        }
 
-        return _mapper.Map<FollowerMessageDto>(created);
+        return createdDto;
     }
 
     public PagedResult<FollowerMessageDto> GetMyMessages(long authorId, int page, int pageSize)
@@ -70,9 +78,9 @@ public class FollowerMessageService : IFollowerMessageService
         if (message.AuthorId != authorId)
             throw new UnauthorizedAccessException("You can only delete your own messages");
 
-        _messageRepository.Delete(messageId);
+        // Delete associated notifications first
+        _notificationService.DeleteFollowerMessageNotifications(messageId);
 
-        // TODO (taèka 3): Ovde æe se obrisati povezane notifikacije
-        // _notificationService.DeleteFollowerMessageNotifications(messageId);
+        _messageRepository.Delete(messageId);
     }
 }

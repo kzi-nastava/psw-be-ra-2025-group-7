@@ -24,12 +24,21 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
             return entity;
         }
 
-        public List<Notification> GetForTourist(long touristId)
+        public List<Notification> GetForUser(long userId, bool onlyUnread = false)
         {
-            return _dbSet
-                .Where(n => n.UserId == touristId)
-                .OrderByDescending(n => n.CreatedAt)
-                .ToList();
+            var query = _dbSet.Where(n => n.UserId == userId);
+            
+            if (onlyUnread)
+            {
+                query = query.Where(n => !n.IsRead);
+            }
+            
+            return query.OrderByDescending(n => n.CreatedAt).ToList();
+        }
+
+        public int GetUnreadCount(long userId)
+        {
+            return _dbSet.Count(n => n.UserId == userId && !n.IsRead);
         }
 
         public Notification Get(long id)
@@ -41,6 +50,56 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
         {
             _dbSet.Update(notification);
             _dbContext.SaveChanges();
+        }
+
+        public void MarkAllAsRead(long userId)
+        {
+            var unreadNotifications = _dbSet
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ToList();
+
+            foreach (var notification in unreadNotifications)
+            {
+                notification.MarkAsRead();
+            }
+
+            _dbContext.SaveChanges();
+        }
+
+        public void Delete(long id)
+        {
+            var notification = _dbSet.FirstOrDefault(n => n.Id == id);
+            if (notification != null)
+            {
+                _dbSet.Remove(notification);
+                _dbContext.SaveChanges();
+            }
+        }
+
+        public void DeleteByFollowerMessageId(long followerMessageId)
+        {
+            var notifications = _dbSet
+                .Where(n => n.SourceFollowerMessageId == followerMessageId)
+                .ToList();
+
+            if (notifications.Any())
+            {
+                _dbSet.RemoveRange(notifications);
+                _dbContext.SaveChanges();
+            }
+        }
+
+        public void DeleteByClubMessageId(long clubMessageId)
+        {
+            var notifications = _dbSet
+                .Where(n => n.SourceClubMessageId == clubMessageId)
+                .ToList();
+
+            if (notifications.Any())
+            {
+                _dbSet.RemoveRange(notifications);
+                _dbContext.SaveChanges();
+            }
         }
     }
 }
