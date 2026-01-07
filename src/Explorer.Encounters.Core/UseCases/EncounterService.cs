@@ -51,7 +51,8 @@ namespace Explorer.Encounters.Core.UseCases
                 encounter.ChangeStatus(ParseStatus(dto.Status));
 
             _repo.Create(encounter);
-            return _mapper.Map<EncounterDto>(encounter);
+         
+                return _mapper.Map<EncounterDto>(encounter);
         }
 
 
