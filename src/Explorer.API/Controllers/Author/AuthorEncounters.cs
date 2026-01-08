@@ -65,11 +65,5 @@ namespace Explorer.API.Controllers.Author
             return Ok(result);
         }
 
-        [HttpGet("by-keypoint/{keyPointId:long}")]
-        public ActionResult<EncounterDto> GetByKeyPoint(long keyPointId)
-        {
-            return Ok(_service.GetByKeyPoint(keyPointId));
-        }
-
     }
 }
