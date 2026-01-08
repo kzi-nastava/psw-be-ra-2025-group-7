@@ -3,12 +3,10 @@ using Explorer.Notifications.API.Public;
 using Explorer.Notifications.Infrastructure;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Administration;
-using Explorer.Tours.API.Public.Shopping;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
 using Explorer.Tours.Core.UseCases.Administration;
-using Explorer.Tours.Core.UseCases.Shopping;
 using Explorer.Tours.Core.UseCases.Tourist;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
@@ -16,6 +14,9 @@ using Explorer.Tours.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Explorer.Tours.API.Public.Author;
+using Explorer.Tours.Core.UseCases.Author;
+
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -46,13 +47,15 @@ public static class ToursStartup
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
         services.AddScoped<ITourBrowsingService, TourBrowsingService>();
-        services.AddScoped<IShoppingCartService, ShoppingCartService>();
         services.AddScoped<IAnnualAwardService, AnnualAwardService>();
         services.AddScoped<ITouristToursService, TouristToursService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ITourExecutionService, TourExecutionService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
+        services.AddScoped<ITourRequestService, TourRequestService>();
+        services.AddScoped<IAuthorTourRequestService, AuthorTourRequestService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -75,6 +78,8 @@ public static class ToursStartup
         services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
         services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
         services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
+        services.AddScoped<ITourRequestRepository, TourRequestDbRepository>();
+
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

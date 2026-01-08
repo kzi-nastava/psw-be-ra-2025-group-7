@@ -1,6 +1,7 @@
 ﻿using Explorer.Stakeholders.Infrastructure.Authentication;
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.API.Public;
 using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Shopping;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -71,12 +72,12 @@ namespace Explorer.API.Controllers.Tourist
         /// All items are converted to purchase tokens and the cart is cleared.
         /// </summary>
         [HttpPost("purchase")]
-        public ActionResult<List<TourPurchaseTokenDto>> PurchaseCart()
+        public ActionResult<List<TourPurchaseTokenDto>> PurchaseCart([FromBody] PurchaseCartWithCouponDto? dto)
         {
             try
             {
                 var touristId = GetTouristIdFromToken();
-                var tokens = _shoppingCartService.PurchaseCart(touristId);
+                var tokens = _shoppingCartService.PurchaseCartWithCoupon(touristId, dto?.CouponCode);
                 return Ok(tokens);
             }
             catch (InvalidOperationException ex)

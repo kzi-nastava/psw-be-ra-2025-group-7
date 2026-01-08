@@ -35,6 +35,24 @@ public class TourPurchaseController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("simple")]
+    public ActionResult<List<SimpleTourDto>> GetMyPurchasedToursSimple()
+    {
+        var userId = User.PersonId();
+        var result = _tourPurchaseTokenService.GetPagedByUser(0, 1000, userId);
+
+        var simpleTours = result.Results
+            .Where(p => p.Tour != null)
+            .Select(p => new SimpleTourDto
+            {
+                Id = p.TourId,
+                Name = p.Tour!.Name
+            })
+            .ToList();
+
+        return Ok(simpleTours);
+    }
+
     [HttpGet("check/{tourId:long}")]
     public ActionResult<bool> HasPurchased(long tourId)
     {

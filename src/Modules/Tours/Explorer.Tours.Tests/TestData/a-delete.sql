@@ -24,6 +24,15 @@ BEGIN
         DELETE FROM tours."TourExecutions";
     END IF;
     
+
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'tours' AND table_name = 'TourRequestResponses') THEN
+        DELETE FROM tours."TourRequestResponses";
+    END IF;
+    
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'tours' AND table_name = 'TourRequests') THEN
+        DELETE FROM tours."TourRequests";
+    END IF;
+    
     IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'tours' AND table_name = 'TourDurations') THEN
         DELETE FROM tours."TourDurations";
     END IF;
