@@ -11,4 +11,6 @@ public interface ITourExecutionRepository
     TourExecution Create(TourExecution execution);
     TourExecution Update(TourExecution execution);
     void Delete(long id);
+    TourExecution GetExecutionWithTourAndKeyPoints(long touristId, long executionId);
+
 }

@@ -43,7 +43,7 @@ public class TourExecutionService : ITourExecutionService
 
         // Proveri da li već postoji aktivna sesija za ovu turu
         var existingExecution = _executionRepository.GetActiveExecutionForTourist(touristId, dto.TourId);
-        if (existingExecution != null)
+        if (existingExecution != null && existingExecution.TourId != dto.TourId)
             throw new InvalidOperationException("There is already an active tour execution for this tour.");
 
         // Kreiraj novu sesiju
@@ -260,4 +260,43 @@ public class TourExecutionService : ITourExecutionService
     {
         return degrees * Math.PI / 180.0;
     }
+
+    public List<TouristKeyPointMapDto> GetKeyPointsForMap(long touristId, long executionId)
+    {
+        var execution = _executionRepository.GetExecutionWithTourAndKeyPoints(touristId, executionId)
+                        ?? throw new NotFoundException("Execution not found");
+
+        if (execution.Tour?.KeyPoints == null || execution.Tour.KeyPoints.Count == 0)
+            return new List<TouristKeyPointMapDto>();
+
+        // Sledeca neotkljucana KP
+        int? nextIndex = null;
+        for (int i = 0; i < execution.Tour.KeyPoints.Count; i++)
+        {
+            if (!execution.IsKeyPointUnlocked(i))
+            {
+                nextIndex = i;
+                break;
+            }
+        }
+
+        // Mapiraj sve KP u DTO za mapu
+        var result = execution.Tour.KeyPoints
+            .Select((kp, index) => new TouristKeyPointMapDto
+            {
+                Index = index,
+                Latitude = kp.Latitude,
+                Longitude = kp.Longitude,
+                Name = kp.Name,
+                IsUnlocked = execution.IsKeyPointUnlocked(index),
+                IsNext = index == nextIndex,
+                Secret = execution.IsKeyPointUnlocked(index) ? kp.Secret : string.Empty
+            })
+            .ToList();
+
+        return result;
+    }
+
+
+
 }

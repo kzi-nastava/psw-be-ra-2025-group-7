@@ -115,4 +115,18 @@ public class TourExecutionDbRepository : ITourExecutionRepository
         _dbSet.Remove(entity);
         DbContext.SaveChanges();
     }
+
+    public TourExecution GetExecutionWithTourAndKeyPoints(long touristId, long executionId)
+    {
+        var execution = _dbSet
+            .Include(te => te.Tour)
+            .ThenInclude(t => t.KeyPoints)
+            .FirstOrDefault(te => te.Id == executionId && te.TouristId == touristId);
+
+        if (execution == null)
+            throw new NotFoundException($"Tour execution not found: {executionId}");
+
+        return execution;
+    }
+
 }

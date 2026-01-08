@@ -98,4 +98,13 @@ public class TourExecutionController : ControllerBase
         var secret = _tourExecutionService.GetKeyPointSecret(touristId, executionId, keyPointIndex);
         return Ok(new { secret });
     }
+
+    [HttpGet("{executionId:long}/map-keypoints")]
+    public ActionResult<List<TouristKeyPointMapDto>> GetKeyPointsForMap(long executionId)
+    {
+        var touristId = User.PersonId();
+        var result = _tourExecutionService.GetKeyPointsForMap(touristId, executionId);
+        return Ok(result);
+    }
+
 }
