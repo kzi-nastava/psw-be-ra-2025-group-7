@@ -19,6 +19,8 @@ namespace Explorer.Tours.Core.Mappers
             CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
             CreateMap<KeyPoint, KeyPointWithoutSecretDto>();
 
+            CreateMap<TourImageDto, TourImage>().ReverseMap();
+
             CreateMap<TourDto, Tour>()
                 .ForMember(dest => dest.KeyPoints,
                            opt => opt.MapFrom(src => src.KeyPoints ?? new List<KeyPointDto>()))
@@ -26,6 +28,8 @@ namespace Explorer.Tours.Core.Mappers
                            opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDurationDto>()))
                 .ForMember(dest => dest.RequiredEquipment,
                            opt => opt.MapFrom(src => src.RequiredEquipment ?? new List<EquipmentDto>()))
+                .ForMember(dest => dest.Images,
+                            opt => opt.MapFrom(src => src.Images ?? new List<TourImageDto>()))
                 .ReverseMap();
             
             // Tour to PurchasedTourInfoDto (for purchased tours without secrets)
@@ -102,6 +106,13 @@ namespace Explorer.Tours.Core.Mappers
             CreateMap<UpdateAnnualAwardDto, AnnualAward>()
                 .ForMember(d => d.Status, opt => opt.Ignore());
 
+            // Tour Images
+            CreateMap<CreateTourDto, IEnumerable<TourImage>>()
+                .ConvertUsing(src => (src.Images ?? new List<TourImageDto>())
+                .Select(i => new TourImage(i.Url, i.Order)));
+        
+        
+        
             //Tour Request
             CreateMap<TourRequest, TourRequestDto>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))

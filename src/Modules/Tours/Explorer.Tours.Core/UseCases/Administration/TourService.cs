@@ -37,6 +37,8 @@ namespace Explorer.Tours.Core.UseCases.Administration
             entity.ArchivedAt = null;
             entity.Status = (int)TourStatus.Draft;
 
+            entity.Images ??= new List<TourImageDto>();
+
             var result = _tourRepository.Create(_mapper.Map<Tour>(entity));
             return _mapper.Map<TourDto>(result);
         }
@@ -50,6 +52,8 @@ namespace Explorer.Tours.Core.UseCases.Administration
 
             // Mapiramo DTO → postojeći domen objekat
             _mapper.Map(entity, existingTour);
+
+            existingTour.SetImages(entity.Images?.Select(i => new TourImage(i.Url, i.Order)));
 
             existingTour.Validate();
 
