@@ -11,4 +11,5 @@ public class KeyPointWithoutSecretDto
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
+    public long? EncounterId { get; set; }
 }
