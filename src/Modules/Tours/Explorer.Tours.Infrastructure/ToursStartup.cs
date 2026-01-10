@@ -75,7 +75,6 @@ public static class ToursStartup
         services.AddScoped<IQuizRepository, QuizRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
-        services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
         services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
         services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
         services.AddScoped<ITourRequestRepository, TourRequestDbRepository>();

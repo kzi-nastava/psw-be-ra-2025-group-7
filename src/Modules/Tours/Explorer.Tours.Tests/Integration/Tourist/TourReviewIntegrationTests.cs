@@ -128,19 +128,43 @@ public class TourReviewIntegrationTests : BaseToursIntegrationTest
     [Fact]
     public void UpdateReview_Fails_When_Not_Owner()
     {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-2"); // Review -1 belongs to tourist -1
+        long reviewId;
 
-        var dto = new UpdateTourReviewDto
+        // First, create a review owned by -1
+        using (var scope = Factory.Services.CreateScope())
         {
-            Rating = 3,
-            Comment = "Trying to update someone else's review"
-        };
+            var controller = CreateController(scope, "-1");
+            var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        // Act & Assert
-        Should.Throw<ForbiddenException>(() => controller.UpdateReview(-1, dto))
-            .Message.ShouldContain("only update your own");
+            var dto = new CreateTourReviewDto
+            {
+                TourId = -3,
+                TourExecutionId = -1,
+                Rating = 4,
+                Comment = "Review for update test",
+                ImageUrls = new List<string>()
+            };
+
+            var result = ((ObjectResult)controller.CreateReview(dto).Result)?.Value as TourReviewDto;
+            result.ShouldNotBeNull();
+            reviewId = result.Id;
+        }
+
+        // Now try to update as different user
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var controller = CreateController(scope, "-2"); // Review belongs to tourist -1
+
+            var dto = new UpdateTourReviewDto
+            {
+                Rating = 3,
+                Comment = "Trying to update someone else's review"
+            };
+
+            // Act & Assert
+            Should.Throw<ForbiddenException>(() => controller.UpdateReview(reviewId, dto))
+                .Message.ShouldContain("only update your own");
+        }
     }
 
     #endregion
@@ -150,20 +174,44 @@ public class TourReviewIntegrationTests : BaseToursIntegrationTest
     [Fact]
     public void DeleteReview_Removes_Review()
     {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-1");
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        long reviewIdToDelete;
 
-        // Act
-        var result = controller.DeleteReview(-1);
+        // First, create a review to delete
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var controller = CreateController(scope, "-1");
+            var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        // Assert - Response
-        result.ShouldBeOfType<OkResult>();
+            var dto = new CreateTourReviewDto
+            {
+                TourId = -3,
+                TourExecutionId = -1,
+                Rating = 3,
+                Comment = "Review to be deleted",
+                ImageUrls = new List<string>()
+            };
 
-        // Assert - Database
-        var deletedReview = dbContext.TourReviews.FirstOrDefault(tr => tr.Id == -1);
-        deletedReview.ShouldBeNull();
+            var result = ((ObjectResult)controller.CreateReview(dto).Result)?.Value as TourReviewDto;
+            result.ShouldNotBeNull();
+            reviewIdToDelete = result.Id;
+        }
+
+        // Now delete it
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var controller = CreateController(scope, "-1");
+            var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+            // Act
+            var result = controller.DeleteReview(reviewIdToDelete);
+
+            // Assert - Response
+            result.ShouldBeOfType<OkResult>();
+
+            // Assert - Database
+            var deletedReview = dbContext.TourReviews.FirstOrDefault(tr => tr.Id == reviewIdToDelete);
+            deletedReview.ShouldBeNull();
+        }
     }
 
     [Fact]
