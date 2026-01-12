@@ -22,6 +22,12 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<TourProblem> TourProblems { get; set; }
         public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
         public DbSet<AnnualAward> AnnualAwards { get; set; }
+        public DbSet<EnhancedReview> EnhancedReviews { get; set; }
+        public DbSet<EnhancedReviewPro> EnhancedReviewPros { get; set; }
+        public DbSet<EnhancedReviewCon> EnhancedReviewCons { get; set; }
+        public DbSet<EnhancedReviewTag> EnhancedReviewTags { get; set; }
+        public DbSet<EnhancedReviewImage> EnhancedReviewImages { get; set; }
+        public DbSet<EnhancedReviewHelpfulVote> EnhancedReviewHelpfulVotes { get; set; }
         public DbSet<TourRequest> TourRequests { get; set; }
         public DbSet<TourRequestResponse> TourRequestResponses { get; set; }
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
@@ -281,6 +287,90 @@ namespace Explorer.Tours.Infrastructure.Database
                 b.Property(p => p.CreatedAt).IsRequired();
                 b.Property(p => p.ProcessedAt).IsRequired(false);
             });
+
+            modelBuilder.Entity<EnhancedReview>(b =>
+            {
+                b.ToTable("EnhancedReviews");
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.TextReview).HasMaxLength(2000);
+
+                b.HasIndex(x => new { x.TourId, x.TouristId }).IsUnique();
+
+                // Pros
+                b.HasMany(x => x.Pros)
+                    .WithOne()
+                    .HasForeignKey(p => p.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Cons
+                b.HasMany(x => x.Cons)
+                    .WithOne()
+                    .HasForeignKey(c => c.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Tags
+                b.HasMany(x => x.SentimentTags)
+                    .WithOne()
+                    .HasForeignKey(t => t.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Images
+                b.HasMany(x => x.Images)
+                    .WithOne()
+                    .HasForeignKey(i => i.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // HelpfulVotes
+                b.HasMany(x => x.HelpfulVotes)
+                    .WithOne()
+                    .HasForeignKey(v => v.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+            });
+
+            modelBuilder.Entity<EnhancedReviewPro>(b =>
+            {
+                b.ToTable("EnhancedReviewPros");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Text).IsRequired().HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<EnhancedReviewCon>(b =>
+            {
+                b.ToTable("EnhancedReviewCons");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Text).IsRequired().HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<EnhancedReviewTag>(b =>
+            {
+                b.ToTable("EnhancedReviewTags");
+                b.HasKey(x => x.Id);
+
+                // enum kao int (default), može i eksplicitno:
+                b.Property(x => x.Tag).IsRequired();
+            });
+
+            modelBuilder.Entity<EnhancedReviewImage>(b =>
+            {
+                b.ToTable("EnhancedReviewImages");
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.Url).IsRequired().HasMaxLength(2048);
+                b.Property(x => x.SizeBytes).IsRequired();
+            });
+
+            modelBuilder.Entity<EnhancedReviewHelpfulVote>(b =>
+            {
+                b.ToTable("EnhancedReviewHelpfulVotes");
+                b.HasKey(x => x.Id);
+
+                b.HasIndex(x => new { x.EnhancedReviewId, x.TouristId }).IsUnique();
+            });
+
+
+            // Ostale entitete (Facility, TourProblem, ...) rade drugi u svojim karticama.
 
             // ===== TourProblem konfiguracija =====
 

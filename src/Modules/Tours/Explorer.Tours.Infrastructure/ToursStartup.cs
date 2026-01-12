@@ -51,6 +51,7 @@ public static class ToursStartup
         services.AddScoped<ITouristToursService, TouristToursService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IEnhancedReviewService, EnhancedReviewService>();
         services.AddScoped<ITourRequestService, TourRequestService>();
         services.AddScoped<IAuthorTourRequestService, AuthorTourRequestService>();
 
@@ -65,7 +66,7 @@ public static class ToursStartup
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>();
         services.AddScoped<ITourJournalRepository, TourJournalDbRepository>();
-
+        services.AddScoped<IEnhancedReviewRepository, EnhancedReviewDbRepository>();
         services.AddScoped<ITouristEquipmentRepository, TouristEquipmentRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>();

@@ -66,5 +66,39 @@ namespace Explorer.API.Controllers
             _notificationService.Delete(id, userId);
             return NoContent();
         }
+
+        // ============== UNIFIED NOTIFICATION ENDPOINTS ==============
+
+        [HttpGet("all")]
+        public ActionResult<List<UnifiedNotificationDto>> GetAllUnified([FromQuery] bool onlyUnread = false)
+        {
+            var userId = User.PersonId();
+            var result = _notificationService.GetAllNotificationsForUser(userId, onlyUnread);
+            return Ok(result);
+        }
+
+        [HttpGet("all/unread/count")]
+        public ActionResult<int> GetAllUnreadCount()
+        {
+            var userId = User.PersonId();
+            var count = _notificationService.GetAllUnreadCount(userId);
+            return Ok(count);
+        }
+
+        [HttpPut("all/{id:long}/read")]
+        public IActionResult MarkUnifiedAsRead(long id, [FromQuery] string source)
+        {
+            var userId = User.PersonId();
+            _notificationService.MarkNotificationAsRead(id, source, userId);
+            return NoContent();
+        }
+
+        [HttpPut("all/read-all")]
+        public IActionResult MarkAllUnifiedAsRead()
+        {
+            var userId = User.PersonId();
+            _notificationService.MarkAllNotificationsAsRead(userId);
+            return NoContent();
+        }
     }
 }
