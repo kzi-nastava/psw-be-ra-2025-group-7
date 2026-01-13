@@ -36,6 +36,17 @@ BEGIN
         DELETE FROM tours."TourPurchaseTokens";
     END IF;
 
+    -- Delete TourReviews before TourExecutions (FK dependency)
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'tours' AND table_name = 'TourReviews') THEN
+        DELETE FROM tours."TourReviews";
+    END IF;
+
+    -- Delete TourExecutions before Tours (FK dependency)
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'tours' AND table_name = 'TourExecutions') THEN
+        DELETE FROM tours."TourExecutions";
+    END IF;
+    
+
     IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'tours' AND table_name = 'TourEquipment') THEN
         DELETE FROM tours."TourEquipment";
     END IF;
