@@ -54,6 +54,8 @@ public static class ToursStartup
         services.AddScoped<ITouristToursService, TouristToursService>();
         services.AddScoped<ITourSearchService, TourSearchService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<ITourExecutionService, TourExecutionService>();
+        services.AddScoped<ITourReviewService, TourReviewService>();
         services.AddScoped<IEnhancedReviewService, EnhancedReviewService>();
         services.AddScoped<ITourRequestService, TourRequestService>();
         services.AddScoped<IAuthorTourRequestService, AuthorTourRequestService>();
@@ -77,6 +79,8 @@ public static class ToursStartup
         services.AddScoped<IQuizRepository, QuizRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
+        services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
+        services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
         services.AddScoped<ITourRequestRepository, TourRequestDbRepository>();
 
 

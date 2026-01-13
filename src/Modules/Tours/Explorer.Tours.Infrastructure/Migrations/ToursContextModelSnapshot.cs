@@ -548,6 +548,62 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 b.ToTable("Tours", "tours");
             });
 
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourExecution", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("AbandonedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastActivity")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("StartLatitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("StartLongitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("TourId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TouristId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("_keyPointUnlockTimes")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("KeyPointUnlockTimes");
+
+                    b.Property<string>("_unlockedKeyPointIndices")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("UnlockedKeyPointIndices");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TourId");
+
+                    b.HasIndex("TouristId");
+
+                    b.HasIndex("TouristId", "TourId", "Status");
+
+                    b.ToTable("TourExecutions", "tours");
+                });
+
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TourJournal", b =>
             {
                 b.Property<long>("Id")
@@ -760,6 +816,61 @@ namespace Explorer.Tours.Infrastructure.Migrations
                 b.ToTable("TourRequestResponses", "tours");
             });
 
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourReview", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("TourExecutionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TourId")
+                        .HasColumnType("bigint");
+
+                    b.Property<double>("TourProgressPercentage")
+                        .HasColumnType("double precision");
+
+                    b.Property<long>("TouristId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("_imageUrls")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ImageUrls");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("TourExecutionId");
+
+                    b.HasIndex("TourId");
+
+                    b.HasIndex("TouristId");
+
+                    b.HasIndex("TouristId", "TourId")
+                        .IsUnique();
+
+                    b.ToTable("TourReviews", "tours");
+                });
+
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TouristEquipment", b =>
             {
                 b.Property<long>("Id")
@@ -949,10 +1060,51 @@ namespace Explorer.Tours.Infrastructure.Migrations
                         .HasForeignKey("TourId");
                 });
 
-                b.Navigation("KeyPoints");
+                    b.OwnsMany("Explorer.Tours.Core.Domain.TourImage", "Images", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<int>("Order")
+                                .HasColumnType("integer");
+
+                            b1.Property<long>("TourId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("TourId");
+
+                            b1.ToTable("TourImages", "tours");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TourId");
+                        });
+
+                    b.Navigation("Images");
+
+                    b.Navigation("KeyPoints");
 
                 b.Navigation("TourDurations");
             });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourExecution", b =>
+                {
+                    b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tour");
+                });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
             {
@@ -972,12 +1124,31 @@ namespace Explorer.Tours.Infrastructure.Migrations
                     .HasForeignKey("TourId")
                     .OnDelete(DeleteBehavior.Restrict);
 
-                b.HasOne("Explorer.Tours.Core.Domain.TourRequest", null)
-                    .WithMany()
-                    .HasForeignKey("TourRequestId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-            });
+                    b.HasOne("Explorer.Tours.Core.Domain.TourRequest", null)
+                        .WithMany()
+                        .HasForeignKey("TourRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourReview", b =>
+                {
+                    b.HasOne("Explorer.Tours.Core.Domain.TourExecution", "TourExecution")
+                        .WithMany()
+                        .HasForeignKey("TourExecutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tour");
+
+                    b.Navigation("TourExecution");
+                });
 
             modelBuilder.Entity("TourEquipment", b =>
             {

@@ -14,6 +14,7 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Tour> Tours { get; set; }
         public DbSet<PublicPointRequest> PublicPointRequests { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+
         public DbSet<TourJournal> TourJournals { get; set; }
         public DbSet<TouristEquipment> TouristEquipment { get; set; }
         public DbSet<Quiz> Quizzes { get; set; }
@@ -28,6 +29,9 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<EnhancedReviewTag> EnhancedReviewTags { get; set; }
         public DbSet<EnhancedReviewImage> EnhancedReviewImages { get; set; }
         public DbSet<EnhancedReviewHelpfulVote> EnhancedReviewHelpfulVotes { get; set; }
+        public DbSet<TourExecution> TourExecutions { get; set; }
+        public DbSet<TourReview> TourReviews { get; set; }
+        
         public DbSet<TourRequest> TourRequests { get; set; }
         public DbSet<TourRequestResponse> TourRequestResponses { get; set; }
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
@@ -411,6 +415,100 @@ namespace Explorer.Tours.Infrastructure.Database
                  );
             });
 
+            // ===== TourExecution konfiguracija =====
+            modelBuilder.Entity<TourExecution>(b =>
+            {
+                b.ToTable("TourExecutions");
+                b.HasKey(te => te.Id);
+
+                b.Property(te => te.TouristId).IsRequired();
+                b.Property(te => te.TourId).IsRequired();
+                b.Property(te => te.StartedAt).IsRequired();
+                b.Property(te => te.CompletedAt).IsRequired(false);
+                b.Property(te => te.AbandonedAt).IsRequired(false);
+                b.Property(te => te.Status).IsRequired();
+                b.Property(te => te.StartLatitude).IsRequired();
+                b.Property(te => te.StartLongitude).IsRequired();
+                b.Property(te => te.LastActivity).IsRequired();
+
+                // Mapiranje privatne liste _unlockedKeyPointIndices kao JSON
+                b.Property<List<int>>("_unlockedKeyPointIndices")
+                    .HasColumnName("UnlockedKeyPointIndices")
+                    .HasColumnType("jsonb")
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                        v => JsonSerializer.Deserialize<List<int>>(v, (JsonSerializerOptions?)null) ?? new List<int>()
+                    );
+
+                // Mapiranje privatnog dictionary-ja _keyPointUnlockTimes kao JSON
+                b.Property<Dictionary<int, DateTime>>("_keyPointUnlockTimes")
+                    .HasColumnName("KeyPointUnlockTimes")
+                    .HasColumnType("jsonb")
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                        v => JsonSerializer.Deserialize<Dictionary<int, DateTime>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<int, DateTime>()
+                    );
+
+                // Ignoriši public readonly properties koji vraćaju read-only verzije
+                b.Ignore(te => te.UnlockedKeyPointIndices);
+                b.Ignore(te => te.KeyPointUnlockTimes);
+
+                // Relacija sa Tour entitetom
+                b.HasOne(te => te.Tour)
+                    .WithMany()
+                    .HasForeignKey(te => te.TourId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Indeksi za brže pretrage
+                b.HasIndex(te => te.TouristId);
+                b.HasIndex(te => new { te.TouristId, te.TourId, te.Status });
+            });
+
+            // ===== TourReview konfiguracija =====
+            modelBuilder.Entity<TourReview>(b =>
+            {
+                b.ToTable("TourReviews");
+                b.HasKey(tr => tr.Id);
+
+                b.Property(tr => tr.TouristId).IsRequired();
+                b.Property(tr => tr.TourId).IsRequired();
+                b.Property(tr => tr.TourExecutionId).IsRequired();
+                b.Property(tr => tr.Rating).IsRequired();
+                b.Property(tr => tr.Comment).IsRequired().HasMaxLength(2000);
+                b.Property(tr => tr.CreatedAt).IsRequired();
+                b.Property(tr => tr.UpdatedAt).IsRequired(false);
+                b.Property(tr => tr.TourProgressPercentage).IsRequired();
+
+                // Mapiranje privatne liste _imageUrls kao JSON
+                b.Property<List<string>>("_imageUrls")
+                    .HasColumnName("ImageUrls")
+                    .HasColumnType("jsonb")
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                        v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>()
+                    );
+
+                // Ignoriši public readonly property
+                b.Ignore(tr => tr.ImageUrls);
+
+                // Relacija sa Tour
+                b.HasOne(tr => tr.Tour)
+                    .WithMany()
+                    .HasForeignKey(tr => tr.TourId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Relacija sa TourExecution
+                b.HasOne(tr => tr.TourExecution)
+                    .WithMany()
+                    .HasForeignKey(tr => tr.TourExecutionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Indeksi
+                b.HasIndex(tr => tr.TouristId);
+                b.HasIndex(tr => tr.TourId);
+                b.HasIndex(tr => new { tr.TouristId, tr.TourId }).IsUnique();
+                b.HasIndex(tr => tr.CreatedAt);
+            });
             //Tour Request
             modelBuilder.Entity<TourRequest>(b =>
             {

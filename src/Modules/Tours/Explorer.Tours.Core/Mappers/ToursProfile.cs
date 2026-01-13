@@ -105,6 +105,17 @@ namespace Explorer.Tours.Core.Mappers
 
             CreateMap<UpdateAnnualAwardDto, AnnualAward>()
                 .ForMember(d => d.Status, opt => opt.Ignore());
+            
+            // TourExecution mappings
+            CreateMap<TourExecution, TourExecutionDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.UnlockedKeyPointIndices, opt => opt.MapFrom(src => src.UnlockedKeyPointIndices.ToList()))
+                .ForMember(dest => dest.Tour, opt => opt.MapFrom(src => src.Tour));
+
+            // TourReview mappings
+            CreateMap<TourReview, TourReviewDto>()
+                .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.ImageUrls.ToList()))
+                .ForMember(dest => dest.Tour, opt => opt.MapFrom(src => src.Tour));
 
             // Tour Images
             CreateMap<CreateTourDto, IEnumerable<TourImage>>()
