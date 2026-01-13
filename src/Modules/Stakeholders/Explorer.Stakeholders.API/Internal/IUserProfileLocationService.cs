@@ -10,5 +10,6 @@ namespace Explorer.Stakeholders.API.Internal
     public interface IUserProfileLocationService
     {
         UserLocationDto GetLocation(int userId);
+        void AddXP(long userId, int XP);
     }
 }

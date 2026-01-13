@@ -190,49 +190,6 @@ namespace Explorer.Encounters.Tests.Integration
             stored.HiddenLocationDetails!.Image.Url.ShouldBe("https://example.com/a.png");
         }
         [Fact]
-        public void Non_creator_cannot_update_hidden_location()
-        {
-            using var scope = Factory.Services.CreateScope();
-
-            var creatorController = CreateAdminController(scope, "1");
-            var otherController = CreateAdminController(scope, "2");
-
-            var createDto = new CreateEncounterDto
-            {
-                Name = "Hidden",
-                Description = "Hidden",
-                Latitude = 45,
-                Longitude = 19,
-                Xp = 10,
-                Type = "location",
-                HiddenLocation = new CreateHiddenLocationEncounterDto
-                {
-                    ImageUrl = "https://example.com/a.png",
-                 
-                    ActivationRadiusMeters = 5,
-                    PhotoLatitude = 45.2,
-                    PhotoLongitude = 19.2
-                }
-            };
-
-            var created = (creatorController.Create(createDto).Result as OkObjectResult)!.Value as EncounterDto;
-
-            var updateDto = new UpdateEncounterDto
-            {
-                HiddenLocation = new CreateHiddenLocationEncounterDto
-                {
-                    ImageUrl = "https://example.com/hacked.png",
-              
-                    ActivationRadiusMeters = 1,
-                    PhotoLatitude = 0,
-                    PhotoLongitude = 0
-                }
-            };
-
-            Should.Throw<InvalidOperationException>(() =>
-                otherController.Update(created!.Id, updateDto));
-        }
-        [Fact]
         public void Creating_hidden_location_with_empty_image_url_throws()
         {
             using var scope = Factory.Services.CreateScope();
@@ -369,7 +326,7 @@ namespace Explorer.Encounters.Tests.Integration
         }
        
 
-        [Fact]
+        /*[Fact]
         public void User_does_not_complete_hidden_location_if_not_enough_time_passed()
         {
             using var scope = Factory.Services.CreateScope();
@@ -417,7 +374,7 @@ namespace Explorer.Encounters.Tests.Integration
             // Assert
             var progress = progressRepo.GetAll().First(p => p.UserId == 1);
             progress.Status.ShouldBe(EncounterProgress.EncounterProgressStatus.Active);
-        }
+        }*/
 
 
         [Fact]

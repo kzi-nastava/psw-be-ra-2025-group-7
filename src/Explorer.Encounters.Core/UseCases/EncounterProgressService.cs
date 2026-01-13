@@ -102,18 +102,7 @@ namespace Explorer.Encounters.Core.UseCases
 
             foreach (var ep in encounterProgresses)
             {
-                var user = _userProfileLocService.GetLocation((int)ep.UserId);
-
-                if (user.Latitude == null || user.Longitude == null)
-                    continue;
-
-                bool isInside = GeoDistanceCalculator.IsWithinRadius(
-                    encounter.Location.Latitude,
-                    encounter.Location.Longitude,
-                    encounter.Location.Radius ?? 0,
-                    user.Latitude ?? 0,
-                    user.Longitude ?? 0
-                );
+                bool isInside = IsUserAtLocation(encounter.Id, ep.UserId);
 
                 if (isInside)
                 {
@@ -122,6 +111,23 @@ namespace Explorer.Encounters.Core.UseCases
             }
 
             return usersInRadius;
+        }
+
+        public bool IsUserAtLocation(long encounterId, long userId)
+        {
+            var encounter = _encounterRepo.Get(encounterId)
+                ?? throw new KeyNotFoundException("Encounter not found.");
+            var userLocationDto = _userProfileLocService.GetLocation((int)userId);
+            if (userLocationDto.Latitude == null || userLocationDto.Longitude == null)
+                return false;
+            bool isWithinRadius = GeoDistanceCalculator.IsWithinRadius(
+                encounter.Location.Latitude,
+                encounter.Location.Longitude,
+                encounter.Location.Radius ?? 0,
+                userLocationDto.Latitude.Value,
+                userLocationDto.Longitude.Value
+            );
+            return isWithinRadius;
         }
 
         public int GetActiveParticipants(int encounterId)
@@ -217,6 +223,71 @@ namespace Explorer.Encounters.Core.UseCases
             }
         }
 
+        public EncounterProgressDto ActivateSocialEncounter(long encounterId, long userId)
+        {
+            bool alreadyActive = _repo.GetAll().Any(p =>
+                p.EncounterId == encounterId &&
+                p.UserId == userId &&
+                p.Status == EncounterProgressStatus.Active);
+
+            bool alreadyFinished = _repo.GetAll().Any(p =>
+                p.EncounterId == encounterId &&
+                p.UserId == userId &&
+                p.Status == EncounterProgressStatus.Completed);
+
+            if (alreadyActive)
+                throw new InvalidOperationException("Encounter already activated.");
+
+            if(alreadyFinished)
+                throw new InvalidOperationException("Encounter already completed.");
+
+            var encounter = _encounterRepo.Get(encounterId)
+                ?? throw new KeyNotFoundException("Encounter not found.");
+
+            var status = EncounterProgressStatus.Active;
+            var encounterProgress = new EncounterProgress(encounterId, userId, status);
+            _repo.Create(encounterProgress);
+            return _mapper.Map<EncounterProgressDto>(encounterProgress);
+        }
+
+        public bool HasActiveSocialEncounter(long userId)
+        {
+            return _repo.GetAll()
+                .Any(p =>
+                {
+                    var encounter = _encounterRepo.Get(p.EncounterId);
+                    return encounter != null &&
+                           encounter.Type == EncounterType.Social &&
+                           p.UserId == userId &&
+                           p.Status == EncounterProgressStatus.Active;
+                });
+        }
+
+        public EncounterDto GetActiveSocial()
+        {
+            var activeSocial = _repo.GetAll()
+                .FirstOrDefault(p =>
+                {
+                    var encounter = _encounterRepo.Get(p.EncounterId);
+                    return encounter != null &&
+                           encounter.Type == EncounterType.Social &&
+                           p.Status == EncounterProgressStatus.Active;
+                });
+
+            if (activeSocial == null)
+            {
+                throw new InvalidOperationException("No active social encounter found.");
+            }
+
+            var encounterDetails = _encounterRepo.Get(activeSocial.EncounterId);
+
+            if (encounterDetails == null)
+            {
+                throw new InvalidOperationException("Encounter not found for the active social progress.");
+            }
+
+            return _mapper.Map<EncounterDto>(encounterDetails);
+        }
 
 
         public void FinishEncounterProgress(List<EncounterProgress> encounterProgresses, List<int> users)
@@ -226,6 +297,8 @@ namespace Explorer.Encounters.Core.UseCases
                 if (users.Contains((int)ep.UserId))
                 {
                     ep.SetCompleted();
+                    var encounter = _encounterRepo.Get(ep.EncounterId);
+                    _userProfileLocService.AddXP((int)ep.UserId, encounter.Xp);
                     _repo.Update(ep);
                 }
             }

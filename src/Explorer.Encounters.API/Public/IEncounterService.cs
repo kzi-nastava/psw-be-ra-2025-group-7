@@ -17,5 +17,8 @@ namespace Explorer.Encounters.API.Public
         IEnumerable<EncounterDto> Get(string? status, string? type);
 
         EncounterDto ChangeStatus(long id, string status);
+
+        EncounterDto AcceptEncounter(long id, UpdateEncounterDto dto);
+        EncounterDto DeclineEncounter(long id);
     }
 }

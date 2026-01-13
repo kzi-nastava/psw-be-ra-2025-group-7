@@ -73,5 +73,19 @@ namespace Explorer.API.Controllers.Administrator.Administration
         }
      
 
+        [HttpPut("{id:long}/accept")]
+        public ActionResult<EncounterDto> AcceptEncounter(long id, [FromBody] UpdateEncounterDto dto)
+        {
+            var result = _service.AcceptEncounter(id, dto);
+            return Ok(result);
+        }
+
+        [HttpPut("{id:long}/decline")]
+        public ActionResult<EncounterDto> DeclineEncounter(long id)
+        {
+            var result = _service.DeclineEncounter(id);
+            return Ok(result);
+        }
+
     }
 }

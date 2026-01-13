@@ -18,5 +18,7 @@ namespace Explorer.Stakeholders.API.Internal
                 Longitude = 19.0001
             };
         }
+
+        public void AddXP(long userId, int XP) {  /* Nije implementirano u lažnoj verziji */  }
     }
 }

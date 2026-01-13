@@ -30,13 +30,16 @@ namespace Explorer.Encounters.Core.Domain
             Status = EncounterStatus.Draft;
         }
 
-       
-        public void Update(int creatorId,string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
+        public Encounter(string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants, EncounterStatus status)
         {
-            
-            if (creatorId != CreatorId)
-                throw new InvalidOperationException("Only the creator can update the encounter.");
+            SetBasics(name, description, location, xp, type, requiredParticipants);
+            Status = status; //default
+        }
 
+      
+        public void Update(int creatorId, string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
+        {
+           
             var previousType = Type;
             SetBasics(name, description, location, xp, type, requiredParticipants);
             // Ako više NIJE location challenge → brišemo hidden config
@@ -56,13 +59,21 @@ namespace Explorer.Encounters.Core.Domain
             //iy active u archived
             var allowed =
                 (Status == EncounterStatus.Draft && newStatus == EncounterStatus.Active) ||
+                (Status == EncounterStatus.Draft && newStatus == EncounterStatus.Pending) ||
                 (Status == EncounterStatus.Active && newStatus == EncounterStatus.Draft) ||
+                (Status == EncounterStatus.Pending && newStatus == EncounterStatus.Active) ||
+                (Status == EncounterStatus.Pending && newStatus == EncounterStatus.Declined) ||
                 (Status == EncounterStatus.Active && newStatus == EncounterStatus.Archived);
 
             if (!allowed)
                 throw new InvalidOperationException($"Status change {Status} -> {newStatus} is not allowed.");
 
             Status = newStatus;
+        }
+
+        public void SetPending(Encounter encounter)
+        {
+            encounter.Status = EncounterStatus.Pending;
         }
 
         private void SetBasics(string name, string description, GeoLocation location, int xp, EncounterType type, int? requiredParticipants)
