@@ -192,4 +192,29 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
         // Act & Assert
         Should.Throw<System.ArgumentException>(() => service.Update(invalidProfile));
     }
+
+    [Fact]
+    public void AddXP_Levels_Up_User_When_XP_Threshold_Reached()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+
+        long touristUserId = -23; // Sara – tourist, već postoji u bazi
+
+        // očistimo tracking da ne povuče keširane vrednosti
+        dbContext.ChangeTracker.Clear();
+
+        // Act
+        service.AddXP(touristUserId, 150); // proizvoljna XP vrednost preko 100
+
+        // Assert
+        dbContext.ChangeTracker.Clear();
+        var updatedProfile = dbContext.UserProfiles.First(up => up.UserId == touristUserId);
+
+        updatedProfile.XP.ShouldBe(150);
+        updatedProfile.Level.ShouldBe(2); // level up sa 1 → 2
+    }
+
 }

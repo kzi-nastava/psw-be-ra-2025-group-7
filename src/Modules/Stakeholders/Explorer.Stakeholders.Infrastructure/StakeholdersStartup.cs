@@ -1,4 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.API.Public.Tourist;
 using Explorer.Stakeholders.API.Services;
@@ -57,7 +58,21 @@ public static class StakeholdersStartup
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<INotificationRepository, NotificationDbRepository>();
 
-        
+        services.AddScoped<IUserProfileLocationService, UserProfileLocationService>();
+
+        // Register NotificationService with both repositories
+        /*services.AddScoped<INotificationService>(provider =>
+        {
+            var stakeholdersRepo = provider.GetRequiredService<INotificationRepository>();
+            var toursRepo = provider.GetRequiredService<Explorer.Tours.Core.Domain.RepositoryInterfaces.INotificationRepository>();
+            var mapper = provider.GetRequiredService<AutoMapper.IMapper>();
+            return new NotificationService(stakeholdersRepo, toursRepo, mapper);
+        });*/
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IUserInternalService, UserInternalService>();
+
+
+
         // New follower system repositories
         services.AddScoped<IFollowerRepository, FollowerDbRepository>();
         services.AddScoped<IFollowerMessageRepository, FollowerMessageDbRepository>();

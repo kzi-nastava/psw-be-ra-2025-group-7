@@ -12,6 +12,8 @@ namespace Explorer.Stakeholders.Core.Domain
         public string? Motto { get; private set; }
         public double? CurrentLatitude { get; private set; }
         public double? CurrentLongitude { get; private set; }
+        public int? XP { get; set; }
+        public int? Level { get; set; }
 
 
         public UserProfile(long userId, string firstName, string lastName,
@@ -27,7 +29,7 @@ namespace Explorer.Stakeholders.Core.Domain
         }
 
         public void UpdateProfile(string firstName, string lastName,
-                                 string? profilePicture, string? biography, string? motto)
+                                 string? profilePicture, string? biography, string? motto, int? xp, int? level)
         {
             ValidateFirstName(firstName);
             ValidateLastName(lastName);
@@ -39,6 +41,8 @@ namespace Explorer.Stakeholders.Core.Domain
             ProfilePicture = profilePicture;
             Biography = biography;
             Motto = motto;
+            XP = xp;
+            Level = level;
         }
 
         public void UpdateLocation(double latitude, double longitude)

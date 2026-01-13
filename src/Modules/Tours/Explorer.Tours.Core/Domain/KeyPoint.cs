@@ -11,6 +11,7 @@ namespace Explorer.Tours.Core.Domain
         public string Description { get; }
         public string? ImageUrl { get; }
         public string Secret { get; }
+        public long? EncounterId { get; set; }
 
         // ✅ NOVO: postaje true tek kad admin odobri zahtev
         public bool IsPublic { get; private set; }
@@ -24,7 +25,7 @@ namespace Explorer.Tours.Core.Domain
             string name,
             string description,
             string secret,
-            string? imageUrl = null)
+            string? imageUrl = null, long? encounterId = null)
         {
             Latitude = latitude;
             Longitude = longitude;
@@ -32,8 +33,9 @@ namespace Explorer.Tours.Core.Domain
             Description = description;
             Secret = secret;
             ImageUrl = imageUrl;
+            EncounterId = encounterId;
 
-            IsPublic = false; // ✅ default
+            IsPublic = false; 
 
             Validate();
         }
