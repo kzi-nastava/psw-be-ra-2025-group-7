@@ -82,8 +82,8 @@ namespace Explorer.Tours.Infrastructure.Database
                     kp.ToTable("KeyPoints");
                     kp.WithOwner().HasForeignKey("TourId");
 
-                    kp.Property<long>("Id");
-                    kp.HasKey("Id");
+                    kp.HasKey(k => k.Id);
+
 
                     kp.Property(k => k.Latitude).IsRequired();
                     kp.Property(k => k.Longitude).IsRequired();
@@ -98,6 +98,7 @@ namespace Explorer.Tours.Infrastructure.Database
 
                     kp.Property(k => k.ImageUrl);
                     kp.Property(k => k.Secret).IsRequired();
+                    kp.Property(k=>k.EncounterId);
                 });
 
                 // TourDuration konfiguracija

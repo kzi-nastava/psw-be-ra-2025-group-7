@@ -10,6 +10,7 @@ namespace Explorer.Tours.Core.Domain
         public string Description { get; }
         public string? ImageUrl { get; }
         public string Secret { get; }
+        public long? EncounterId { get; set; }
 
         // TODO (Drugi članovi): Po potrebi ovde mogu dodati dodatna polja
         // npr. redosled tačke u turi kada budu radili svoje kartice.
@@ -20,7 +21,7 @@ namespace Explorer.Tours.Core.Domain
             string name,
             string description,
             string secret,
-            string? imageUrl = null)
+            string? imageUrl = null, long? encounterId = null)
         {
             Latitude = latitude;
             Longitude = longitude;
@@ -28,7 +29,7 @@ namespace Explorer.Tours.Core.Domain
             Description = description;
             Secret = secret;
             ImageUrl = imageUrl;
-
+            EncounterId = encounterId;
             Validate();
         }
 

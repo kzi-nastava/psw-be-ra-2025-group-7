@@ -17,6 +17,8 @@ namespace Explorer.Encounters.API.Dtos
         public string Type { get; set; } = "";
         public int? RequiredParticipants { get; set; }
 
+        public long? KeyPointId { get; set; }
+        public bool? IsMandatory { get; set; }
         public string? Status { get; set; }
         public CreateHiddenLocationEncounterDto? HiddenLocation { get; set; }
     }
