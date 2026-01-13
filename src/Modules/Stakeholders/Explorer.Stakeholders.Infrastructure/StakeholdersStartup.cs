@@ -43,9 +43,6 @@ public static class StakeholdersStartup
         services.AddScoped<IClubMessageService, ClubMessageService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IUserInternalService, UserInternalService>();
-
-
-
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
