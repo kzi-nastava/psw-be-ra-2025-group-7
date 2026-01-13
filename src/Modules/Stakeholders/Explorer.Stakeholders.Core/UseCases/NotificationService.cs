@@ -6,18 +6,24 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
-using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using StakeholdersNotificationRepository = Explorer.Stakeholders.Core.Domain.RepositoryInterfaces.INotificationRepository;
+using ToursNotificationRepository = Explorer.Tours.Core.Domain.RepositoryInterfaces.INotificationRepository;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
     public class NotificationService : INotificationService
     {
-        private readonly INotificationRepository _repository;
+        private readonly StakeholdersNotificationRepository _repository;
+        private readonly ToursNotificationRepository _tourNotificationRepository;
         private readonly IMapper _mapper;
 
-        public NotificationService(INotificationRepository repository, IMapper mapper)
+        public NotificationService(
+            StakeholdersNotificationRepository repository,
+            ToursNotificationRepository tourNotificationRepository,
+            IMapper mapper)
         {
             _repository = repository;
+            _tourNotificationRepository = tourNotificationRepository;
             _mapper = mapper;
         }
 
@@ -149,6 +155,103 @@ namespace Explorer.Stakeholders.Core.UseCases
         public void DeleteClubMessageNotifications(long clubMessageId)
         {
             _repository.DeleteByClubMessageId(clubMessageId);
+        }
+
+        // ============== UNIFIED NOTIFICATION METHODS ==============
+
+        public List<UnifiedNotificationDto> GetAllNotificationsForUser(long userId, bool onlyUnread = false)
+        {
+            var unifiedNotifications = new List<UnifiedNotificationDto>();
+
+            // Get Stakeholder notifications
+            var stakeholderNotifications = _repository.GetForUser(userId, onlyUnread);
+            foreach (var notification in stakeholderNotifications)
+            {
+                unifiedNotifications.Add(new UnifiedNotificationDto
+                {
+                    Id = notification.Id,
+                    Source = "Stakeholder",
+                    Title = GetTitleFromType(notification.Type),
+                    Content = notification.Content,
+                    CreatedAt = notification.CreatedAt,
+                    IsRead = notification.IsRead,
+                    ClubId = notification.ClubId,
+                    Type = (int)notification.Type,
+                    ResourceId = notification.ResourceId,
+                    ResourceType = notification.ResourceType.HasValue ? (int)notification.ResourceType.Value : null,
+                    SourceFollowerMessageId = notification.SourceFollowerMessageId,
+                    SourceClubMessageId = notification.SourceClubMessageId
+                });
+            }
+
+            // Get Tour notifications
+            var tourNotifications = _tourNotificationRepository.GetForUser(userId, onlyUnread);
+            foreach (var notification in tourNotifications)
+            {
+                unifiedNotifications.Add(new UnifiedNotificationDto
+                {
+                    Id = notification.Id,
+                    Source = "Tour",
+                    Title = notification.Title,
+                    Content = notification.Preview, // Tours use Preview as content
+                    CreatedAt = notification.CreatedAt,
+                    IsRead = notification.IsRead,
+                    ProblemId = notification.ProblemId
+                });
+            }
+
+            // Sort by creation date, newest first
+            return unifiedNotifications
+                .OrderByDescending(n => n.CreatedAt)
+                .ToList();
+        }
+
+        public int GetAllUnreadCount(long userId)
+        {
+            var stakeholderCount = _repository.GetUnreadCount(userId);
+            var tourCount = _tourNotificationRepository.GetForUser(userId, onlyUnread: true).Count;
+            return stakeholderCount + tourCount;
+        }
+
+        public void MarkNotificationAsRead(long notificationId, string source, long userId)
+        {
+            if (source == "Stakeholder")
+            {
+                MarkAsRead(notificationId, userId);
+            }
+            else if (source == "Tour")
+            {
+                _tourNotificationRepository.MarkAsRead((int)notificationId, userId);
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid notification source: {source}");
+            }
+        }
+
+        public void MarkAllNotificationsAsRead(long userId)
+        {
+            // Mark all Stakeholder notifications as read
+            _repository.MarkAllAsRead(userId);
+
+            // Mark all Tour notifications as read
+            var tourNotifications = _tourNotificationRepository.GetForUser(userId, onlyUnread: true);
+            foreach (var notification in tourNotifications)
+            {
+                _tourNotificationRepository.MarkAsRead((int)notification.Id, userId);
+            }
+        }
+
+        private string GetTitleFromType(NotificationType type)
+        {
+            return type switch
+            {
+                NotificationType.JoinRequestAccepted => "Club Join Request Accepted",
+                NotificationType.JoinRequestRejected => "Club Join Request Rejected",
+                NotificationType.FollowerMessage => "New Follower Message",
+                NotificationType.ClubActivity => "Club Activity",
+                _ => "Notification"
+            };
         }
     }
 }

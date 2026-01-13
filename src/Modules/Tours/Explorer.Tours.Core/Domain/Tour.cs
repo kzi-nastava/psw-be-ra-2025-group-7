@@ -324,6 +324,14 @@ namespace Explorer.Tours.Core.Domain
             if (Status != TourStatus.Published)
                 throw new InvalidOperationException("Only published tours can be purchased.");
         }
+        public void ApproveKeyPointAsPublic(int keyPointIndex)
+        {
+            if (keyPointIndex < 0 || keyPointIndex >= KeyPoints.Count)
+                throw new ArgumentOutOfRangeException(nameof(keyPointIndex), "Key point index is out of range.");
+
+            KeyPoints[keyPointIndex].MarkAsPublicApproved();
+        }
+
 
 
         public void SetImages(IEnumerable<TourImage>? images)
