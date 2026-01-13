@@ -181,12 +181,15 @@ namespace Explorer.Encounters.Core.UseCases
             foreach (var progress in activeProgresses)
             {
                 var encounter = _encounterRepo.Get(progress.EncounterId);
+                if (encounter == null) continue;
+
                 if (encounter.Type != EncounterType.Location) continue;
                 var hidden = encounter.HiddenLocationDetails;
                 if (hidden == null) continue;
 
                 var userLoc = _userProfileLocService.GetLocation((int)userId);
-                if (userLoc.Latitude == null || userLoc.Longitude == null) continue;
+                if (userLoc == null || userLoc.Latitude == null || userLoc.Longitude == null) continue;
+
 
                 bool inPhotoRadius = GeoDistanceCalculator.IsWithinRadius(
                     hidden.PhotoLocation.Latitude,
