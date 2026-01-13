@@ -13,5 +13,6 @@
 
         // Tajna koja se otključava kada turista stigne do tačke
         public string Secret { get; set; } = string.Empty;
+        public long? EncounterId { get; set; }
     }
 }
