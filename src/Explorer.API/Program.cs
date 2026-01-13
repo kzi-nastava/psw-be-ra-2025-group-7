@@ -5,16 +5,10 @@ using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using System;
 
-
-using Microsoft.Extensions.FileProviders;
-using Explorer.Stakeholders.Infrastructure.Database;
-using Microsoft.EntityFrameworkCore;
-using System;
 using Explorer.Notifications.API.Public;
-using Explorer.Notifications.Infrastructure;  // gde je implementacija NotificationService
+using Explorer.Notifications.Infrastructure; 
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Infrastructure.Database;
-using Explorer.Notifications.Infrastructure; // gde ti je TourRepository
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +39,7 @@ var webRootPath = app.Environment.WebRootPath ?? Path.Combine(Directory.GetCurre
 var imagesPath = Path.Combine(webRootPath, "blog-images");
 Directory.CreateDirectory(imagesPath);
 
+Directory.CreateDirectory(Path.Combine(webRootPath, "enhanced-review-images"));
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

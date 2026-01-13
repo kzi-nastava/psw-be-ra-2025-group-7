@@ -28,14 +28,36 @@ namespace Explorer.API.Controllers.Tourist.Notes
         }
 
         [HttpGet]
-        public ActionResult<List<NoteDto>> GetMyNotes()
+        public ActionResult<List<NoteDto>> GetMyNotes(
+            [FromQuery] int? type,
+            [FromQuery] string? tag,
+            [FromQuery] long? tourId,
+            [FromQuery] string? search)
         {
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
 
+            // If any filter is applied, use filtered query
+            if (type.HasValue || !string.IsNullOrWhiteSpace(tag) || tourId.HasValue || !string.IsNullOrWhiteSpace(search))
+            {
+                var filteredNotes = _noteService.GetFilteredByUserId(userId, type, tag, tourId, search);
+                return Ok(filteredNotes);
+            }
+
+            // Otherwise, use regular query
             var notes = _noteService.GetByUserId(userId);
             return Ok(notes);
+        }
+
+        [HttpGet("tags")]
+        public ActionResult<List<string>> GetMyTags()
+        {
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
+            var tags = _noteService.GetUserTags(userId);
+            return Ok(tags);
         }
 
         [HttpGet("{id}")]
@@ -44,7 +66,6 @@ namespace Explorer.API.Controllers.Tourist.Notes
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
-
             var note = _noteService.Get(id, userId);
             return Ok(note);
         }
@@ -55,7 +76,6 @@ namespace Explorer.API.Controllers.Tourist.Notes
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
-
             var created = _noteService.Create(userId, dto);
             return Ok(created);
         }
@@ -66,9 +86,18 @@ namespace Explorer.API.Controllers.Tourist.Notes
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
-
             dto.Id = id;
             var updated = _noteService.Update(userId, dto);
+            return Ok(updated);
+        }
+
+        [HttpPut("{id}/pin")]
+        public ActionResult<NoteDto> TogglePin(long id)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == 0)
+                return Unauthorized();
+            var updated = _noteService.TogglePin(id, userId);
             return Ok(updated);
         }
 
@@ -78,7 +107,6 @@ namespace Explorer.API.Controllers.Tourist.Notes
             var userId = GetCurrentUserId();
             if (userId == 0)
                 return Unauthorized();
-
             _noteService.Delete(id, userId);
             return Ok(new { message = "Note deleted successfully." });
         }

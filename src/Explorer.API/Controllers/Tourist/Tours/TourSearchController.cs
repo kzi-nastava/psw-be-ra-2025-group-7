@@ -3,6 +3,8 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+
 
 // Mozda kada se doda Tour Controller u Tourist delu, ovaj namespace treba da se promeni
 
@@ -23,9 +25,9 @@ namespace Explorer.API.Controllers.Tourist.Tours
         [HttpGet("by-location")]
         [AllowAnonymous]
         public ActionResult<List<TourDto>> SearchByLocation(
-            [FromQuery] double lat,
-            [FromQuery] double lon,
-            [FromQuery] double radiusKm)
+     [FromQuery] double lat,
+     [FromQuery] double lon,
+     [FromQuery] double radiusKm)
         {
             if (radiusKm <= 0)
             {
@@ -40,7 +42,20 @@ namespace Explorer.API.Controllers.Tourist.Tours
             };
 
             var result = _tourSearchService.SearchByLocation(query);
+
+            // ✅ Turisti vide samo odobrene public keypointove
+            foreach (var tour in result)
+            {
+                if (tour.KeyPoints != null)
+                {
+                    tour.KeyPoints = tour.KeyPoints
+                        .Where(kp => kp.IsPublic)
+                        .ToList();
+                }
+            }
+
             return Ok(result);
         }
+
     }
 }

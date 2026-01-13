@@ -8,5 +8,6 @@ namespace Explorer.Notes.API.Dtos
         public string Content { get; set; } = string.Empty;
         public NoteTypeDto Type { get; set; }
         public List<string> Tags { get; set; } = new();
+        public long? TourId { get; set; }
     }
 }

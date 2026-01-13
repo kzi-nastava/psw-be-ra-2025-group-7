@@ -66,5 +66,39 @@ namespace Explorer.API.Controllers.Tourist
             _notificationService.Delete(id, touristId);
             return Ok();
         }
+
+        // ============== UNIFIED NOTIFICATION ENDPOINTS ==============
+
+        [HttpGet("all")]
+        public ActionResult<List<UnifiedNotificationDto>> GetAllUnified([FromQuery] bool onlyUnread = false)
+        {
+            var touristId = User.PersonId();
+            var result = _notificationService.GetAllNotificationsForUser(touristId, onlyUnread);
+            return Ok(result);
+        }
+
+        [HttpGet("all/unread/count")]
+        public ActionResult<int> GetAllUnreadCount()
+        {
+            var touristId = User.PersonId();
+            var count = _notificationService.GetAllUnreadCount(touristId);
+            return Ok(count);
+        }
+
+        [HttpPatch("all/{id:long}/read")]
+        public IActionResult MarkUnifiedAsRead(long id, [FromQuery] string source)
+        {
+            var touristId = User.PersonId();
+            _notificationService.MarkNotificationAsRead(id, source, touristId);
+            return Ok();
+        }
+
+        [HttpPut("all/read-all")]
+        public IActionResult MarkAllUnifiedAsRead()
+        {
+            var touristId = User.PersonId();
+            _notificationService.MarkAllNotificationsAsRead(touristId);
+            return Ok();
+        }
     }
 }

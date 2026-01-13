@@ -16,5 +16,11 @@ namespace Explorer.Stakeholders.API.Public
         void CreateClubMessageNotifications(ClubMessageDto message, List<long> memberIds);
         void DeleteFollowerMessageNotifications(long followerMessageId);
         void DeleteClubMessageNotifications(long clubMessageId);
+        
+        // Unified notification methods
+        List<UnifiedNotificationDto> GetAllNotificationsForUser(long userId, bool onlyUnread = false);
+        int GetAllUnreadCount(long userId);
+        void MarkNotificationAsRead(long notificationId, string source, long userId);
+        void MarkAllNotificationsAsRead(long userId);
     }
 }

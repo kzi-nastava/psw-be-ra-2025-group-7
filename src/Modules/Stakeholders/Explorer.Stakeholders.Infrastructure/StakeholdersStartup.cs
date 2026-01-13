@@ -13,6 +13,8 @@ using Explorer.Stakeholders.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Core.UseCases.Internal;
 
 namespace Explorer.Stakeholders.Infrastructure;
 
@@ -42,6 +44,18 @@ public static class StakeholdersStartup
         services.AddScoped<IClubMessageService, ClubMessageService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IUserProfileLocationService, UserProfileLocationService>();
+        
+        // Register NotificationService with both repositories
+        services.AddScoped<INotificationService>(provider =>
+        {
+            var stakeholdersRepo = provider.GetRequiredService<INotificationRepository>();
+            var toursRepo = provider.GetRequiredService<Explorer.Tours.Core.Domain.RepositoryInterfaces.INotificationRepository>();
+            var mapper = provider.GetRequiredService<AutoMapper.IMapper>();
+            return new NotificationService(stakeholdersRepo, toursRepo, mapper);
+        });
+        //services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IUserInternalService, UserInternalService>();
+
 
 
     }
