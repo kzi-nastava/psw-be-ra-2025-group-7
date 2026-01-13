@@ -326,55 +326,7 @@ namespace Explorer.Encounters.Tests.Integration
         }
        
 
-        /*[Fact]
-        public void User_does_not_complete_hidden_location_if_not_enough_time_passed()
-        {
-            using var scope = Factory.Services.CreateScope();
-
-            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
-            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
-            var progressRepo = scope.ServiceProvider.GetRequiredService<IEncounterProgressRepository>();
-            var userProfileRepo = scope.ServiceProvider.GetRequiredService<IUserProfileRepository>();
-
-            // Arrange – encounter
-            var encounter = encounterService.Create(-1, new CreateEncounterDto
-            {
-                Name = "Hidden",
-                Description = "Hidden",
-                Latitude = 45,
-                Longitude = 19,
-                Xp = 10,
-                Type = "location",
-                HiddenLocation = new CreateHiddenLocationEncounterDto
-                {
-                    ImageUrl = "dummy",
-                    ActivationRadiusMeters = 1000,
-                    PhotoLatitude = 45,
-                    PhotoLongitude = 19
-                }
-            });
-
-            encounterService.ChangeStatus(encounter.Id, "active");
-
-            // Arrange – user profile (DUMMY)
-            var userProfile = new UserProfile(
-                userId: 1,
-                firstName: "Dummy",
-                lastName: "User"
-            );
-            userProfile.UpdateLocation(45, 19);
-            userProfileRepo.Create(userProfile);
-
-            // Arrange – activate encounter
-            progressService.ActivateHiddenLocationForUser(encounter.Id, 1);
-
-            // Act – simulate one location tick
-            progressService.OnUserLocationChanged(1);
-
-            // Assert
-            var progress = progressRepo.GetAll().First(p => p.UserId == 1);
-            progress.Status.ShouldBe(EncounterProgress.EncounterProgressStatus.Active);
-        }*/
+     
 
 
         [Fact]
