@@ -10,11 +10,13 @@ namespace Explorer.Stakeholders.Core.UseCases
     {
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly IMapper _mapper;
+        private readonly IUserRepository _userRepositoy;
 
-        public UserProfileService(IUserProfileRepository userProfileRepository, IMapper mapper)
+        public UserProfileService(IUserProfileRepository userProfileRepository, IMapper mapper, IUserRepository userRepositoy)
         {
             _userProfileRepository = userProfileRepository;
             _mapper = mapper;
+            _userRepositoy = userRepositoy;
         }
 
         // Helper: kreira profil ako ne postoji
@@ -33,7 +35,18 @@ namespace Explorer.Stakeholders.Core.UseCases
                     null
                 );
 
-                _userProfileRepository.Create(profile);
+                var user = _userRepositoy.GetById(userId);
+                if(user.Role == UserRole.Tourist)
+                {
+                    profile.XP = 0;
+                    profile.Level = 1;
+                } else
+                {
+                    profile.XP = null;
+                    profile.Level = null;
+                }
+
+                    _userProfileRepository.Create(profile);
             }
 
             return profile;
@@ -44,6 +57,38 @@ namespace Explorer.Stakeholders.Core.UseCases
             var profile = GetOrCreateProfile(userId);
             return _mapper.Map<UserProfileDto>(profile);
         }
+
+        public void AddXP(long userId, int XP)
+        {
+            var profile = GetOrCreateProfile(userId);
+
+            if (profile.XP == null)
+            {
+                profile.XP = 0;
+                profile.Level = 1;
+            }
+
+            profile.XP += XP;
+            CheckLevel(profile);
+            _userProfileRepository.Update(profile);
+        }
+
+        public void CheckLevel(UserProfile profile)
+        {
+            int xp = profile.XP ?? 0;
+            int level = 1;
+
+            int xpForNextLevel = 100;
+
+            while (xp >= xpForNextLevel)
+            {
+                level++;
+                xpForNextLevel += level * 100;
+            }
+
+            profile.Level = level;
+        }
+
 
         public UserProfileDto Create(UserProfileDto profileDto)
         {
@@ -61,7 +106,9 @@ namespace Explorer.Stakeholders.Core.UseCases
                 profileDto.LastName,
                 profileDto.ProfilePicture,
                 profileDto.Biography,
-                profileDto.Motto
+                profileDto.Motto,
+                profileDto.XP,
+                profileDto.Level
             );
 
             var updatedProfile = _userProfileRepository.Update(profile);

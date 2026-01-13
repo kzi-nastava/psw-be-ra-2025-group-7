@@ -13,21 +13,24 @@ public class EncountersContext : DbContext
     public EncountersContext(DbContextOptions<EncountersContext> options) : base(options) { }
 
     public DbSet<Encounter> Encounters { get; set; }
+    public DbSet<EncounterProgress> EncounterProgresses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        
         modelBuilder.HasDefaultSchema("encounters");
 
-        // base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Encounter>(e =>
         {
             e.ToTable("Encounters");
             e.HasKey(x => x.Id);
 
-            e.Property(x => x.Name).IsRequired().HasMaxLength(200);
-            e.Property(x => x.Description).IsRequired();
+            e.Property(x => x.CreatorId).IsRequired();
 
+            e.Property(x => x.Name)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            e.Property(x => x.Description).IsRequired();
             e.Property(x => x.Xp).IsRequired();
 
             e.Property(x => x.Status)
@@ -38,20 +41,69 @@ public class EncountersContext : DbContext
                 .IsRequired()
                 .HasConversion<int>();
 
-            
+            // -----------------------------
+            // GeoLocation (VALUE OBJECT)
+            // -----------------------------
             e.OwnsOne(x => x.Location, loc =>
             {
-                
                 loc.ToJson();
 
-                
-                loc.Property(p => p.Latitude).HasColumnName("latitude");
-                loc.Property(p => p.Longitude).HasColumnName("longitude");
+                loc.Property(p => p.Latitude)
+                   .HasColumnName("latitude")
+                   .IsRequired();
+
+                loc.Property(p => p.Longitude)
+                   .HasColumnName("longitude")
+                   .IsRequired();
+
+                // Radius MORA biti nullable
+                loc.Property(p => p.Radius)
+                   .HasColumnName("radius")
+                   .IsRequired(false);
+            });
+
+            // ---------------------------------------------
+            // HiddenLocationDetails (OPTIONAL)
+            // ---------------------------------------------
+            e.OwnsOne(x => x.HiddenLocationDetails, hl =>
+            {
+                hl.ToJson();
+
+                hl.Property(p => p.ActivationRadiusMeters)
+                  .HasColumnName("activationRadiusMeters")
+                  .IsRequired();
+
+                hl.OwnsOne(p => p.Image, img =>
+                {
+                    img.Property(i => i.Url)
+                       .HasColumnName("imageUrl")
+                       .IsRequired(false);
+                });
+
+             
+
+                hl.OwnsOne(p => p.PhotoLocation, pl =>
+                {
+                    pl.Property(p => p.Latitude)
+                      .HasColumnName("photoLatitude");
+
+                    pl.Property(p => p.Longitude)
+                      .HasColumnName("photoLongitude");
+                });
             });
         });
+
+        modelBuilder.Entity<EncounterProgress>(ep =>
+        {
+            ep.ToTable("EncounterProgresses");
+            ep.HasKey(x => x.Id);
+
+            ep.Property(x => x.UserId).IsRequired();
+            ep.Property(x => x.EncounterId).IsRequired();
+
+            ep.Property(x => x.Status)
+              .IsRequired()
+              .HasConversion<int>();
+        });
     }
-
-
 }
-
-

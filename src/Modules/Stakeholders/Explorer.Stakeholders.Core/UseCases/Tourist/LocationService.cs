@@ -5,6 +5,7 @@ using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.API.Dtos;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Encounters.API.Internal;
 
 namespace Explorer.Stakeholders.Core.UseCases.Tourist
 {
@@ -13,11 +14,18 @@ namespace Explorer.Stakeholders.Core.UseCases.Tourist
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly IMonumentRepository _monumentRepository;
 
-        public LocationService(IUserProfileRepository userProfileRepository, IMonumentRepository monumentRepository)
+        private readonly IUserLocationChangedNotifier _locationChangedNotifier;
+
+        public LocationService(
+            IUserProfileRepository userProfileRepository,
+            IMonumentRepository monumentRepository,
+            IUserLocationChangedNotifier locationChangedNotifier)
         {
             _userProfileRepository = userProfileRepository;
             _monumentRepository = monumentRepository;
+            _locationChangedNotifier = locationChangedNotifier;
         }
+
 
         private UserProfile GetOrCreateProfile(long userId)
         {
@@ -54,7 +62,7 @@ namespace Explorer.Stakeholders.Core.UseCases.Tourist
 
             profile.UpdateLocation(latitude, longitude);
             _userProfileRepository.Update(profile);
-
+            _locationChangedNotifier.UserLocationChanged(userId);
             return new TouristLocationDto
             {
                 Latitude = profile.CurrentLatitude ?? 0,
