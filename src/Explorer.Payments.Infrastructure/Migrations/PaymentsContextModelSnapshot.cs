@@ -74,6 +74,32 @@ namespace Explorer.Payments.Infrastructure.Migrations
                     b.ToTable("ShoppingCarts", "payments");
                 });
 
+            modelBuilder.Entity("Explorer.Payments.Core.Domain.Wallet", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Wallets", "payments");
+                });
+
             modelBuilder.Entity("Explorer.Payments.Core.Domain.OrderItem", b =>
                 {
                     b.HasOne("Explorer.Payments.Core.Domain.ShoppingCart", null)

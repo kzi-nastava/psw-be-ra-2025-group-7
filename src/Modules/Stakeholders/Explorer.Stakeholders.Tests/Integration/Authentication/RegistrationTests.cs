@@ -21,6 +21,13 @@ public class RegistrationTests : BaseStakeholdersIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+
+        var existingUser = dbContext.Users.FirstOrDefault(u => u.Username == "turistaA@gmail.com");
+        if (existingUser != null)
+        {
+            dbContext.Users.Remove(existingUser);
+            dbContext.SaveChanges();
+        }
         var controller = CreateController(scope);
         var account = new AccountRegistrationDto
         {

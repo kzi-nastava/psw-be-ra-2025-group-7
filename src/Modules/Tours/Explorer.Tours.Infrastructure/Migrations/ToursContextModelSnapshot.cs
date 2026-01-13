@@ -24,602 +24,1003 @@ namespace Explorer.Tours.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.AnnualAward", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                b.Property<int>("Status")
+                    .HasColumnType("integer");
 
-                    b.Property<DateTime>("VotingEndDate")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime>("VotingEndDate")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("VotingStartDate")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime>("VotingStartDate")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
+                b.Property<int>("Year")
+                    .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("AnnualAwards", "tours");
-                });
+                b.ToTable("AnnualAwards", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReview", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<int>("Difficulty")
+                    .HasColumnType("integer");
+
+                b.Property<int>("GroupSize")
+                    .HasColumnType("integer");
+
+                b.Property<int>("GuideQuality")
+                    .HasColumnType("integer");
+
+                b.Property<int>("OverallRating")
+                    .HasColumnType("integer");
+
+                b.Property<int>("RouteScenery")
+                    .HasColumnType("integer");
+
+                b.Property<string>("TextReview")
+                    .HasMaxLength(2000)
+                    .HasColumnType("character varying(2000)");
+
+                b.Property<long>("TourId")
+                    .HasColumnType("bigint");
+
+                b.Property<long>("TouristId")
+                    .HasColumnType("bigint");
+
+                b.Property<int>("ValueForMoney")
+                    .HasColumnType("integer");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TourId", "TouristId")
+                    .IsUnique();
+
+                b.ToTable("EnhancedReviews", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewCon", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<long>("EnhancedReviewId")
+                    .HasColumnType("bigint");
+
+                b.Property<string>("Text")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("character varying(200)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("EnhancedReviewId");
+
+                b.ToTable("EnhancedReviewCons", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewHelpfulVote", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<long>("EnhancedReviewId")
+                    .HasColumnType("bigint");
+
+                b.Property<long>("TouristId")
+                    .HasColumnType("bigint");
+
+                b.Property<DateTime>("VotedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.HasKey("Id");
+
+                b.HasIndex("EnhancedReviewId", "TouristId")
+                    .IsUnique();
+
+                b.ToTable("EnhancedReviewHelpfulVotes", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewImage", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<long>("EnhancedReviewId")
+                    .HasColumnType("bigint");
+
+                b.Property<long>("SizeBytes")
+                    .HasColumnType("bigint");
+
+                b.Property<string>("Url")
+                    .IsRequired()
+                    .HasMaxLength(2048)
+                    .HasColumnType("character varying(2048)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("EnhancedReviewId");
+
+                b.ToTable("EnhancedReviewImages", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewPro", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<long>("EnhancedReviewId")
+                    .HasColumnType("bigint");
+
+                b.Property<string>("Text")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("character varying(200)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("EnhancedReviewId");
+
+                b.ToTable("EnhancedReviewPros", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewTag", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<long>("EnhancedReviewId")
+                    .HasColumnType("bigint");
+
+                b.Property<int>("Tag")
+                    .HasColumnType("integer");
+
+                b.HasKey("Id");
+
+                b.HasIndex("EnhancedReviewId");
+
+                b.ToTable("EnhancedReviewTags", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Option", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Feedback")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                b.Property<string>("Feedback")
+                    .IsRequired()
+                    .HasMaxLength(500)
+                    .HasColumnType("character varying(500)");
 
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("boolean");
+                b.Property<bool>("IsCorrect")
+                    .HasColumnType("boolean");
 
-                    b.Property<long>("QuestionId")
-                        .HasColumnType("bigint");
+                b.Property<long>("QuestionId")
+                    .HasColumnType("bigint");
 
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Text")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("QuestionId");
+                b.HasIndex("QuestionId");
 
-                    b.ToTable("Option", "tours");
-                });
+                b.ToTable("Option", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Question", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<bool>("AllowsMultipleCorrect")
-                        .HasColumnType("boolean");
+                b.Property<bool>("AllowsMultipleCorrect")
+                    .HasColumnType("boolean");
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Content")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<long>("QuizId")
-                        .HasColumnType("bigint");
+                b.Property<long>("QuizId")
+                    .HasColumnType("bigint");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("QuizId");
+                b.HasIndex("QuizId");
 
-                    b.ToTable("Questions", "tours");
-                });
+                b.ToTable("Questions", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Quiz", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AuthorId")
-                        .HasColumnType("bigint");
+                b.Property<long>("AuthorId")
+                    .HasColumnType("bigint");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Quizzes", "tours");
-                });
+                b.ToTable("Quizzes", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Equipment", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                b.Property<string>("Description")
+                    .HasMaxLength(500)
+                    .HasColumnType("character varying(500)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("character varying(200)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Equipment", "tours");
-                });
+                b.ToTable("Equipment", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Facility", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("Category")
-                        .HasColumnType("integer");
+                b.Property<int>("Category")
+                    .HasColumnType("integer");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.Property<double>("Latitude")
-                        .HasColumnType("double precision");
+                b.Property<double>("Latitude")
+                    .HasColumnType("double precision");
 
-                    b.Property<double>("Longitude")
-                        .HasColumnType("double precision");
+                b.Property<double>("Longitude")
+                    .HasColumnType("double precision");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Facility", "tours");
-                });
+                b.ToTable("Facility", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Monument", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<double>("Latitude")
-                        .HasColumnType("double precision");
+                b.Property<double>("Latitude")
+                    .HasColumnType("double precision");
 
-                    b.Property<double>("Longitude")
-                        .HasColumnType("double precision");
+                b.Property<double>("Longitude")
+                    .HasColumnType("double precision");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                b.Property<int>("Status")
+                    .HasColumnType("integer");
 
-                    b.Property<int>("YearOfCreation")
-                        .HasColumnType("integer");
+                b.Property<int>("YearOfCreation")
+                    .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Monuments", "tours");
-                });
+                b.ToTable("Monuments", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Notification", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
+                b.Property<bool>("IsRead")
+                    .HasColumnType("boolean");
 
-                    b.Property<string>("Preview")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Preview")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                b.Property<int>("ProblemId")
+                    .HasColumnType("integer");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                b.Property<long>("UserId")
+                    .HasColumnType("bigint");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Notifications", "tours");
-                });
+                b.ToTable("Notifications", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.OrderItem", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<decimal>("Price")
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property<long?>("ShoppingCartId")
+                    .HasColumnType("bigint");
+
+                b.Property<long>("TourId")
+                    .HasColumnType("bigint");
+
+                b.Property<string>("TourName")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("character varying(100)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("ShoppingCartId");
+
+                b.ToTable("OrderItems", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.PublicPointRequest", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("AdminComment")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                b.Property<string>("AdminComment")
+                    .HasMaxLength(500)
+                    .HasColumnType("character varying(500)");
 
-                    b.Property<long>("AuthorId")
-                        .HasColumnType("bigint");
+                b.Property<long>("AuthorId")
+                    .HasColumnType("bigint");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("KeyPointIndex")
-                        .HasColumnType("integer");
+                b.Property<int>("KeyPointIndex")
+                    .HasColumnType("integer");
 
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime?>("ProcessedAt")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                b.Property<int>("Status")
+                    .HasColumnType("integer");
 
-                    b.Property<long>("TourId")
-                        .HasColumnType("bigint");
+                b.Property<long>("TourId")
+                    .HasColumnType("bigint");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("PublicPointRequests", "tours");
-                });
+                b.ToTable("PublicPointRequests", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.ShoppingCart", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<decimal>("TotalPrice")
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property<long>("TouristId")
+                    .HasColumnType("bigint");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TouristId")
+                    .IsUnique();
+
+                b.ToTable("ShoppingCarts", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Tour", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime?>("ArchivedAt")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime?>("ArchivedAt")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("AuthorId")
-                        .HasColumnType("bigint");
+                b.Property<long>("AuthorId")
+                    .HasColumnType("bigint");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<int>("Difficulty")
-                        .HasColumnType("integer");
+                b.Property<int>("Difficulty")
+                    .HasColumnType("integer");
 
-                    b.Property<double>("LengthInKm")
-                        .HasColumnType("double precision");
+                b.Property<double>("LengthInKm")
+                    .HasColumnType("double precision");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
+                b.Property<decimal>("Price")
+                    .HasColumnType("numeric");
 
-                    b.Property<DateTime?>("PublishedAt")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime?>("PublishedAt")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                b.Property<int>("Status")
+                    .HasColumnType("integer");
 
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.Property<string>("Tags")
+                    .IsRequired()
+                    .HasColumnType("text");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Tours", "tours");
-                });
+                b.ToTable("Tours", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TourJournal", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                b.Property<string>("City")
+                    .HasMaxLength(100)
+                    .HasColumnType("character varying(100)");
 
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                b.Property<string>("Country")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("character varying(200)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                b.Property<int>("Status")
+                    .HasColumnType("integer");
 
-                    b.Property<long>("TouristId")
-                        .HasColumnType("bigint");
+                b.Property<long>("TouristId")
+                    .HasColumnType("bigint");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("TourJournals", "tours");
-                });
+                b.ToTable("TourJournals", "tours");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TourProblem", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("integer");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                b.Property<int>("Category")
+                    .HasColumnType("integer");
+
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasMaxLength(2000)
+                    .HasColumnType("character varying(2000)");
+
+                b.Property<bool>("IsSolved")
+                    .HasColumnType("boolean");
+
+                b.Property<int>("Priority")
+                    .HasColumnType("integer");
+
+                b.Property<DateTime?>("ResolveDue")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<int>("Status")
+                    .HasColumnType("integer");
+
+                b.Property<DateTime>("TimeReported")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<int>("TourId")
+                    .HasColumnType("integer");
+
+                b.Property<int>("TouristId")
+                    .HasColumnType("integer");
+
+                b.Property<string>("_comments")
+                    .IsRequired()
+                    .HasColumnType("jsonb")
+                    .HasColumnName("_comments");
+
+                b.HasKey("Id");
+
+                b.ToTable("TourProblems", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<DateTime>("PurchaseDate")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<long>("TourId")
+                    .HasColumnType("bigint");
+
+                b.Property<long>("UserId")
+                    .HasColumnType("bigint");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TourId");
+
+                b.HasIndex("UserId");
+
+                b.HasIndex("UserId", "TourId")
+                    .IsUnique();
+
+                b.ToTable("TourPurchaseTokens", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourRequest", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<decimal>("Budget")
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("text");
+
+                b.Property<DateTime>("ExpiresAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<double?>("Latitude")
+                    .HasColumnType("double precision");
+
+                b.Property<double?>("Longitude")
+                    .HasColumnType("double precision");
+
+                b.Property<int>("NumberOfParticipants")
+                    .HasColumnType("integer");
+
+                b.Property<DateTime?>("PreferredDate")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<int?>("PreferredDifficulty")
+                    .HasColumnType("integer");
+
+                b.Property<int?>("Radius")
+                    .HasColumnType("integer");
+
+                b.Property<int>("Status")
+                    .HasColumnType("integer");
+
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("character varying(100)");
+
+                b.Property<long>("TouristId")
+                    .HasColumnType("bigint");
+
+                b.HasKey("Id");
+
+                b.ToTable("TourRequests", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourRequestResponse", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<long>("AuthorId")
+                    .HasColumnType("bigint");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Message")
+                    .HasMaxLength(500)
+                    .HasColumnType("character varying(500)");
+
+                b.Property<string>("ProposalDescription")
+                    .HasColumnType("text");
+
+                b.Property<decimal>("ProposedPrice")
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property<int>("ResponseType")
+                    .HasColumnType("integer");
+
+                b.Property<int>("Status")
+                    .HasColumnType("integer");
+
+                b.Property<long?>("TourId")
+                    .HasColumnType("bigint");
+
+                b.Property<long>("TourRequestId")
+                    .HasColumnType("bigint");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TourId");
+
+                b.HasIndex("TourRequestId");
+
+                b.ToTable("TourRequestResponses", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TouristEquipment", b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("bigint");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                b.Property<long>("EquipmentId")
+                    .HasColumnType("bigint");
+
+                b.Property<long>("TouristId")
+                    .HasColumnType("bigint");
+
+                b.HasKey("Id");
+
+                b.ToTable("TouristEquipment", "tours");
+            });
+
+            modelBuilder.Entity("TourEquipment", b =>
+            {
+                b.Property<long>("TourId")
+                    .HasColumnType("bigint");
+
+                b.Property<long>("EquipmentId")
+                    .HasColumnType("bigint");
+
+                b.HasKey("TourId", "EquipmentId");
+
+                b.HasIndex("EquipmentId");
+
+                b.ToTable("TourEquipment", "tours");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewCon", b =>
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.EnhancedReview", null)
+                    .WithMany("Cons")
+                    .HasForeignKey("EnhancedReviewId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewHelpfulVote", b =>
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.EnhancedReview", null)
+                    .WithMany("HelpfulVotes")
+                    .HasForeignKey("EnhancedReviewId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewImage", b =>
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.EnhancedReview", null)
+                    .WithMany("Images")
+                    .HasForeignKey("EnhancedReviewId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewPro", b =>
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.EnhancedReview", null)
+                    .WithMany("Pros")
+                    .HasForeignKey("EnhancedReviewId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReviewTag", b =>
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.EnhancedReview", null)
+                    .WithMany("SentimentTags")
+                    .HasForeignKey("EnhancedReviewId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Option", b =>
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.Entities.Question", "Question")
+                    .WithMany("Options")
+                    .HasForeignKey("QuestionId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Question");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Question", b =>
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.Entities.Quiz", "Quiz")
+                    .WithMany("Questions")
+                    .HasForeignKey("QuizId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Quiz");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.OrderItem", b =>
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.ShoppingCart", null)
+                    .WithMany("Items")
+                    .HasForeignKey("ShoppingCartId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.Tour", b =>
+            {
+                b.OwnsMany("Explorer.Tours.Core.Domain.KeyPoint", "KeyPoints", b1 =>
                 {
-                    b.Property<int>("Id")
+                    b1.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
 
-                    b.Property<int>("Category")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Description")
+                    b1.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
-                    b.Property<bool>("IsSolved")
-                        .HasColumnType("boolean");
+                    b1.Property<string>("ImageUrl")
+                        .HasColumnType("text");
 
-                    b.Property<int>("Priority")
-                        .HasColumnType("integer");
+                    b1.Property<double>("Latitude")
+                        .HasColumnType("double precision");
 
-                    b.Property<DateTime?>("ResolveDue")
-                        .HasColumnType("timestamp with time zone");
+                    b1.Property<double>("Longitude")
+                        .HasColumnType("double precision");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("TimeReported")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("TourId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TouristId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("_comments")
+                    b1.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("_comments");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.HasKey("Id");
+                    b1.Property<string>("Secret")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.ToTable("TourProblems", "tours");
+                    b1.Property<long>("TourId")
+                        .HasColumnType("bigint");
+
+                    b1.HasKey("Id");
+
+                    b1.HasIndex("TourId");
+
+                    b1.ToTable("KeyPoints", "tours");
+
+                    b1.WithOwner()
+                        .HasForeignKey("TourId");
                 });
 
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
+                b.OwnsMany("Explorer.Tours.Core.Domain.TourDuration", "TourDurations", b1 =>
                 {
-                    b.Property<long>("Id")
+                    b1.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
 
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("timestamp with time zone");
+                    b1.Property<int>("Minutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("DurationInMinutes");
 
-                    b.Property<long>("TourId")
+                    b1.Property<long>("TourId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b1.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("TransportType");
 
-                    b.HasKey("Id");
+                    b1.HasKey("Id");
 
-                    b.HasIndex("TourId");
+                    b1.HasIndex("TourId");
 
-                    b.HasIndex("UserId");
+                    b1.ToTable("TourDurations", "tours", t =>
+                    {
+                        t.HasCheckConstraint("CK_TourDuration_Minutes_Positive", "\"DurationInMinutes\" > 0");
+                    });
 
-                    b.HasIndex("UserId", "TourId")
-                        .IsUnique();
-
-                    b.ToTable("TourPurchaseTokens", "tours");
+                    b1.WithOwner()
+                        .HasForeignKey("TourId");
                 });
 
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.TouristEquipment", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                b.Navigation("KeyPoints");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("EquipmentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TouristId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TouristEquipment", "tours");
-                });
-
-            modelBuilder.Entity("TourEquipment", b =>
-                {
-                    b.Property<long>("TourId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("EquipmentId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("TourId", "EquipmentId");
-
-                    b.HasIndex("EquipmentId");
-
-                    b.ToTable("TourEquipment", "tours");
-                });
-
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Option", b =>
-                {
-                    b.HasOne("Explorer.Tours.Core.Domain.Entities.Question", "Question")
-                        .WithMany("Options")
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-                });
-
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Question", b =>
-                {
-                    b.HasOne("Explorer.Tours.Core.Domain.Entities.Quiz", "Quiz")
-                        .WithMany("Questions")
-                        .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Quiz");
-                });
-
-            modelBuilder.Entity("Explorer.Tours.Core.Domain.Tour", b =>
-                {
-                    b.OwnsMany("Explorer.Tours.Core.Domain.KeyPoint", "KeyPoints", b1 =>
-                        {
-                            b1.Property<long>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("bigint");
-
-                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
-
-                            b1.Property<string>("Description")
-                                .IsRequired()
-                                .HasMaxLength(2000)
-                                .HasColumnType("character varying(2000)");
-
-                            b1.Property<string>("ImageUrl")
-                                .HasColumnType("text");
-
-                            b1.Property<double>("Latitude")
-                                .HasColumnType("double precision");
-
-                            b1.Property<double>("Longitude")
-                                .HasColumnType("double precision");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)");
-
-                            b1.Property<string>("Secret")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<long>("TourId")
-                                .HasColumnType("bigint");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("TourId");
-
-                            b1.ToTable("KeyPoints", "tours");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TourId");
-                        });
-
-                    b.OwnsMany("Explorer.Tours.Core.Domain.TourDuration", "TourDurations", b1 =>
-                        {
-                            b1.Property<long>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("bigint");
-
-                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("Id"));
-
-                            b1.Property<int>("Minutes")
-                                .HasColumnType("integer")
-                                .HasColumnName("DurationInMinutes");
-
-                            b1.Property<long>("TourId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<string>("Type")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("character varying(50)")
-                                .HasColumnName("TransportType");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("TourId");
-
-                            b1.ToTable("TourDurations", "tours", t =>
-                                {
-                                    t.HasCheckConstraint("CK_TourDuration_Minutes_Positive", "\"DurationInMinutes\" > 0");
-                                });
-
-                            b1.WithOwner()
-                                .HasForeignKey("TourId");
-                        });
-
-                    b.Navigation("KeyPoints");
-
-                    b.Navigation("TourDurations");
-                });
+                b.Navigation("TourDurations");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.TourPurchaseToken", b =>
-                {
-                    b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
-                        .WithMany()
-                        .HasForeignKey("TourId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.Tour", "Tour")
+                    .WithMany()
+                    .HasForeignKey("TourId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
 
-                    b.Navigation("Tour");
-                });
+                b.Navigation("Tour");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.TourRequestResponse", b =>
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.Tour", null)
+                    .WithMany()
+                    .HasForeignKey("TourId")
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasOne("Explorer.Tours.Core.Domain.TourRequest", null)
+                    .WithMany()
+                    .HasForeignKey("TourRequestId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
             modelBuilder.Entity("TourEquipment", b =>
-                {
-                    b.HasOne("Explorer.Tours.Core.Domain.Equipment", null)
-                        .WithMany()
-                        .HasForeignKey("EquipmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("Explorer.Tours.Core.Domain.Equipment", null)
+                    .WithMany()
+                    .HasForeignKey("EquipmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("Explorer.Tours.Core.Domain.Tour", null)
-                        .WithMany()
-                        .HasForeignKey("TourId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                b.HasOne("Explorer.Tours.Core.Domain.Tour", null)
+                    .WithMany()
+                    .HasForeignKey("TourId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.EnhancedReview", b =>
+            {
+                b.Navigation("Cons");
+
+                b.Navigation("HelpfulVotes");
+
+                b.Navigation("Images");
+
+                b.Navigation("Pros");
+
+                b.Navigation("SentimentTags");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Question", b =>
-                {
-                    b.Navigation("Options");
-                });
+            {
+                b.Navigation("Options");
+            });
 
             modelBuilder.Entity("Explorer.Tours.Core.Domain.Entities.Quiz", b =>
-                {
-                    b.Navigation("Questions");
-                });
+            {
+                b.Navigation("Questions");
+            });
+
+            modelBuilder.Entity("Explorer.Tours.Core.Domain.ShoppingCart", b =>
+            {
+                b.Navigation("Items");
+            });
 #pragma warning restore 612, 618
         }
     }

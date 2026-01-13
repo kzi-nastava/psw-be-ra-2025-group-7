@@ -1,4 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Payments.API.Internal;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
@@ -12,13 +13,15 @@ public class AuthenticationService : IAuthenticationService
     private readonly IUserRepository _userRepository;
     private readonly IPersonRepository _personRepository;
     private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IWalletInternalService _walletInternalService;
 
-    public AuthenticationService(IUserRepository userRepository, IPersonRepository personRepository, ITokenGenerator tokenGenerator, IUserProfileRepository userProfileRepository)
+    public AuthenticationService(IUserRepository userRepository, IPersonRepository personRepository, ITokenGenerator tokenGenerator, IUserProfileRepository userProfileRepository, IWalletInternalService walletInternalService)
     {
         _tokenGenerator = tokenGenerator;
         _userRepository = userRepository;
         _personRepository = personRepository;
         _userProfileRepository = userProfileRepository;
+        _walletInternalService = walletInternalService;
     }
 
     public AuthenticationTokensDto Login(CredentialsDto credentials)
@@ -47,9 +50,10 @@ public class AuthenticationService : IAuthenticationService
             throw new EntityValidationException("Provided username already exists.");
 
         var user = _userRepository.Create(new User(account.Username, account.Password, UserRole.Tourist, true));
+        _walletInternalService.CreateWallet(user.Id);
         var person = _personRepository.Create(new Person(user.Id, account.Name, account.Surname, account.Email));
         var userProfile = _userProfileRepository.Create(new UserProfile(user.Id, account.Name, account.Surname, null, null, null));
-
+        
         return _tokenGenerator.GenerateAccessToken(user, person.Id);
     }
 }

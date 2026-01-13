@@ -26,6 +26,7 @@ public class TourDbRepository : ITourRepository
             .Include(t => t.KeyPoints)
             .Include(t => t.TourDurations)
             .Include(t => t.RequiredEquipment)
+            .Include(t => t.Images)
             .Where(t => t.AuthorId == authorId);
 
         var totalCount = query.Count();
@@ -55,6 +56,7 @@ public class TourDbRepository : ITourRepository
             .Include(t => t.KeyPoints)
             .Include(t => t.TourDurations)
             .Include(t => t.RequiredEquipment)
+            .Include(t => t.Images)
             .FirstOrDefault(t => t.Id == id);
         if (entity == null) throw new NotFoundException("Not found: " + id);
         return entity;
@@ -76,6 +78,7 @@ public class TourDbRepository : ITourRepository
                 .Include(t => t.RequiredEquipment)
                 .Include(t => t.KeyPoints)
                 .Include(t => t.TourDurations)
+                .Include(t => t.Images)
                 .FirstOrDefault(t => t.Id == entity.Id);
 
             if (existingTour == null)
@@ -131,6 +134,7 @@ public class TourDbRepository : ITourRepository
     {
         return DbContext.Tours
             .Include(t => t.KeyPoints)
+            .Include(t => t.Images)
             .ToList();
     }
     public IEnumerable<Tour> GetPublishedWithKeyPoints()
@@ -138,6 +142,7 @@ public class TourDbRepository : ITourRepository
         return _dbSet
             .Include(t => t.KeyPoints)
             .Include(t => t.TourDurations)
+            .Include(t => t.Images)
             .Where(t => t.Status == TourStatus.Published)
             .ToList();
     }
