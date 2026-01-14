@@ -23,6 +23,8 @@ namespace Explorer.Tours.API.Dtos
 
         public List<EquipmentDto> RequiredEquipment { get; set; } = new();
 
+        public List<TourImageDto> Images { get; set; } = new();
+
         // KARTICA 4 – dužina ture u km za prikaz na frontendu
         public double LengthInKm { get; set; }
     }

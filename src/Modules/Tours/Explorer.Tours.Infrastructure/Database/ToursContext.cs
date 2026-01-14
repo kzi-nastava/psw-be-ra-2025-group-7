@@ -14,6 +14,7 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Tour> Tours { get; set; }
         public DbSet<PublicPointRequest> PublicPointRequests { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+
         public DbSet<TourJournal> TourJournals { get; set; }
         public DbSet<TouristEquipment> TouristEquipment { get; set; }
         public DbSet<Quiz> Quizzes { get; set; }
@@ -21,9 +22,18 @@ namespace Explorer.Tours.Infrastructure.Database
         public DbSet<Facility> Facility { get; set; }
         public DbSet<TourProblem> TourProblems { get; set; }
         public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
-        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<AnnualAward> AnnualAwards { get; set; }
-
+        public DbSet<EnhancedReview> EnhancedReviews { get; set; }
+        public DbSet<EnhancedReviewPro> EnhancedReviewPros { get; set; }
+        public DbSet<EnhancedReviewCon> EnhancedReviewCons { get; set; }
+        public DbSet<EnhancedReviewTag> EnhancedReviewTags { get; set; }
+        public DbSet<EnhancedReviewImage> EnhancedReviewImages { get; set; }
+        public DbSet<EnhancedReviewHelpfulVote> EnhancedReviewHelpfulVotes { get; set; }
+        public DbSet<TourExecution> TourExecutions { get; set; }
+        public DbSet<TourReview> TourReviews { get; set; }
+        
+        public DbSet<TourRequest> TourRequests { get; set; }
+        public DbSet<TourRequestResponse> TourRequestResponses { get; set; }
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -83,8 +93,8 @@ namespace Explorer.Tours.Infrastructure.Database
                     kp.ToTable("KeyPoints");
                     kp.WithOwner().HasForeignKey("TourId");
 
-                    kp.Property<long>("Id");
-                    kp.HasKey("Id");
+                    kp.HasKey(k => k.Id);
+
 
                     kp.Property(k => k.Latitude).IsRequired();
                     kp.Property(k => k.Longitude).IsRequired();
@@ -99,6 +109,25 @@ namespace Explorer.Tours.Infrastructure.Database
 
                     kp.Property(k => k.ImageUrl);
                     kp.Property(k => k.Secret).IsRequired();
+                    kp.Property(k=>k.EncounterId);
+                    kp.Property(k => k.IsPublic)
+                      .HasColumnName("IsPublic")
+                      .IsRequired()
+                      .HasDefaultValue(false);
+
+                });
+
+
+                b.OwnsMany(t => t.Images, img =>
+                {
+                    img.ToTable("TourImages");
+                    img.WithOwner().HasForeignKey("TourId");
+
+                    img.Property<int>("Id");   // shadow key za red u tabeli slika
+                    img.HasKey("Id");
+
+                    img.Property(i => i.Url).IsRequired();
+                    img.Property(i => i.Order).IsRequired();
                 });
 
                 // TourDuration konfiguracija
@@ -252,46 +281,6 @@ namespace Explorer.Tours.Infrastructure.Database
                 b.HasIndex(tpt => tpt.UserId);
             });
 
-            // ===== ShoppingCart konfiguracija =====
-            modelBuilder.Entity<ShoppingCart>(b =>
-            {
-                b.ToTable("ShoppingCarts");
-                b.HasKey(sc => sc.Id);
-
-                b.Property(sc => sc.TouristId)
-                    .IsRequired();
-
-                b.Property(sc => sc.TotalPrice)
-                    .IsRequired()
-                    .HasColumnType("decimal(18,2)");
-
-                b.HasIndex(sc => sc.TouristId)
-                    .IsUnique();
-
-                b.HasMany(sc => sc.Items)
-                    .WithOne()
-                    .HasForeignKey("ShoppingCartId")
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            // ===== OrderItem konfiguracija =====
-            modelBuilder.Entity<OrderItem>(b =>
-            {
-                b.ToTable("OrderItems");
-                b.HasKey(oi => oi.Id);
-
-                b.Property(oi => oi.TourId)
-                    .IsRequired();
-
-                b.Property(oi => oi.TourName)
-                    .IsRequired()
-                    .HasMaxLength(100);
-
-                b.Property(oi => oi.Price)
-                    .IsRequired()
-                    .HasColumnType("decimal(18,2)");
-            });
-
             // ===== PublicPointRequest konfiguracija =====
             modelBuilder.Entity<PublicPointRequest>(b =>
             {
@@ -309,10 +298,91 @@ namespace Explorer.Tours.Infrastructure.Database
                 b.Property(p => p.ProcessedAt).IsRequired(false);
             });
 
-            // ===== TourProblem konfiguracija =====
+            modelBuilder.Entity<EnhancedReview>(b =>
+            {
+                b.ToTable("EnhancedReviews");
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.TextReview).HasMaxLength(2000);
+
+                b.HasIndex(x => new { x.TourId, x.TouristId }).IsUnique();
+
+                // Pros
+                b.HasMany(x => x.Pros)
+                    .WithOne()
+                    .HasForeignKey(p => p.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Cons
+                b.HasMany(x => x.Cons)
+                    .WithOne()
+                    .HasForeignKey(c => c.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Tags
+                b.HasMany(x => x.SentimentTags)
+                    .WithOne()
+                    .HasForeignKey(t => t.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Images
+                b.HasMany(x => x.Images)
+                    .WithOne()
+                    .HasForeignKey(i => i.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // HelpfulVotes
+                b.HasMany(x => x.HelpfulVotes)
+                    .WithOne()
+                    .HasForeignKey(v => v.EnhancedReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+            });
+
+            modelBuilder.Entity<EnhancedReviewPro>(b =>
+            {
+                b.ToTable("EnhancedReviewPros");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Text).IsRequired().HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<EnhancedReviewCon>(b =>
+            {
+                b.ToTable("EnhancedReviewCons");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Text).IsRequired().HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<EnhancedReviewTag>(b =>
+            {
+                b.ToTable("EnhancedReviewTags");
+                b.HasKey(x => x.Id);
+
+                // enum kao int (default), može i eksplicitno:
+                b.Property(x => x.Tag).IsRequired();
+            });
+
+            modelBuilder.Entity<EnhancedReviewImage>(b =>
+            {
+                b.ToTable("EnhancedReviewImages");
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.Url).IsRequired().HasMaxLength(2048);
+                b.Property(x => x.SizeBytes).IsRequired();
+            });
+
+            modelBuilder.Entity<EnhancedReviewHelpfulVote>(b =>
+            {
+                b.ToTable("EnhancedReviewHelpfulVotes");
+                b.HasKey(x => x.Id);
+
+                b.HasIndex(x => new { x.EnhancedReviewId, x.TouristId }).IsUnique();
+            });
+
 
             // Ostale entitete (Facility, TourProblem, ...) rade drugi u svojim karticama.
 
+            // ===== TourProblem konfiguracija =====
 
             modelBuilder.Entity<Tour>().HasKey(t => t.Id);
             modelBuilder.Entity<Tour>().Property(t => t.Tags).HasConversion(v => string.Join(',', v),
@@ -346,6 +416,146 @@ namespace Explorer.Tours.Infrastructure.Database
                  );
             });
 
+            // ===== TourExecution konfiguracija =====
+            modelBuilder.Entity<TourExecution>(b =>
+            {
+                b.ToTable("TourExecutions");
+                b.HasKey(te => te.Id);
+
+                b.Property(te => te.TouristId).IsRequired();
+                b.Property(te => te.TourId).IsRequired();
+                b.Property(te => te.StartedAt).IsRequired();
+                b.Property(te => te.CompletedAt).IsRequired(false);
+                b.Property(te => te.AbandonedAt).IsRequired(false);
+                b.Property(te => te.Status).IsRequired();
+                b.Property(te => te.StartLatitude).IsRequired();
+                b.Property(te => te.StartLongitude).IsRequired();
+                b.Property(te => te.LastActivity).IsRequired();
+
+                // Mapiranje privatne liste _unlockedKeyPointIndices kao JSON
+                b.Property<List<int>>("_unlockedKeyPointIndices")
+                    .HasColumnName("UnlockedKeyPointIndices")
+                    .HasColumnType("jsonb")
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                        v => JsonSerializer.Deserialize<List<int>>(v, (JsonSerializerOptions?)null) ?? new List<int>()
+                    );
+
+                // Mapiranje privatnog dictionary-ja _keyPointUnlockTimes kao JSON
+                b.Property<Dictionary<int, DateTime>>("_keyPointUnlockTimes")
+                    .HasColumnName("KeyPointUnlockTimes")
+                    .HasColumnType("jsonb")
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                        v => JsonSerializer.Deserialize<Dictionary<int, DateTime>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<int, DateTime>()
+                    );
+
+                // Ignoriši public readonly properties koji vraćaju read-only verzije
+                b.Ignore(te => te.UnlockedKeyPointIndices);
+                b.Ignore(te => te.KeyPointUnlockTimes);
+
+                // Relacija sa Tour entitetom
+                b.HasOne(te => te.Tour)
+                    .WithMany()
+                    .HasForeignKey(te => te.TourId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Indeksi za brže pretrage
+                b.HasIndex(te => te.TouristId);
+                b.HasIndex(te => new { te.TouristId, te.TourId, te.Status });
+            });
+
+            // ===== TourReview konfiguracija =====
+            modelBuilder.Entity<TourReview>(b =>
+            {
+                b.ToTable("TourReviews");
+                b.HasKey(tr => tr.Id);
+
+                b.Property(tr => tr.TouristId).IsRequired();
+                b.Property(tr => tr.TourId).IsRequired();
+                b.Property(tr => tr.TourExecutionId).IsRequired();
+                b.Property(tr => tr.Rating).IsRequired();
+                b.Property(tr => tr.Comment).IsRequired().HasMaxLength(2000);
+                b.Property(tr => tr.CreatedAt).IsRequired();
+                b.Property(tr => tr.UpdatedAt).IsRequired(false);
+                b.Property(tr => tr.TourProgressPercentage).IsRequired();
+
+                // Mapiranje privatne liste _imageUrls kao JSON
+                b.Property<List<string>>("_imageUrls")
+                    .HasColumnName("ImageUrls")
+                    .HasColumnType("jsonb")
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                        v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>()
+                    );
+
+                // Ignoriši public readonly property
+                b.Ignore(tr => tr.ImageUrls);
+
+                // Relacija sa Tour
+                b.HasOne(tr => tr.Tour)
+                    .WithMany()
+                    .HasForeignKey(tr => tr.TourId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Relacija sa TourExecution
+                b.HasOne(tr => tr.TourExecution)
+                    .WithMany()
+                    .HasForeignKey(tr => tr.TourExecutionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Indeksi
+                b.HasIndex(tr => tr.TouristId);
+                b.HasIndex(tr => tr.TourId);
+                b.HasIndex(tr => new { tr.TouristId, tr.TourId }).IsUnique();
+                b.HasIndex(tr => tr.CreatedAt);
+            });
+            //Tour Request
+            modelBuilder.Entity<TourRequest>(b =>
+            {
+                b.ToTable("TourRequests");
+                b.HasKey(tr => tr.Id);
+
+                b.Property(tr => tr.TouristId).IsRequired();
+                b.Property(tr => tr.Title).IsRequired().HasMaxLength(100);
+                b.Property(tr => tr.Description).IsRequired();
+
+                b.Property(tr => tr.Latitude).IsRequired(false);
+                b.Property(tr => tr.Longitude).IsRequired(false);
+                b.Property(tr => tr.Radius).IsRequired(false);
+
+                b.Property(tr => tr.Budget).IsRequired().HasColumnType("decimal(18,2)");
+
+                b.Property(tr => tr.PreferredDifficulty).IsRequired(false);
+                b.Property(tr => tr.NumberOfParticipants).IsRequired();
+                b.Property(tr => tr.PreferredDate).IsRequired(false);
+
+                b.Property(tr => tr.Status).IsRequired();
+                b.Property(tr => tr.CreatedAt).IsRequired();
+                b.Property(tr => tr.ExpiresAt).IsRequired();
+            });
+
+            //Tour Request Response
+            modelBuilder.Entity<TourRequestResponse>(b =>
+            {
+                b.ToTable("TourRequestResponses");
+                b.HasKey(trr => trr.Id);
+
+                b.Property(trr => trr.TourRequestId).IsRequired();
+                b.Property(trr => trr.AuthorId).IsRequired();
+                b.Property(trr => trr.ResponseType).IsRequired();
+
+                b.Property(trr => trr.TourId).IsRequired(false);
+                b.Property(trr => trr.ProposalDescription).IsRequired(false);
+
+                b.Property(trr => trr.ProposedPrice).IsRequired().HasColumnType("decimal(18,2)");
+                b.Property(trr => trr.Message).IsRequired(false).HasMaxLength(500);
+                b.Property(trr => trr.Status).IsRequired();
+                b.Property(trr => trr.CreatedAt).IsRequired();
+
+                b.HasOne<TourRequest>().WithMany().HasForeignKey(trr => trr.TourRequestId).OnDelete(DeleteBehavior.Cascade);
+                b.HasOne<Tour>().WithMany().HasForeignKey(trr => trr.TourId).OnDelete(DeleteBehavior.Restrict).IsRequired(false);
+            });
         }
     }
 }

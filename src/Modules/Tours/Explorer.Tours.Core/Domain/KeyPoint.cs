@@ -1,4 +1,5 @@
-﻿using Explorer.BuildingBlocks.Core.Domain;
+﻿using System;
+using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain
 {
@@ -10,6 +11,10 @@ namespace Explorer.Tours.Core.Domain
         public string Description { get; }
         public string? ImageUrl { get; }
         public string Secret { get; }
+        public long? EncounterId { get; set; }
+
+        // ✅ NOVO: postaje true tek kad admin odobri zahtev
+        public bool IsPublic { get; private set; }
 
         // TODO (Drugi članovi): Po potrebi ovde mogu dodati dodatna polja
         // npr. redosled tačke u turi kada budu radili svoje kartice.
@@ -20,7 +25,7 @@ namespace Explorer.Tours.Core.Domain
             string name,
             string description,
             string secret,
-            string? imageUrl = null)
+            string? imageUrl = null, long? encounterId = null)
         {
             Latitude = latitude;
             Longitude = longitude;
@@ -28,8 +33,23 @@ namespace Explorer.Tours.Core.Domain
             Description = description;
             Secret = secret;
             ImageUrl = imageUrl;
+            EncounterId = encounterId;
+
+            IsPublic = false; 
 
             Validate();
+        }
+
+        // ✅ Admin approve flow će pozvati ovo
+        public void MarkAsPublicApproved()
+        {
+            IsPublic = true;
+        }
+
+        // ✅ Ako ikad treba vratiti na private (opciono)
+        public void MarkAsPrivate()
+        {
+            IsPublic = false;
         }
 
         private void Validate()
@@ -55,6 +75,7 @@ namespace Explorer.Tours.Core.Domain
             if (string.IsNullOrWhiteSpace(Secret))
                 throw new ArgumentException("Key point secret is required.");
         }
+
         /*
         protected override IEnumerable<object> GetEqualityComponents()
         {

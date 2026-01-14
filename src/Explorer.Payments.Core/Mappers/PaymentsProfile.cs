@@ -1,0 +1,33 @@
+﻿using AutoMapper;
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.Core.Domain;
+
+namespace Explorer.Payments.Core.Mappers
+{
+    public class PaymentsProfile : Profile
+    {
+        public PaymentsProfile()
+        {
+            // Shopping Cart mapovi
+            CreateMap<OrderItem, OrderItemDto>().ReverseMap();
+            CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
+
+            // Payment notifications (ako ti treba kasnije, ali ne diram)
+            // CreateMap<PaymentNotification, PaymentNotificationDto>().ReverseMap();
+
+            // Purchase notifications (NEW)
+            CreateMap<PurchaseNotification, PurchaseNotificationDto>();
+
+            // Bundle mapovi
+            CreateMap<Bundle, BundleDto>()
+                .ForMember(d => d.TourIds, opt => opt.MapFrom(s => s.Items.Select(i => i.TourId).ToList()))
+                .ForMember(d => d.Status, opt => opt.MapFrom(s => (int)s.Status));
+
+            // Coupon mapovi
+            CreateMap<Coupon, CouponDto>().ReverseMap();
+
+            // PaymentRecord mapovi
+            CreateMap<PaymentRecord, PaymentRecordDto>().ReverseMap();
+        }
+    }
+}

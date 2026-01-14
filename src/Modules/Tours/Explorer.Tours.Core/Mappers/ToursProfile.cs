@@ -19,6 +19,8 @@ namespace Explorer.Tours.Core.Mappers
             CreateMap<TouristEquipment, TouristEquipmentDto>().ReverseMap();
             CreateMap<KeyPoint, KeyPointWithoutSecretDto>();
 
+            CreateMap<TourImageDto, TourImage>().ReverseMap();
+
             CreateMap<TourDto, Tour>()
                 .ForMember(dest => dest.KeyPoints,
                            opt => opt.MapFrom(src => src.KeyPoints ?? new List<KeyPointDto>()))
@@ -26,6 +28,8 @@ namespace Explorer.Tours.Core.Mappers
                            opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDurationDto>()))
                 .ForMember(dest => dest.RequiredEquipment,
                            opt => opt.MapFrom(src => src.RequiredEquipment ?? new List<EquipmentDto>()))
+                .ForMember(dest => dest.Images,
+                            opt => opt.MapFrom(src => src.Images ?? new List<TourImageDto>()))
                 .ReverseMap();
             
             // Tour to PurchasedTourInfoDto (for purchased tours without secrets)
@@ -46,7 +50,8 @@ namespace Explorer.Tours.Core.Mappers
                                ? src.KeyPoints.First() 
                                : null))
                 .ForMember(dest => dest.TourDurations,
-                           opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDuration>()));
+                           opt => opt.MapFrom(src => src.TourDurations ?? new List<TourDuration>()))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price)); ;
 
             // Mapiranje za kreiranje ture (priča člana 1)
             CreateMap<CreateTourDto, Tour>();
@@ -84,10 +89,6 @@ namespace Explorer.Tours.Core.Mappers
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (TravelType)src.Type))
                 .ReverseMap()
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type));
-
-            // Shopping Cart mapovi
-            CreateMap<OrderItem, OrderItemDto>().ReverseMap();
-            CreateMap<ShoppingCart, ShoppingCartDto>().ReverseMap();
             
             // Tour Purchase Token mapovi - includes purchased tour info
             CreateMap<TourPurchaseToken, TourPurchaseTokenDto>()
@@ -104,6 +105,84 @@ namespace Explorer.Tours.Core.Mappers
 
             CreateMap<UpdateAnnualAwardDto, AnnualAward>()
                 .ForMember(d => d.Status, opt => opt.Ignore());
+            
+            // TourExecution mappings
+            CreateMap<TourExecution, TourExecutionDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.UnlockedKeyPointIndices, opt => opt.MapFrom(src => src.UnlockedKeyPointIndices.ToList()))
+                .ForMember(dest => dest.Tour, opt => opt.MapFrom(src => src.Tour));
+
+            // TourReview mappings
+            CreateMap<TourReview, TourReviewDto>()
+                .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.ImageUrls.ToList()))
+                .ForMember(dest => dest.Tour, opt => opt.MapFrom(src => src.Tour));
+
+            // Tour Images
+            CreateMap<CreateTourDto, IEnumerable<TourImage>>()
+                .ConvertUsing(src => (src.Images ?? new List<TourImageDto>())
+                .Select(i => new TourImage(i.Url, i.Order)));
+        
+        
+        
+            //Tour Request
+            CreateMap<TourRequest, TourRequestDto>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))
+                .ForMember(dest => dest.PreferredDifficulty,
+               opt => opt.MapFrom(src => src.PreferredDifficulty.HasValue
+                   ? (int?)src.PreferredDifficulty.Value
+                   : null))
+                .ForMember(dest => dest.ResponseCount, opt => opt.Ignore())
+                .ForMember(dest => dest.DaysUntilExpiration, opt => opt.Ignore());
+
+            CreateMap<CreateTourRequestDto, TourRequest>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.TouristId, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.ExpiresAt, opt => opt.Ignore());
+
+            CreateMap<UpdateTourRequestDto, TourRequest>()
+                .ForMember(dest => dest.TouristId, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.ExpiresAt, opt => opt.Ignore());
+
+            //Tour Request Response
+            CreateMap<TourRequestResponse, TourRequestResponseDto>()
+                .ForMember(dest => dest.ResponseType, opt => opt.MapFrom(src => (int)src.ResponseType))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))
+                .ForMember(dest => dest.AuthorName, opt => opt.Ignore())
+                .ForMember(dest => dest.AuthorAvatar, opt => opt.Ignore())
+                .ForMember(dest => dest.AuthorRating, opt => opt.Ignore())
+                .ForMember(dest => dest.Tour, opt => opt.Ignore());
+
+            CreateMap<TourRequestResponse, TourRequestResponsePreviewDto>()
+                .ForMember(dest => dest.ResponseType, opt => opt.MapFrom(src => (int)src.ResponseType))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))
+                .ForMember(dest => dest.AuthorName, opt => opt.Ignore())
+                .ForMember(dest => dest.AuthorAvatar, opt => opt.Ignore())
+                .ForMember(dest => dest.AuthorRating, opt => opt.Ignore());
+
+
+            CreateMap<TourRequest, AuthorTourRequestListItemDto>()
+             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))
+             .ForMember(dest => dest.PreferredDifficulty,
+                 opt => opt.MapFrom(src => src.PreferredDifficulty.HasValue ? (int?)src.PreferredDifficulty.Value : null))
+             .ForMember(dest => dest.ResponseCount, opt => opt.Ignore())
+             .ForMember(dest => dest.AlreadyResponded, opt => opt.Ignore())
+             .ForMember(dest => dest.DaysUntilExpiration, opt => opt.Ignore());
+
+
+            CreateMap<TourRequest, AuthorTourRequestDetailsDto>()
+            .ForMember(d => d.PreferredDifficulty,
+                opt => opt.MapFrom(s => s.PreferredDifficulty.HasValue ? (int?)s.PreferredDifficulty.Value : null))
+            .ForMember(d => d.TouristName, opt => opt.Ignore())
+            .ForMember(d => d.TouristProfilePicture, opt => opt.Ignore())
+            .ForMember(d => d.ContactDisclaimer, opt => opt.Ignore())
+            .ForMember(d => d.ResponseCount, opt => opt.Ignore())
+            .ForMember(d => d.DaysUntilExpiration, opt => opt.Ignore());
+
+
         }
     }
 }

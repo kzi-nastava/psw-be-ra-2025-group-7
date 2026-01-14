@@ -1,4 +1,4 @@
-using ArchUnitNET.xUnit;
+ï»¿using ArchUnitNET.xUnit;
 using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace Explorer.Architecture.Tests;
@@ -14,7 +14,7 @@ public class ModulesTests : BaseArchitecturalTests
         // Dozvoljene izuzetke za cross-module zavisnosti
         var allowedExceptions = new[]
         {
-            "Explorer.Tours.API" // Stakeholders.API može da koristi Tours.API (Monument DTO)
+            "Explorer.Tours.API" // Stakeholders.API moÅ¾e da koristi Tours.API (Monument DTO)
         };
         
         var forbiddenTypes = GetForbiddenTypes(
@@ -37,8 +37,8 @@ public class ModulesTests : BaseArchitecturalTests
         // Dozvoljene izuzetke za cross-module zavisnosti
         var allowedExceptions = new[]
         {
-            "Explorer.Tours.API",  // Stakeholders.Core može da koristi Tours.API
-            "Explorer.Tours.Core"  // Stakeholders.Core može da koristi Tours.Core (IMonumentRepository)
+            "Explorer.Tours.API",  // Stakeholders.Core moÅ¾e da koristi Tours.API
+            "Explorer.Tours.Core"  // Stakeholders.Core moÅ¾e da koristi Tours.Core (IMonumentRepository)
         };
         
         var forbiddenTypes = GetForbiddenTypes(
@@ -88,7 +88,7 @@ public class ModulesTests : BaseArchitecturalTests
         var useCaseTypes = allTypesFromCoreAssembly.Where(x => x.FullName.Contains(".UseCases.")).ToList();
         var typesFromOtherAssemblies = GetForbiddenTypes("Explorer.API", $"Explorer.{moduleName}.API");
         
-        // Izuzetak: Stakeholders.Core može da koristi Tours.API zbog Monument funkcionalnosti
+        // Izuzetak: Stakeholders.Core moÅ¾e da koristi Tours.API zbog Monument funkcionalnosti
         var publicApiTypesFromOtherAssemblies = typesFromOtherAssemblies
             .Where(x => x.FullName.Contains("API.Public"))
             .Where(x => !(moduleName == "Stakeholders" && x.FullName.StartsWith("Explorer.Tours.API")));
@@ -123,6 +123,14 @@ public class ModulesTests : BaseArchitecturalTests
         new object[]
         {
             "Tours"
-        }
+        },
+        new object[]
+        {
+            "Payments"
+        },
+        new object[]
+        {
+        "Encounters"
+        }   
     };
 }

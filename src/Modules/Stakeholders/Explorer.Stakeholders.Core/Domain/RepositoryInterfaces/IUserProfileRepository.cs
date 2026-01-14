@@ -13,5 +13,6 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
         UserProfile? GetByUserId(long userId);
         UserProfile Create(UserProfile profile);
         UserProfile Update(UserProfile profile);
+        UserProfile GetById(long userId);
     }
 }
