@@ -1,5 +1,6 @@
 using Explorer.API.Middleware;
 using Explorer.API.Startup;
+using Explorer.API.BackgroundServices;
 using Microsoft.Extensions.FileProviders;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,8 @@ builder.Services.ConfigureAuth();
 
 builder.Services.RegisterModules();
 
+// Register CryptoDepositMonitor background service
+builder.Services.AddHostedService<CryptoDepositMonitor>();
 
 
 builder.Services.AddAuthorization(options =>

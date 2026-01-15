@@ -24,6 +24,15 @@ namespace Explorer.Payments.Infrastructure.Database.Repositories
                 ?? throw new KeyNotFoundException("Wallet not found.");
         }
 
+        public Wallet? GetByUserSolanaAddress(string solanaAddress)
+        {
+            if (string.IsNullOrWhiteSpace(solanaAddress))
+                return null;
+
+            return _context.Wallets
+                .FirstOrDefault(w => w.SolanaWalletAddress == solanaAddress);
+        }
+
         public bool ExistsForUser(long userId)
         {
             return _context.Wallets.Any(w => w.UserId == userId);

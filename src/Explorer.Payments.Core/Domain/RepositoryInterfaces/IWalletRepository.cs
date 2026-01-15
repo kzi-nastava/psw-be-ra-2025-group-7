@@ -9,6 +9,7 @@ namespace Explorer.Payments.Core.Domain.RepositoryInterfaces
     public interface IWalletRepository
     {
         Wallet GetByUserId(long userId);
+        Wallet? GetByUserSolanaAddress(string solanaAddress);
         bool ExistsForUser(long userId);
         Wallet Create(Wallet wallet);
         void Update(Wallet wallet);
