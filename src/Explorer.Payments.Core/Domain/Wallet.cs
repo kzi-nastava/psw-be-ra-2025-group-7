@@ -13,6 +13,7 @@ namespace Explorer.Payments.Core.Domain
         public long UserId { get; private set; }
         public decimal Balance { get; private set; }
         public DateTime CreatedAt { get; private set; }
+        public string? SolanaWalletAddress { get; private set; }
 
         protected Wallet() { } 
 
@@ -40,6 +41,18 @@ namespace Explorer.Payments.Core.Domain
                 throw new InvalidOperationException("Insufficient funds.");
 
             Balance -= amount;
+        }
+
+        public void RegisterSolanaAddress(string solanaAddress)
+        {
+            if (string.IsNullOrWhiteSpace(solanaAddress))
+                throw new ArgumentException("Solana address cannot be empty.", nameof(solanaAddress));
+
+            // Basic validation: Solana addresses are base58 encoded, typically 32-44 characters
+            if (solanaAddress.Length < 32 || solanaAddress.Length > 44)
+                throw new ArgumentException("Invalid Solana address format.", nameof(solanaAddress));
+
+            SolanaWalletAddress = solanaAddress;
         }
     }
 }
