@@ -11,5 +11,7 @@ namespace Explorer.Stakeholders.API.Internal
         UserBasicInfoDto GetUserBasicInfo(long userId);
 
         UserContactInfoDto GetUserContactInfo(long userId);
+
+        string GetUsername(long userId);
     }
 }
