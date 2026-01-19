@@ -17,5 +17,6 @@ namespace Explorer.Encounters.Core.Domain.RepositoryInterfaces
 
         
         PagedResult<Encounter> GetPaged(int page, int pageSize, EncounterStatus? status, EncounterType? type);
+        IEnumerable<Encounter> GetAll();
     }
 }

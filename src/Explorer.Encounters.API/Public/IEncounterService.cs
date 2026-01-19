@@ -9,9 +9,9 @@ namespace Explorer.Encounters.API.Public
 {
     public interface IEncounterService
     {
-        EncounterDto Create(int creatorId,CreateEncounterDto dto);
-        EncounterDto Update(long id,int creatorId, UpdateEncounterDto dto);
-        void Delete(long id,int creatorId);
+        EncounterDto Create(int creatorId, CreateEncounterDto dto);
+        EncounterDto Update(long id, int creatorId, UpdateEncounterDto dto);
+        void Delete(long id, int creatorId);
 
         EncounterDto Get(long id);
         IEnumerable<EncounterDto> Get(string? status, string? type);
@@ -20,5 +20,7 @@ namespace Explorer.Encounters.API.Public
 
         EncounterDto AcceptEncounter(long id, UpdateEncounterDto dto);
         EncounterDto DeclineEncounter(long id);
+
+        IEnumerable<EncounterDto> GetByLocation(double Latitude, double Longitude);
     }
 }

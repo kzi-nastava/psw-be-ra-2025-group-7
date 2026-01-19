@@ -62,5 +62,11 @@ namespace Explorer.Encounters.Infrastructure.Database.Repositories
 
             return new PagedResult<Encounter>(items, total);
         }
+
+        public IEnumerable<Encounter> GetAll()
+        {
+            return _context.Encounters.ToList();
+        }
+
     }
 }

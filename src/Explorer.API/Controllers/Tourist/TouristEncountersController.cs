@@ -110,5 +110,12 @@ namespace Explorer.API.Controllers.Tourist
             return Ok(progress);
         }
 
+        [HttpGet("{latitude}/encounters/{longitude}/available")]
+        public ActionResult<IEnumerable<EncounterDto>> Get(double latitude, double longitude)
+        {
+            var result = _service.GetByLocation(latitude, longitude);
+            return Ok(result);
+        }
+
     }
 }

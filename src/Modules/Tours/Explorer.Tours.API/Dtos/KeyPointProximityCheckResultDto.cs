@@ -9,4 +9,7 @@ public class KeyPointProximityCheckResultDto
     public DateTime? UnlockedAt { get; set; }
     public bool WasAlreadyUnlocked { get; set; }
     public TourExecutionDto TourExecution { get; set; }
+
+    public double? KeyPointLatitude { get; set; }
+    public double? KeyPointLongitude { get; set; }
 }

@@ -231,6 +231,8 @@ public class TourExecutionService : ITourExecutionService
             result.DistanceInMeters = distanceKm * 1000; // Convert to meters
             result.WasAlreadyUnlocked = wasAlreadyUnlocked;
             result.UnlockedAt = execution.GetKeyPointUnlockTime(keyPointIndex);
+            result.KeyPointLatitude = keyPoint.Latitude;
+            result.KeyPointLongitude = keyPoint.Longitude;
         }
         else
         {
@@ -296,7 +298,5 @@ public class TourExecutionService : ITourExecutionService
 
         return result;
     }
-
-
 
 }
