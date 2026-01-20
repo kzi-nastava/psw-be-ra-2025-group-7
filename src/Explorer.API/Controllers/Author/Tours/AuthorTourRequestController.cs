@@ -113,7 +113,24 @@ namespace Explorer.API.Controllers.Author.Tours
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
         }
 
-
+        [HttpPut("my-responses/{responseId:long}/mark-ready")]
+        public ActionResult MarkAsReady(long responseId)
+        {
+            try
+            {
+                var authorId = User.PersonId();
+                _service.MarkResponseAsReady(responseId, authorId);
+                return Ok(new { message = "Response marked as ready. Tourist can now accept it." });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
 
     }

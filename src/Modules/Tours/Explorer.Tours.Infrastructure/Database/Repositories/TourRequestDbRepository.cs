@@ -308,7 +308,47 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
         }
 
 
+        public Tour GetForPreview(long id)
+        {
+            var tour = _dbContext.Tours
+                .Include(t => t.KeyPoints)
+                .Include(t => t.TourDurations)
+                .Include(t => t.RequiredEquipment)
+                .Include(t => t.Images)
+                .AsNoTracking()  
+                .FirstOrDefault(t => t.Id == id);
 
+            if (tour == null)
+            {
+                throw new KeyNotFoundException($"Tour with id {id} not found.");
+            }
+
+            return tour;
+        }
+
+        public void ExpressInterest(long responseId)
+        {
+            var response = _dbContext.TourRequestResponses
+                .FirstOrDefault(r => r.Id == responseId);
+
+            if (response == null)
+                throw new KeyNotFoundException($"Response {responseId} not found.");
+
+            response.ExpressInterest();
+            _dbContext.SaveChanges();
+        }
+
+        public void MarkResponseAsReady(long responseId)
+        {
+            var response = _dbContext.TourRequestResponses
+                .FirstOrDefault(r => r.Id == responseId);
+
+            if (response == null)
+                throw new KeyNotFoundException($"Response {responseId} not found.");
+
+            response.MarkAsReady();
+            _dbContext.SaveChanges();
+        }
 
     }
 }

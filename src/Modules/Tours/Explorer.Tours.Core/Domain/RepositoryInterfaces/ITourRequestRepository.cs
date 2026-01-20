@@ -27,5 +27,8 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
 
         List<TourRequestResponse> GetResponsesByAuthor(long authorId);
 
+        void ExpressInterest(long responseId);
+        void MarkResponseAsReady(long responseId);
+
     }
 }

@@ -15,7 +15,7 @@ namespace Explorer.Tours.API.Dtos;
         public long Id { get; set; }
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
-        public int Difficulty { get; set; }
+        public string Difficulty { get; set; } = "";
         public List<string> Tags { get; set; } = new();
     public decimal Price { get; set; }
     public bool IsPurchasable { get; set; }
@@ -37,4 +37,12 @@ namespace Explorer.Tours.API.Dtos;
     /// Image from the starting point
     /// </summary>
     public string? PreviewImageUrl => StartingPoint?.ImageUrl;
+
+    public double? AverageRating { get; set; }
+    public int KeyPointsCount { get; set; }
+    public int ReviewCount { get; set; }
+
+    public int? ShortestDurationMinutes { get; set; }
+    public int Status { get; set; }
+
 }
