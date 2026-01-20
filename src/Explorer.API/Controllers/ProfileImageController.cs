@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers.Tourist
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize]
     [Route("api/profile-images")]
     [ApiController]
