@@ -10,6 +10,7 @@ namespace Explorer.Tours.API.Dtos
     {
         public int Id { get; set; }
         public int TourId { get; set; }
+        public string TourName { get; set; } = string.Empty;
         public int TouristId { get; set; }
         public string Category { get; set; } = "";
         public string Priority { get; set; } = "";
