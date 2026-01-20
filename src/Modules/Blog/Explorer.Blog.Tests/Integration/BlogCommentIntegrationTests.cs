@@ -344,4 +344,48 @@ public class BlogCommentIntegrationTests : BaseBlogIntegrationTest
         });
     }
 
+    [Fact]
+    public void GetByBlogId_Returns_Comments_With_Usernames()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IBlogCommentService>();
+
+        // Act 
+        var comments = service.GetByBlogId(-2);
+
+        // Assert
+        comments.ShouldNotBeNull();
+        comments.Count.ShouldBeGreaterThan(0);
+
+        foreach (var comment in comments)
+        {
+            comment.Username.ShouldNotBeNullOrEmpty(); 
+            comment.Username.ShouldNotBe("Unknown User"); 
+        }
+    }
+
+    [Fact]
+    public void Create_Returns_Comment_With_Username()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        const long authorId = -12;
+        var controller = CreateCommentController(scope, authorId.ToString());
+
+        var dto = new CreateCommentDto
+        {
+            BlogId = -2,
+            Text = "Test komentar sa username-om",
+            UserId = authorId
+        };
+
+        // Act
+        var result = (controller.Create(dto).Result as OkObjectResult)?.Value as BlogCommentDto;
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Username.ShouldNotBeNullOrEmpty(); 
+    }
+
 }
