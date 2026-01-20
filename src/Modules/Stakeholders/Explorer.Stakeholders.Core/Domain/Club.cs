@@ -10,6 +10,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public string Name { get; private set; }
         public string Description { get; private set; }
         public long CreatedBy { get; private set; }
+
         public List<string> ImageUrls { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
@@ -33,7 +34,8 @@ namespace Explorer.Stakeholders.Core.Domain
             Name = name;
             Description = description;
             CreatedBy = createdBy;
-            ImageUrls = imageUrls ?? new List<string>();
+
+            ImageUrls = NormalizeImageUrls(imageUrls);
 
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
@@ -47,9 +49,38 @@ namespace Explorer.Stakeholders.Core.Domain
         {
             Name = name;
             Description = description;
-            ImageUrls = imageUrls ?? new List<string>();
+            ImageUrls = NormalizeImageUrls(imageUrls);
+
             UpdatedAt = DateTime.UtcNow;
             Validate();
+        }
+
+        // ✅ New helper: safely append images without losing existing ones
+        public void AddImages(IEnumerable<string> imageUrls)
+        {
+            var newUrls = NormalizeImageUrls(imageUrls);
+            if (newUrls.Count == 0) return;
+
+            ImageUrls ??= new List<string>();
+            ImageUrls = ImageUrls
+                .Concat(newUrls)
+                .Where(u => !string.IsNullOrWhiteSpace(u))
+                .Select(u => u.Trim())
+                .Distinct()
+                .ToList();
+
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        private static List<string> NormalizeImageUrls(IEnumerable<string> imageUrls)
+        {
+            if (imageUrls == null) return new List<string>();
+
+            return imageUrls
+                .Where(u => !string.IsNullOrWhiteSpace(u))
+                .Select(u => u.Trim())
+                .Distinct()
+                .ToList();
         }
 
         private void Validate()
@@ -61,16 +92,8 @@ namespace Explorer.Stakeholders.Core.Domain
                 throw new ArgumentException("Club description is required.", nameof(Description));
         }
 
-
-        public void Close()
-        {
-            Status = ClubStatus.Closed;
-        }
-
-        public void Open()
-        {
-            Status = ClubStatus.Active;
-        }
+        public void Close() => Status = ClubStatus.Closed;
+        public void Open() => Status = ClubStatus.Active;
 
         private void EnsureActive()
         {
@@ -199,7 +222,5 @@ namespace Explorer.Stakeholders.Core.Domain
             _members.Remove(member);
             UpdatedAt = DateTime.UtcNow;
         }
-
-        
     }
 }

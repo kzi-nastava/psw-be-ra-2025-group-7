@@ -44,6 +44,8 @@ Directory.CreateDirectory(imagesPath);
 
 Directory.CreateDirectory(Path.Combine(webRootPath, "enhanced-review-images"));
 
+Directory.CreateDirectory(Path.Combine(webRootPath, "clubs"));
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
