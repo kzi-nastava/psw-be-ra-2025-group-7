@@ -129,8 +129,7 @@ public class ClubsController : ControllerBase
         return Ok(updated.ImageUrls);
     }
 
-    // ✅ DELETE single image
-    // FE: DELETE /api/tourist/clubs/{clubId}/images?fileName=xxx.png
+    
     [HttpDelete("{clubId:long}/images")]
     public IActionResult DeleteImage(long clubId, [FromQuery] string fileName)
     {
@@ -291,10 +290,6 @@ public class ClubsController : ControllerBase
         _clubService.RemoveMember(clubId, ownerId, touristId);
         return NoContent();
     }
-
-    // -------------------------
-    // Helpers: username mapping
-    // -------------------------
 
     private void EnrichWithUsernames(List<ClubDto> clubs)
     {

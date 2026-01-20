@@ -55,7 +55,7 @@ namespace Explorer.Stakeholders.Core.Domain
             Validate();
         }
 
-        // ✅ New helper: safely append images without losing existing ones
+       
         public void AddImages(IEnumerable<string> imageUrls)
         {
             var newUrls = NormalizeImageUrls(imageUrls);

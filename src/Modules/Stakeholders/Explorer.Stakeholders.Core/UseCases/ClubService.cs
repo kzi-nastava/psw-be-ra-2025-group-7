@@ -34,7 +34,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             var name = string.IsNullOrWhiteSpace(dto.Name) ? club.Name : dto.Name;
             var description = string.IsNullOrWhiteSpace(dto.Description) ? club.Description : dto.Description;
 
-            // Update: dodaj nove slike (ako postoje), ali ne briši stare ovde
             var imageUrlsToPersist = club.ImageUrls?.ToList() ?? new List<string>();
 
             if (dto.ImageUrls != null && dto.ImageUrls.Count > 0)
@@ -69,7 +68,7 @@ namespace Explorer.Stakeholders.Core.UseCases
                 .Distinct()
                 .ToList();
 
-            // idempotent: ok i ako nije obrisalo ništa
+           
             club.Update(club.Name, club.Description, newList);
             _clubRepository.Update(club);
         }
