@@ -93,7 +93,9 @@ namespace Explorer.Tours.Core.Mappers
             // Tour Purchase Token mapovi - includes purchased tour info
             CreateMap<TourPurchaseToken, TourPurchaseTokenDto>()
                 .ForMember(dest => dest.Tour, 
-                           opt => opt.MapFrom(src => src.Tour));
+                           opt => opt.MapFrom(src => src.Tour))
+                .ForMember(dest => dest.TourName,
+               opt => opt.MapFrom(src => src.Tour != null ? src.Tour.Name : string.Empty));
             CreateMap<AnnualAward, AnnualAwardDto>()
                 .ForMember(d => d.Status, opt => opt.MapFrom(s => s.Status.ToString()));
 
