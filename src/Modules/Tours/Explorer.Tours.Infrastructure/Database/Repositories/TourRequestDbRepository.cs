@@ -275,7 +275,7 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
 
 
 
-        public PagedResult<TourRequest> GetOpenRequestsFiltered(int page, int pageSize, decimal? minBudget, decimal? maxBudget)
+        public PagedResult<TourRequest> GetOpenRequestsFiltered(int page, int pageSize, decimal? minBudget, decimal? maxBudget, int? difficulty)
         {
             var query = _tourRequests.Where(tr =>
                 tr.Status == TourRequestStatus.Open || tr.Status == TourRequestStatus.InProgress
@@ -283,6 +283,14 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
 
             if (minBudget.HasValue) query = query.Where(tr => tr.Budget >= minBudget.Value);
             if (maxBudget.HasValue) query = query.Where(tr => tr.Budget <= maxBudget.Value);
+
+
+            if (difficulty.HasValue)
+            {
+                var diffEnum = (TourDifficulty)difficulty.Value;
+                query = query.Where(tr => tr.PreferredDifficulty == diffEnum);
+            }
+
 
             var totalCount = query.Count();
 

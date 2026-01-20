@@ -35,9 +35,9 @@ namespace Explorer.Tours.Core.UseCases.Author
             int pageSize,
             long authorId,
             decimal? minBudget,
-            decimal? maxBudget)
+            decimal? maxBudget, int? difficulty)
         {
-            var result = _repository.GetOpenRequestsFiltered(page, pageSize, minBudget, maxBudget);
+            var result = _repository.GetOpenRequestsFiltered(page, pageSize, minBudget, maxBudget, difficulty);
 
             var dtos = result.Results.Select(tr =>
             {
