@@ -15,7 +15,8 @@ namespace Explorer.Tours.API.Public.Author
             int pageSize,
             long authorId,
             decimal? minBudget,
-            decimal? maxBudget
+            decimal? maxBudget,
+            int? difficulty
         );
 
         AuthorTourRequestDetailsDto GetDetails(long requestId, long authorId);

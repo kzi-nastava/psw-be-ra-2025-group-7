@@ -24,10 +24,11 @@ namespace Explorer.API.Controllers.Author.Tours
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] decimal? minBudget = null,
-            [FromQuery] decimal? maxBudget = null)
+            [FromQuery] decimal? maxBudget = null,
+            [FromQuery] int? difficulty = null)
         {
             var authorId = User.PersonId();
-            var result = _service.GetOpen(page, pageSize, authorId, minBudget, maxBudget);
+            var result = _service.GetOpen(page, pageSize, authorId, minBudget, maxBudget, difficulty);
             return Ok(result);
         }
 
