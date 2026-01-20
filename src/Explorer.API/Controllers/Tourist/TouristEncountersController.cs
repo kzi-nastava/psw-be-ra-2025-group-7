@@ -117,5 +117,24 @@ namespace Explorer.API.Controllers.Tourist
             return Ok(result);
         }
 
+        [HttpPost("{encounterId:long}/activate-misc")]
+        public IActionResult ActivateMiscEncounter(long encounterId)
+        {
+            try
+            {
+                var userId = User.PersonId();
+                _encounterProgressService.ActivateMiscEncounter(encounterId, userId);
+                return Ok();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }
