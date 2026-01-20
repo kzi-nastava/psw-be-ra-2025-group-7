@@ -81,24 +81,32 @@ namespace Explorer.Tours.Core.UseCases.Author
                 throw new InvalidOperationException("This request is no longer accepting responses.");
 
             if (request.ExpiresAt <= DateTime.UtcNow)
-                throw new InvalidOperationException("This request is no longer accepting responses.");
+                throw new InvalidOperationException("This request has expired.");
 
             var existing = _repository.GetResponseByAuthorAndRequest(authorId, dto.TourRequestId);
             if (existing != null)
                 throw new InvalidOperationException("You have already responded to this request.");
+
+            if (!dto.TourId.HasValue)
+            {
+                throw new ArgumentException(
+                    dto.ResponseType == (int)ResponseType.CustomProposal
+                        ? "You must create a draft tour before sending a custom proposal."
+                        : "Tour ID is required.");
+            }
+
+            var tour = _tourRepo.Get(dto.TourId.Value);
+
+            if (tour.AuthorId != authorId)
+                throw new UnauthorizedAccessException("You can only offer your own tours.");
 
             TourRequestResponse response;
             var responseType = (ResponseType)dto.ResponseType;
 
             if (responseType == ResponseType.ExistingTour)
             {
-                if (!dto.TourId.HasValue)
-                    throw new ArgumentException("TourId is required for existing tour response.");
-
-                var tour = _tourRepo.Get(dto.TourId.Value);
-
-                if (tour.AuthorId != authorId)
-                    throw new UnauthorizedAccessException("You can offer only your own tours.");
+                if (tour.Status != TourStatus.Published)
+                    throw new InvalidOperationException("Only published tours can be offered as existing tours.");
 
                 response = TourRequestResponse.CreateForExistingTour(
                     dto.TourRequestId,
@@ -110,12 +118,16 @@ namespace Explorer.Tours.Core.UseCases.Author
             }
             else if (responseType == ResponseType.CustomProposal)
             {
+                if (tour.Status != TourStatus.Draft)
+                    throw new InvalidOperationException("Custom proposals must use draft tours.");
+
                 if (string.IsNullOrWhiteSpace(dto.ProposalDescription))
-                    throw new ArgumentException("Proposal description is required.");
+                    throw new ArgumentException("Proposal description is required for custom proposals.");
 
                 response = TourRequestResponse.CreateCustomProposal(
                     dto.TourRequestId,
                     authorId,
+                    dto.TourId.Value,      
                     dto.ProposalDescription,
                     dto.ProposedPrice,
                     dto.Message
@@ -151,37 +163,76 @@ namespace Explorer.Tours.Core.UseCases.Author
                     ResponseId = response.Id,
                     TourRequestId = response.TourRequestId,
                     TourRequestTitle = request.Title,
-
                     ResponseType = (int)response.ResponseType,
                     ProposedPrice = response.ProposedPrice,
                     SentAt = response.CreatedAt,
                     Status = (int)response.Status,
-
                     Message = response.Message,
                     ProposalDescription = response.ResponseType == ResponseType.CustomProposal
                         ? response.ProposalDescription
                         : null,
-                    TourId = response.ResponseType == ResponseType.ExistingTour
-                        ? response.TourId
-                        : null
+                    TourId = response.TourId
                 };
 
-                if (response.ResponseType == ResponseType.ExistingTour && response.TourId.HasValue)
+                if (response.TourId.HasValue)
                 {
-                    var tour = _tourRepo.Get(response.TourId.Value);
-                    dto.TourName = tour.Name; 
+                    try
+                    {
+                        var tour = _tourRepo.Get(response.TourId.Value);
+                        if (tour != null)
+                        {
+                            dto.TourName = tour.Name;
+                            dto.TourStatus = (int)tour.Status;
+                        }
+                        else
+                        {
+                            dto.TourName = "[Tour not found]";
+                        }
+                    }
+                    catch
+                    {
+                        dto.TourName = "[Tour not found]";
+                    }
                 }
 
-                var basic = _userInternalService.GetUserBasicInfo(request.TouristId);
-                dto.TouristName = basic.DisplayName;
-                dto.TouristProfilePicture = basic.ProfilePicture;
-
-                if (response.Status == ResponseStatus.Accepted)
+                try
                 {
-                    var contact = _userInternalService.GetUserContactInfo(request.TouristId);
-                    dto.TouristEmail = contact.Email;
-                    dto.TouristBiography = contact.Biography;
-                    dto.TouristMotto = contact.Motto;
+                    var basic = _userInternalService.GetUserBasicInfo(request.TouristId);
+
+                    if (basic != null)
+                    {
+                        dto.TouristName = basic.DisplayName ?? $"Tourist #{request.TouristId}";
+                        dto.TouristProfilePicture = basic.ProfilePicture;
+                    }
+                    else
+                    {
+                        dto.TouristName = $"Tourist #{request.TouristId}";
+                        dto.TouristProfilePicture = null;
+                    }
+
+                    if (response.Status == ResponseStatus.Accepted)
+                    {
+                        try
+                        {
+                            var contact = _userInternalService.GetUserContactInfo(request.TouristId);
+                            if (contact != null)
+                            {
+                                dto.TouristEmail = contact.Email;
+                                dto.TouristBiography = contact.Biography;
+                                dto.TouristMotto = contact.Motto;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Failed to load contact info: {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to load tourist info for user {request.TouristId}: {ex.Message}");
+                    dto.TouristName = $"Tourist #{request.TouristId}";
+                    dto.TouristProfilePicture = null;
                 }
 
                 result.Add(dto);
@@ -207,16 +258,23 @@ namespace Explorer.Tours.Core.UseCases.Author
 
             if (response.ResponseType == ResponseType.CustomProposal)
             {
-                if (dto.ProposalDescription != null)
+                if (!string.IsNullOrWhiteSpace(dto.ProposalDescription))
                 {
-                    if (string.IsNullOrWhiteSpace(dto.ProposalDescription))
-                        throw new ArgumentException("Proposal description cannot be empty.");
-
                     response.UpdateProposalDescription(dto.ProposalDescription);
                 }
 
                 if (dto.TourId.HasValue)
-                    throw new ArgumentException("TourId is not allowed for custom proposal responses.");
+                {
+                    var tour = _tourRepo.Get(dto.TourId.Value);
+
+                    if (tour.AuthorId != authorId)
+                        throw new UnauthorizedAccessException("You can only offer your own tours.");
+
+                    if (tour.Status != TourStatus.Draft)
+                        throw new InvalidOperationException("Custom proposals must use draft tours.");
+
+                    response.UpdateTour(dto.TourId.Value);
+                }
             }
             else
             {
@@ -228,13 +286,12 @@ namespace Explorer.Tours.Core.UseCases.Author
                     var tour = _tourRepo.Get(dto.TourId.Value);
 
                     if (tour.AuthorId != authorId)
-                        throw new UnauthorizedAccessException("You can offer only your own tours.");
+                        throw new UnauthorizedAccessException("You can only offer your own tours.");
+
+                    if (tour.Status != TourStatus.Published)
+                        throw new InvalidOperationException("Only published tours can be offered as existing tours.");
 
                     response.UpdateTour(dto.TourId.Value);
-                }
-                else
-                {
-                    
                 }
             }
 
@@ -253,6 +310,29 @@ namespace Explorer.Tours.Core.UseCases.Author
                 throw new InvalidOperationException("You cannot delete accepted or rejected responses.");
 
             _repository.DeleteResponse(responseId);
+        }
+
+        public void MarkResponseAsReady(long responseId, long authorId)
+        {
+            var response = _repository.GetResponse(responseId);
+
+            if (response.AuthorId != authorId)
+                throw new UnauthorizedAccessException("You can only mark your own responses as ready.");
+
+            if (response.ResponseType != ResponseType.CustomProposal)
+                throw new InvalidOperationException("Only custom proposals can be marked as ready.");
+
+            if (!response.TourId.HasValue)
+                throw new InvalidOperationException("Tour must be created before marking as ready.");
+
+            var tour = _tourRepo.Get(response.TourId.Value);
+            if (tour.Status != TourStatus.Published)
+                throw new InvalidOperationException("Tour must be published before marking response as ready.");
+
+            _repository.MarkResponseAsReady(responseId);
+
+            // TODO: Pošalji notifikaciju turistu
+            // _notificationService.NotifyTourist(tourRequest.TouristId, "Your custom tour is ready!");
         }
     }
 }

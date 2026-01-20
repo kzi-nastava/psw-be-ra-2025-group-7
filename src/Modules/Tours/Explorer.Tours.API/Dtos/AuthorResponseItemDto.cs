@@ -32,5 +32,7 @@ namespace Explorer.Tours.API.Dtos
 
         public string? TourName { get; set; }
 
+        public int? TourStatus { get; set; }
+
     }
 }

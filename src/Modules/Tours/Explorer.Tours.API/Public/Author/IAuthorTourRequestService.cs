@@ -27,6 +27,7 @@ namespace Explorer.Tours.API.Public.Author
         TourRequestResponseDto UpdateMyResponse(long responseId, long authorId, UpdateMyResponseDto dto);
         void DeleteMyResponse(long responseId, long authorId);
 
+        void MarkResponseAsReady(long responseId, long authorId);
 
     }
 }
