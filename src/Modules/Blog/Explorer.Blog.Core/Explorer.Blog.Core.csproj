@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Stakeholders\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
     <ProjectReference Include="..\Explorer.Blog.API\Explorer.Blog.API.csproj" />
   </ItemGroup>
 

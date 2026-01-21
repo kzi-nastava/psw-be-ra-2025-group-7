@@ -24,10 +24,11 @@ namespace Explorer.API.Controllers.Author.Tours
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] decimal? minBudget = null,
-            [FromQuery] decimal? maxBudget = null)
+            [FromQuery] decimal? maxBudget = null,
+            [FromQuery] int? difficulty = null)
         {
             var authorId = User.PersonId();
-            var result = _service.GetOpen(page, pageSize, authorId, minBudget, maxBudget);
+            var result = _service.GetOpen(page, pageSize, authorId, minBudget, maxBudget, difficulty);
             return Ok(result);
         }
 
@@ -113,7 +114,24 @@ namespace Explorer.API.Controllers.Author.Tours
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
         }
 
-
+        [HttpPut("my-responses/{responseId:long}/mark-ready")]
+        public ActionResult MarkAsReady(long responseId)
+        {
+            try
+            {
+                var authorId = User.PersonId();
+                _service.MarkResponseAsReady(responseId, authorId);
+                return Ok(new { message = "Response marked as ready. Tourist can now accept it." });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
 
     }

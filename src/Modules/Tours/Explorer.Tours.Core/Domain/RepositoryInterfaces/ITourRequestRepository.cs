@@ -23,9 +23,12 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
         int GetResponseCount(long tourRequestId);
         void AcceptResponse(long responseId, long tourRequestId);
 
-        PagedResult<TourRequest> GetOpenRequestsFiltered(int page, int pageSize, decimal? minBudget, decimal? maxBudget);
+        PagedResult<TourRequest> GetOpenRequestsFiltered(int page, int pageSize, decimal? minBudget, decimal? maxBudget, int? difficulty);
 
         List<TourRequestResponse> GetResponsesByAuthor(long authorId);
+
+        void ExpressInterest(long responseId);
+        void MarkResponseAsReady(long responseId);
 
     }
 }
