@@ -12,7 +12,8 @@ namespace Explorer.Tours.Core.Domain
     {
         Walk,
         Bike,
-        Car
+        Car,
+        Boat
     }
     public class TourDuration : ValueObject
     {
