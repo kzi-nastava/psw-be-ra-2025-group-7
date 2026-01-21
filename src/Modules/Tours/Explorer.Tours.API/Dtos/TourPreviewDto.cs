@@ -18,8 +18,13 @@ namespace Explorer.Tours.API.Dtos;
         public string Difficulty { get; set; } = "";
         public List<string> Tags { get; set; } = new();
     public decimal Price { get; set; }
+    public decimal DiscountPercentage { get; set; }
     public bool IsPurchasable { get; set; }
-    
+
+    public decimal OriginalPrice { get; set; }
+    public bool IsOnSale { get; set; }
+
+
     /// <summary>
     /// Duration information visible before purchase
     /// </summary>

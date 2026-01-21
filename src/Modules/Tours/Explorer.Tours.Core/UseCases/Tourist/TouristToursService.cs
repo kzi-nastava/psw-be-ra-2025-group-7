@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Explorer.Payments.API.Internal;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
@@ -15,17 +16,20 @@ namespace Explorer.Tours.Core.UseCases.Tourist
     {
         private readonly ITourRepository _tours;
         private readonly IMapper _mapper;
+        private readonly ISaleInternalService _saleInternalService;
         private readonly ITourReviewRepository _reviews;
 
-        public TouristToursService(ITourRepository tours, IMapper mapper, ITourReviewRepository reviews)
+        public TouristToursService(ITourRepository tours, IMapper mapper, ISaleInternalService sale, ITourReviewRepository reviews)
         {
             _tours = tours;
             _mapper = mapper;
+            _saleInternalService = sale;
             _reviews = reviews;
         }
 
         public List<TourPreviewDto> GetPublishedTours()
         {
+
             var tours = _tours.GetAll()
                 .Where(t => t.Status == TourStatus.Published)
                 .ToList();
@@ -34,6 +38,11 @@ namespace Explorer.Tours.Core.UseCases.Tourist
 
             foreach (var tour in tours)
             {
+                var discountedPrice = _saleInternalService.GetDiscountedPrice(tour.Id, tour.Price);
+                var discountPercentage = _saleInternalService.GetActiveDiscountForTour(tour.Id) ?? 0;
+
+                var isOnSale = discountedPrice != null;
+
                 var allReviews = _reviews.GetAll()
                     .Where(r => r.TourId == tour.Id)
                     .ToList();
@@ -45,7 +54,12 @@ namespace Explorer.Tours.Core.UseCases.Tourist
                     Description = tour.Description,
                     Difficulty = tour.Difficulty.ToString(),
                     Tags = tour.Tags.ToList(),
-                    Price = tour.Price,
+
+                    OriginalPrice = tour.Price,
+                    Price = discountedPrice ?? tour.Price,
+                    DiscountPercentage = discountPercentage,
+                    IsOnSale = isOnSale,
+
                     FirstKeyPoint = tour.KeyPoints.Any()
                         ? _mapper.Map<KeyPointDto>(tour.KeyPoints.First())
                         : null,
