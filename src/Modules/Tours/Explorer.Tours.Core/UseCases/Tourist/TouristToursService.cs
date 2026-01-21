@@ -19,17 +19,11 @@ namespace Explorer.Tours.Core.UseCases.Tourist
         private readonly ISaleInternalService _saleInternalService;
         private readonly ITourReviewRepository _reviews;
 
-        public TouristToursService(ITourRepository tours, IMapper mapper, ISaleInternalService sale)
+        public TouristToursService(ITourRepository tours, IMapper mapper, ISaleInternalService sale, ITourReviewRepository reviews)
         {
             _tours = tours;
             _mapper = mapper;
             _saleInternalService = sale;
-        }
-        
-        public TouristToursService(ITourRepository tours, IMapper mapper, ITourReviewRepository reviews)
-        {
-            _tours = tours;
-            _mapper = mapper;
             _reviews = reviews;
         }
 
