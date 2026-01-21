@@ -34,6 +34,8 @@ namespace Explorer.Payments.Infrastructure
             services.AddScoped<IBundlePurchaseService, BundlePurchaseService>();
             services.AddScoped<IPurchaseNotificationService, PurchaseNotificationService>();
             services.AddScoped<ICouponService, CouponService>();
+            services.AddScoped<ISaleInternalService, SaleInternalService>();
+            services.AddScoped<ISaleService, SaleService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
@@ -52,6 +54,7 @@ namespace Explorer.Payments.Infrastructure
             // NEW (coupons)
             services.AddScoped<ICouponRepository, CouponDbRepository>();
             services.AddScoped<IPaymentRecordRepository, PaymentRecordDbRepository>();
+            services.AddScoped<ISaleRepository, SaleRepository>();
 
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("payments"));
             dataSourceBuilder.EnableDynamicJson();
