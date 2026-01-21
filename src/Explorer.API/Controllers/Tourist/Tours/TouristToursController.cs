@@ -36,6 +36,7 @@ namespace Explorer.API.Controllers.Tourist.Tours
             return Ok(reviewId);
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpPost("enhanced-reviews/{reviewId}/images")]
         [Authorize(Policy = "touristPolicy")]
         [Consumes("multipart/form-data")]

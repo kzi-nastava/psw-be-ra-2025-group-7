@@ -44,30 +44,27 @@ namespace Explorer.Tours.Core.Domain
             };
         }
 
-        public static TourRequestResponse CreateCustomProposal(
-            long tourRequestId,
-            long authorId,
-            string proposalDescription,
-            decimal proposedPrice,
-            string message = null)
+        public static TourRequestResponse CreateCustomProposal(long tourRequestId, long authorId, long tourId, string proposalDescription,
+                                                                decimal proposedPrice,string? message)
         {
-            ValidateProposalDescription(proposalDescription);
-            ValidatePrice(proposedPrice);
+            if (string.IsNullOrWhiteSpace(proposalDescription))
+                throw new ArgumentException("Proposal description is required for custom proposals.");
 
             return new TourRequestResponse
             {
                 TourRequestId = tourRequestId,
                 AuthorId = authorId,
                 ResponseType = ResponseType.CustomProposal,
-                ProposalDescription = proposalDescription.Trim(),
+                TourId = tourId,       
+                ProposalDescription = proposalDescription,
                 ProposedPrice = proposedPrice,
-                Message = message?.Trim(),
+                Message = message,
                 Status = ResponseStatus.Pending,
                 CreatedAt = DateTime.UtcNow
             };
         }
 
-        public void Update(decimal proposedPrice, string message = null)
+            public void Update(decimal proposedPrice, string message = null)
         {
             EnsurePendingStatus();
             ValidatePrice(proposedPrice);
@@ -101,7 +98,17 @@ namespace Explorer.Tours.Core.Domain
 
         public void Accept()
         {
-            EnsurePendingStatus();
+            if (ResponseType == ResponseType.ExistingTour)
+            {
+                if (Status != ResponseStatus.Pending)
+                    throw new InvalidOperationException("Can only accept pending responses.");
+            }
+            else
+            {
+                if (Status != ResponseStatus.Ready)
+                    throw new InvalidOperationException("Custom proposal must be in Ready state before final acceptance.");
+            }
+
             Status = ResponseStatus.Accepted;
         }
 
@@ -128,6 +135,31 @@ namespace Explorer.Tours.Core.Domain
             if (price <= 0)
                 throw new ArgumentException("Proposed price must be greater than zero.");
         }
+
+        public void ExpressInterest()
+        {
+            if (Status != ResponseStatus.Pending)
+                throw new InvalidOperationException("You can only express interest for pending responses.");
+
+            if (ResponseType != ResponseType.CustomProposal)
+                throw new InvalidOperationException("Interest can only be expressed for custom proposals.");
+
+            Status = ResponseStatus.Interested;
+        }
+
+        public void MarkAsReady()
+        {
+            if (Status != ResponseStatus.Interested)
+                throw new InvalidOperationException("Response must be in Interested state.");
+
+            if (ResponseType != ResponseType.CustomProposal)
+                throw new InvalidOperationException("Only custom proposals can be marked as ready.");
+
+            if (!TourId.HasValue)
+                throw new InvalidOperationException("Tour must be created before marking as ready.");
+
+            Status = ResponseStatus.Ready;
+        }
     }
 
     public enum ResponseType
@@ -138,8 +170,10 @@ namespace Explorer.Tours.Core.Domain
 
     public enum ResponseStatus
     {
-        Pending,
-        Accepted,
-        Rejected
+        Pending = 0,      
+        Interested = 1,   
+        Ready = 2,        
+        Accepted = 3,   
+        Rejected = 4
     }
 }

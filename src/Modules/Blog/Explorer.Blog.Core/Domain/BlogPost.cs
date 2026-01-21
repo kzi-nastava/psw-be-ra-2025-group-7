@@ -83,9 +83,15 @@ namespace Explorer.Blog.Core.Domain
 
         public void Publish()
         {
-            EnsureDraft();
+            ClosedBlogCheck();
+
+            if (Status != BlogStatus.Draft && Status != BlogStatus.Archived)
+                throw new InvalidOperationException("Only draft or archived blogs can be published.");
+
             Status = BlogStatus.Published;
+            LastModifiedAt = DateTime.UtcNow;
         }
+
 
 
         public void Archive()

@@ -24,6 +24,9 @@ namespace Explorer.Payments.Infrastructure.Database
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleTour> SaleTours { get; set; }
 
+        // NEW (crypto deposits)
+        public DbSet<CryptoDepositRequest> CryptoDepositRequests { get; set; }
+
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -87,8 +90,13 @@ namespace Explorer.Payments.Infrastructure.Database
                 builder.Property(w => w.CreatedAt)
                        .IsRequired();
 
+                builder.Property(w => w.SolanaWalletAddress)
+                       .HasMaxLength(50);
+
                 builder.HasIndex(w => w.UserId)
                        .IsUnique();
+
+                builder.HasIndex(w => w.SolanaWalletAddress);
             });
 
             // ===== PaymentNotification konfiguracija =====
@@ -309,7 +317,48 @@ namespace Explorer.Payments.Infrastructure.Database
                 b.Property(st => st.TourId)
                     .IsRequired();
             });
+            // ===== CryptoDepositRequest konfiguracija =====
+            modelBuilder.Entity<CryptoDepositRequest>(b =>
+            {
+                b.ToTable("CryptoDepositRequests");
+                b.HasKey(cdr => cdr.Id);
 
+                b.Property(cdr => cdr.UserId)
+                    .IsRequired();
+
+                b.Property(cdr => cdr.TransactionId)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                b.Property(cdr => cdr.CryptoAmount)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,8)");
+
+                b.Property(cdr => cdr.CoinsAmount)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property(cdr => cdr.Status)
+                    .IsRequired();
+
+                b.Property(cdr => cdr.RequestedAt)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(cdr => cdr.ConfirmedAt)
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(cdr => cdr.BlockchainExplorerUrl)
+                    .HasMaxLength(500);
+
+                b.Property(cdr => cdr.SenderWalletAddress)
+                    .HasMaxLength(50);
+
+                b.HasIndex(cdr => cdr.UserId);
+                b.HasIndex(cdr => cdr.TransactionId)
+                    .IsUnique();
+                b.HasIndex(cdr => cdr.Status);
+            });
         }
     }
 }

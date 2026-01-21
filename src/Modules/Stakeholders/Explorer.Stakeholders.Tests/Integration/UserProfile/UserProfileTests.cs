@@ -217,4 +217,40 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
         updatedProfile.Level.ShouldBe(2); // level up sa 1 → 2
     }
 
+    [Fact]
+    public void GetByUserId_Returns_Author_Profile_Without_XP()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        // Act - učitaj profil AUTORA
+        var result = service.GetByUserId(-11); 
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.UserId.ShouldBe(-11);
+        result.FirstName.ShouldBe("Ana");
+        result.XP.ShouldBeNull();
+        result.Level.ShouldBeNull();
+    }
+
+    [Fact]
+    public void GetByUserId_Returns_Tourist_Profile_With_XP()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+
+        // Act - učitaj profil TURISTE
+        var result = service.GetByUserId(-21); 
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.UserId.ShouldBe(-21);
+        result.FirstName.ShouldBe("Pera"); 
+        result.XP.ShouldNotBeNull(); 
+        result.Level.ShouldNotBeNull(); 
+    }
+
 }

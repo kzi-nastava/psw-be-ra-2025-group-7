@@ -17,13 +17,20 @@ namespace Explorer.Tours.Core.UseCases.Tourist
         private readonly ITourRepository _tours;
         private readonly IMapper _mapper;
         private readonly ISaleInternalService _saleInternalService;
-
+        private readonly ITourReviewRepository _reviews;
 
         public TouristToursService(ITourRepository tours, IMapper mapper, ISaleInternalService sale)
         {
             _tours = tours;
             _mapper = mapper;
             _saleInternalService = sale;
+        }
+        
+        public TouristToursService(ITourRepository tours, IMapper mapper, ITourReviewRepository reviews)
+        {
+            _tours = tours;
+            _mapper = mapper;
+            _reviews = reviews;
         }
 
         public List<TourPreviewDto> GetPublishedTours()
@@ -42,12 +49,16 @@ namespace Explorer.Tours.Core.UseCases.Tourist
 
                 var isOnSale = discountedPrice != null;
 
+                var allReviews = _reviews.GetAll()
+                    .Where(r => r.TourId == tour.Id)
+                    .ToList();
+
                 var dto = new TourPreviewDto
                 {
                     Id = tour.Id,
                     Name = tour.Name,
                     Description = tour.Description,
-                    Difficulty = (int)tour.Difficulty,
+                    Difficulty = tour.Difficulty.ToString(),
                     Tags = tour.Tags.ToList(),
 
                     OriginalPrice = tour.Price,
@@ -57,9 +68,16 @@ namespace Explorer.Tours.Core.UseCases.Tourist
 
                     FirstKeyPoint = tour.KeyPoints.Any()
                         ? _mapper.Map<KeyPointDto>(tour.KeyPoints.First())
-                        : null
+                        : null,
+                    KeyPointsCount = tour.KeyPoints.Count,
+                    ShortestDurationMinutes = tour.TourDurations.Any()
+                        ? tour.TourDurations.Min(d => d.Minutes)
+                        : (int?)null,
+                    AverageRating = allReviews.Any()
+                        ? _reviews.GetAverageRatingForTour(tour.Id)
+                        : (double?)null,
+                    ReviewCount = allReviews.Count
                 };
-
 
                 // Ne šalješ sekrete
                 if (dto.FirstKeyPoint != null)

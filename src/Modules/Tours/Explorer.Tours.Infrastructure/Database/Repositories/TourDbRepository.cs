@@ -146,4 +146,18 @@ public class TourDbRepository : ITourRepository
             .Where(t => t.Status == TourStatus.Published)
             .ToList();
     }
+
+    public Tour GetForPreview(long id)
+    {
+        var tour = _dbSet
+            .Include(t => t.Images)
+            .Include(t => t.KeyPoints)
+            .FirstOrDefault(t => t.Id == id);
+
+        if (tour == null)
+            throw new NotFoundException($"Tour with id {id} not found.");
+
+        return tour;
+    }
+
 }

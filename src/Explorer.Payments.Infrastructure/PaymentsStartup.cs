@@ -36,6 +36,8 @@ namespace Explorer.Payments.Infrastructure
             services.AddScoped<ICouponService, CouponService>();
             services.AddScoped<ISaleInternalService, SaleInternalService>();
             services.AddScoped<ISaleService, SaleService>();
+            // NEW (crypto payments)
+            services.AddScoped<ICryptoPaymentService, SolanaCryptoPaymentService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
@@ -55,6 +57,12 @@ namespace Explorer.Payments.Infrastructure
             services.AddScoped<ICouponRepository, CouponDbRepository>();
             services.AddScoped<IPaymentRecordRepository, PaymentRecordDbRepository>();
             services.AddScoped<ISaleRepository, SaleRepository>();
+
+            // NEW (crypto deposits)
+            services.AddScoped<ICryptoDepositRequestRepository, CryptoDepositRequestDbRepository>();
+
+            // Add HttpClient for Solana RPC calls
+            services.AddHttpClient();
 
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("payments"));
             dataSourceBuilder.EnableDynamicJson();
