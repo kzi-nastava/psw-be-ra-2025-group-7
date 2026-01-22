@@ -6,7 +6,9 @@ public class TourPurchaseTokenDto
     public long UserId { get; set; }
     public long TourId { get; set; }
     public DateTime PurchaseDate { get; set; }
-    
+
+    public string TourName { get; set; } = string.Empty;
+
     /// <summary>
     /// Full tour information available after purchase.
     /// Includes all key points (without secrets) that can be used for tour execution.
