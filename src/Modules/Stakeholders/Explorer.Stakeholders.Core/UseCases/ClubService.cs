@@ -1,28 +1,22 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
     public class ClubService : IClubService
     {
         private readonly IClubRepository _clubRepository;
-        private readonly IMapper _mapper;
         private readonly INotificationRepository _notificationRepository;
 
-        public ClubService(
-            IClubRepository clubRepository,
-            IMapper mapper,
-            INotificationRepository notificationRepository)
+        public ClubService(IClubRepository clubRepository, INotificationRepository notificationRepository)
         {
             _clubRepository = clubRepository;
-            _mapper = mapper;
             _notificationRepository = notificationRepository;
         }
 
@@ -36,28 +30,68 @@ namespace Explorer.Stakeholders.Core.UseCases
         public ClubDto Update(ClubDto dto)
         {
             var club = _clubRepository.Get(dto.Id);
-            club.Update(dto.Name, dto.Description, dto.ImageUrls);
+
+            var name = string.IsNullOrWhiteSpace(dto.Name) ? club.Name : dto.Name;
+            var description = string.IsNullOrWhiteSpace(dto.Description) ? club.Description : dto.Description;
+
+            var imageUrlsToPersist = club.ImageUrls?.ToList() ?? new List<string>();
+
+            if (dto.ImageUrls != null && dto.ImageUrls.Count > 0)
+            {
+                imageUrlsToPersist = imageUrlsToPersist
+                    .Concat(dto.ImageUrls)
+                    .Where(u => !string.IsNullOrWhiteSpace(u))
+                    .Select(u => u.Trim())
+                    .Distinct()
+                    .ToList();
+            }
+
+            club.Update(name, description, imageUrlsToPersist);
+
             var updated = _clubRepository.Update(club);
             return MapClubToDto(updated);
         }
 
-        public void Delete(long id)
+        public void DeleteImage(long clubId, long ownerId, string fileName)
         {
-            _clubRepository.Delete(id);
-        }
+            var club = _clubRepository.Get(clubId);
+            EnsureOwner(club, ownerId);
 
-        public List<ClubDto> GetAll()
-        {
-            return _clubRepository.GetAll()
-                .Select(c => MapClubToDto(c))
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentException("fileName is required.");
+
+            var safeFileName = System.IO.Path.GetFileName(fileName).Trim();
+            var current = club.ImageUrls?.ToList() ?? new List<string>();
+
+            var newList = current
+                .Where(u => !EndsWithFileName(u, safeFileName))
+                .Distinct()
                 .ToList();
+
+           
+            club.Update(club.Name, club.Description, newList);
+            _clubRepository.Update(club);
         }
 
-        public ClubDto Get(long id)
+        private static bool EndsWithFileName(string url, string fileName)
         {
-            var club = _clubRepository.Get(id);
-            return MapClubToDto(club);
+            if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(fileName)) return false;
+
+            var u = url.Trim();
+            var f = fileName.Trim();
+
+            return u.EndsWith("/" + f, StringComparison.OrdinalIgnoreCase)
+                   || u.EndsWith("\\" + f, StringComparison.OrdinalIgnoreCase)
+                   || u.Equals(f, StringComparison.OrdinalIgnoreCase);
         }
+
+        public void Delete(long id) => _clubRepository.Delete(id);
+
+        public List<ClubDto> GetAll() =>
+            _clubRepository.GetAll().Select(MapClubToDto).ToList();
+
+        public ClubDto Get(long id) =>
+            MapClubToDto(_clubRepository.Get(id));
 
         public void Close(long clubId, long ownerId)
         {
@@ -99,7 +133,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             club.AcceptRequest(touristId);
             _clubRepository.Update(club);
 
-            // UPDATED: Using new unified Notification constructor
             var notification = new Notification(
                 userId: touristId,
                 clubId: clubId,
@@ -117,7 +150,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             club.RejectRequest(touristId);
             _clubRepository.Update(club);
 
-            // UPDATED: Using new unified Notification constructor
             var notification = new Notification(
                 userId: touristId,
                 clubId: clubId,
@@ -162,15 +194,16 @@ namespace Explorer.Stakeholders.Core.UseCases
             _clubRepository.Update(club);
         }
 
-        private void EnsureOwner(Club club, long ownerId)
+        private static void EnsureOwner(Club club, long ownerId)
         {
             if (club.CreatedBy != ownerId)
                 throw new ForbiddenException("Only the owner can perform this action.");
         }
 
-        private ClubDto MapClubToDto(Club club)
+        private static ClubDto MapClubToDto(Club club)
         {
             if (club == null) return null;
+
             var dto = new ClubDto
             {
                 Id = club.Id,
@@ -180,47 +213,37 @@ namespace Explorer.Stakeholders.Core.UseCases
                 CreatedBy = club.CreatedBy,
                 CreatedAt = club.CreatedAt,
                 UpdatedAt = club.UpdatedAt,
-                Status = (ClubStatusDto)club.Status
+                Status = (ClubStatusDto)club.Status,
+                Members = new List<ClubMemberDto>(),
+                JoinRequests = new List<ClubJoinRequestDto>(),
+                Invitations = new List<ClubInvitationDto>()
             };
 
-            dto.Members = new List<ClubMemberDto>();
-            dto.JoinRequests = new List<ClubJoinRequestDto>();
-            dto.Invitations = new List<ClubInvitationDto>();
-
-            // Members
             if (club.Members != null)
             {
-                dto.Members = club.Members
-                    .Select(m => new ClubMemberDto
-                    {
-                        TouristId = m.TouristId,
-                        JoinedAt = m.JoinedAt
-                    })
-                    .ToList();
+                dto.Members = club.Members.Select(m => new ClubMemberDto
+                {
+                    TouristId = m.TouristId,
+                    JoinedAt = m.JoinedAt
+                }).ToList();
             }
 
-            // JoinRequests
             if (club.JoinRequests != null)
             {
-                dto.JoinRequests = club.JoinRequests
-                    .Select(r => new ClubJoinRequestDto
-                    {
-                        TouristId = r.TouristId,
-                        RequestedAt = r.RequestedAt
-                    })
-                    .ToList();
+                dto.JoinRequests = club.JoinRequests.Select(r => new ClubJoinRequestDto
+                {
+                    TouristId = r.TouristId,
+                    RequestedAt = r.RequestedAt
+                }).ToList();
             }
 
-            // Invitations
             if (club.Invitations != null)
             {
-                dto.Invitations = club.Invitations
-                    .Select(i => new ClubInvitationDto
-                    {
-                        TouristId = i.TouristId,
-                        SentAt = i.SentAt
-                    })
-                    .ToList();
+                dto.Invitations = club.Invitations.Select(i => new ClubInvitationDto
+                {
+                    TouristId = i.TouristId,
+                    SentAt = i.SentAt
+                }).ToList();
             }
 
             return dto;
