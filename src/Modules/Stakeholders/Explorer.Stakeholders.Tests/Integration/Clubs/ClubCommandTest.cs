@@ -4,6 +4,7 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Database;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -46,7 +47,6 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         result.CreatedAt.ShouldNotBe(default);
         result.UpdatedAt.ShouldNotBe(default);
         result.Status.ShouldBe(ClubStatusDto.Active);
-
 
         // Assert - Database
         var storedEntity = dbContext.Clubs.FirstOrDefault(c => c.Id == result.Id);
@@ -121,7 +121,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
             result.Id.ShouldBe(idToUpdate);
             result.Name.ShouldBe(updatedEntity.Name);
             result.Description.ShouldBe(updatedEntity.Description);
-            result.ImageUrls.ShouldBe(updatedEntity.ImageUrls);
+            result.ImageUrls.ShouldBeEquivalentTo(new List<string> { "initial.jpg", "updated.jpg" });
             result.CreatedBy.ShouldBe(updatedEntity.CreatedBy);
             result.CreatedAt.ShouldNotBe(default);
             result.UpdatedAt.ShouldNotBe(default);
@@ -132,7 +132,7 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
             storedEntity.ShouldNotBeNull();
             storedEntity.Name.ShouldBe(updatedEntity.Name);
             storedEntity.Description.ShouldBe(updatedEntity.Description);
-            storedEntity.ImageUrls.ShouldBe(updatedEntity.ImageUrls);
+            storedEntity.ImageUrls.ShouldBeEquivalentTo(new List<string> { "initial.jpg", "updated.jpg" });
             storedEntity.CreatedBy.ShouldBe(updatedEntity.CreatedBy);
             storedEntity.CreatedAt.ShouldNotBe(default);
             storedEntity.UpdatedAt.ShouldNotBe(default);
@@ -212,17 +212,17 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
         var clubService = scope.ServiceProvider.GetRequiredService<IClubService>();
+        var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
 
-        // owner = -21, tourist = -22 (može biti bilo koji ID, nema FK ka Person)
         const long ownerPersonId = 1;
         const long touristPersonId = -22;
 
-        var ownerController = new ClubsController(clubService)
+        var ownerController = new ClubsController(clubService, dbContext, env)
         {
             ControllerContext = BuildContext(ownerPersonId.ToString())
         };
 
-        var touristController = new ClubsController(clubService)
+        var touristController = new ClubsController(clubService, dbContext, env)
         {
             ControllerContext = BuildContext(touristPersonId.ToString())
         };
@@ -243,14 +243,14 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         clubId.ShouldNotBe(0);
 
         // 2) Turista šalje zahtev za učlanjenje
-        var joinResult = touristController.RequestMembership(clubId) as OkObjectResult;
+        var joinResult = touristController.RequestMembership(clubId) as NoContentResult;
         joinResult.ShouldNotBeNull();
-        joinResult.StatusCode.ShouldBe(200);
+        joinResult.StatusCode.ShouldBe(204);
 
         // 3) Owner prihvata zahtev
-        var acceptResult = ownerController.AcceptMembershipRequest(clubId, touristPersonId) as OkObjectResult;
+        var acceptResult = ownerController.AcceptMembershipRequest(clubId, touristPersonId) as NoContentResult;
         acceptResult.ShouldNotBeNull();
-        acceptResult.StatusCode.ShouldBe(200);
+        acceptResult.StatusCode.ShouldBe(204);
 
         // 4) Assert – Notification u bazi
         var notifications = dbContext.Set<Notification>()
@@ -270,16 +270,17 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
         var clubService = scope.ServiceProvider.GetRequiredService<IClubService>();
+        var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
 
         const long ownerPersonId = 1;
-        const long touristPersonId = -23; 
+        const long touristPersonId = -23;
 
-        var ownerController = new ClubsController(clubService)
+        var ownerController = new ClubsController(clubService, dbContext, env)
         {
             ControllerContext = BuildContext(ownerPersonId.ToString())
         };
 
-        var touristController = new ClubsController(clubService)
+        var touristController = new ClubsController(clubService, dbContext, env)
         {
             ControllerContext = BuildContext(touristPersonId.ToString())
         };
@@ -300,14 +301,14 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         clubId.ShouldNotBe(0);
 
         // 2) Turista šalje zahtev za učlanjenje
-        var joinResult = touristController.RequestMembership(clubId) as OkObjectResult;
+        var joinResult = touristController.RequestMembership(clubId) as NoContentResult;
         joinResult.ShouldNotBeNull();
-        joinResult.StatusCode.ShouldBe(200);
+        joinResult.StatusCode.ShouldBe(204);
 
         // 3) Owner odbija zahtev
-        var rejectResult = ownerController.RejectMembershipRequest(clubId, touristPersonId) as OkObjectResult;
+        var rejectResult = ownerController.RejectMembershipRequest(clubId, touristPersonId) as NoContentResult;
         rejectResult.ShouldNotBeNull();
-        rejectResult.StatusCode.ShouldBe(200);
+        rejectResult.StatusCode.ShouldBe(204);
 
         // 4) Assert – Notification u bazi
         var notifications = dbContext.Set<Notification>()
@@ -318,14 +319,15 @@ public class ClubCommandTest : BaseStakeholdersIntegrationTest
         var notification = notifications.Single();
         notification.IsRead.ShouldBeFalse();
         notification.CreatedAt.ShouldNotBe(default);
-        // Ako ti enum imena odgovaraju, može i:
-        // notification.Type.ShouldBe(NotificationType.MembershipRejected);
     }
-
 
     private static ClubsController CreateController(IServiceScope scope)
     {
-        return new ClubsController(scope.ServiceProvider.GetRequiredService<IClubService>())
+        var clubService = scope.ServiceProvider.GetRequiredService<IClubService>();
+        var db = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+        var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
+
+        return new ClubsController(clubService, db, env)
         {
             ControllerContext = BuildContext("1")
         };

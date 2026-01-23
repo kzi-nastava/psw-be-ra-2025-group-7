@@ -18,5 +18,7 @@ namespace Explorer.Tours.API.Public.Tourist
         List<TourRequestResponseDto> GetResponses(long tourRequestId, long touristId);
         TourRequestDto AcceptResponse(AcceptResponseDto dto, long touristId);
         void DeclineResponse(long responseId, long touristId);
+
+        TourRequestDto ExpressInterest(long tourRequestId, long responseId, long touristId);
     }
 }

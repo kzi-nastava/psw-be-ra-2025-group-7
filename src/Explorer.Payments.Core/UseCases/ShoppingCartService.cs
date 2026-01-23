@@ -20,6 +20,7 @@ namespace Explorer.Payments.Core.UseCases
         private readonly IPurchaseNotificationService _purchaseNotificationService;
         private readonly ICouponRepository _couponRepository;
         private readonly IPaymentRecordRepository _paymentRecordRepository;
+        private readonly ISaleRepository _saleRepository;
 
         public ShoppingCartService(
             IShoppingCartRepository cartRepository,
@@ -29,7 +30,8 @@ namespace Explorer.Payments.Core.UseCases
             IWalletInternalService walletInternalService,
             IPurchaseNotificationService purchaseNotificationService,
             ICouponRepository couponRepository,
-            IPaymentRecordRepository paymentRecordRepository)
+            IPaymentRecordRepository paymentRecordRepository,
+            ISaleRepository saleRepository)
         {
             _cartRepository = cartRepository;
             _tourRepository = tourRepository;
@@ -39,6 +41,7 @@ namespace Explorer.Payments.Core.UseCases
             _purchaseNotificationService = purchaseNotificationService;
             _couponRepository = couponRepository;
             _paymentRecordRepository = paymentRecordRepository;
+            _saleRepository = saleRepository;
         }
 
         public PaymentsDto.ShoppingCartDto GetByTouristId(long touristId)
@@ -106,7 +109,7 @@ namespace Explorer.Payments.Core.UseCases
                     throw new InvalidOperationException($"Tour with ID {tourId} has already been purchased.");
                 }
             }
-
+            
             Coupon? coupon = null;
             if (!string.IsNullOrWhiteSpace(couponCode))
             {
@@ -119,6 +122,12 @@ namespace Explorer.Payments.Core.UseCases
             var totalBeforeDiscount = cart.TotalPrice;
             var totalAfterDiscount = totalBeforeDiscount;
             var discountPercentage = 0m;
+
+            var sales = tours.ToDictionary(
+                        t => t.Id,
+                        t => _saleRepository.GetActiveSaleForTour(t.Id, DateTime.UtcNow)
+                    );
+
 
             if (coupon != null)
             {
@@ -163,11 +172,19 @@ namespace Explorer.Payments.Core.UseCases
                 // Check if this specific tour got a discount
                 var tourDiscountPercentage = 0m;
                 var tourFinalPrice = tour.Price;
+                var sale = sales[tour.Id];
+
+                // 1) Sale discount
+                if (sale != null)
+                {
+                    tourDiscountPercentage = sale.DiscountPercentage;
+                    tourFinalPrice = tour.Price * (1 - sale.DiscountPercentage / 100m);
+                }
 
                 if (coupon != null && coupon.AppliesTo(tour.Id, tour.AuthorId))
                 {
                     tourDiscountPercentage = coupon.DiscountPercentage;
-                    tourFinalPrice = tour.Price * (1 - tourDiscountPercentage / 100m);
+                    tourFinalPrice = tourFinalPrice * (1 - tourDiscountPercentage / 100m);
                 }
 
                 var token = TourPurchaseToken.CreateForTour(touristId, tour);
@@ -186,7 +203,7 @@ namespace Explorer.Payments.Core.UseCases
                     touristId,
                     tour.Id,
                     null,
-                    tour.Price,
+                    tourFinalPrice,
                     tourDiscountPercentage,
                     coupon != null && coupon.AppliesTo(tour.Id, tour.AuthorId) ? couponCode : null
                 );

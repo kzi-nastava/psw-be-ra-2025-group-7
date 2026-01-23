@@ -13,7 +13,7 @@ public class StakeholdersContext : DbContext
     public DbSet<Club> Clubs { get; set; }
     public DbSet<TourPreferences> TourPreferences { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
-    
+
     // New follower system DbSets
     public DbSet<Follower> Followers { get; set; }
     public DbSet<FollowerMessage> FollowerMessages { get; set; }
@@ -51,14 +51,20 @@ public class StakeholdersContext : DbContext
             .WithOne()
             .HasForeignKey<UserProfile>(up => up.UserId);
 
-        // Club configuration - EXPLICITLY configure Status
+        // Club configuration
         modelBuilder.Entity<Club>()
             .HasKey(c => c.Id);
 
         modelBuilder.Entity<Club>()
             .Property(c => c.Status)
             .IsRequired()
-            .HasConversion<int>(); // Ensure Status enum is stored as int
+            .HasConversion<int>();
+
+        // ✅ IMPORTANT: ImageUrls stays as List<string> -> Postgres text[]
+        // Npgsql supports this out of the box and your migration already created text[] column.
+        modelBuilder.Entity<Club>()
+            .Property(c => c.ImageUrls)
+            .IsRequired();
 
         modelBuilder.Entity<Club>()
             .HasMany(c => c.Members)
@@ -134,15 +140,13 @@ public class StakeholdersContext : DbContext
         modelBuilder.Entity<Notification>()
             .HasKey(n => n.Id);
 
-        // UserId is required
         modelBuilder.Entity<Notification>()
             .Property(n => n.UserId)
             .IsRequired();
 
-        // ClubId is NULLABLE (not all notifications are club-related)
         modelBuilder.Entity<Notification>()
             .Property(n => n.ClubId)
-            .IsRequired(false); // ← FIX: Make nullable
+            .IsRequired(false);
 
         modelBuilder.Entity<Notification>()
             .Property(n => n.Type)
