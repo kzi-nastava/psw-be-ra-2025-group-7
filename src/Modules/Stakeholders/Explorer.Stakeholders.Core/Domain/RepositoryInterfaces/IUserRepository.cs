@@ -7,4 +7,6 @@ public interface IUserRepository
     User Create(User user);
     long GetPersonId(long userId);
     User? GetById(long userId);
+    List<User> SearchByUsername(string searchTerm);
+    List<User> GetAllActiveUsers();
 }

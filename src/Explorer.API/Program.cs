@@ -44,6 +44,9 @@ Directory.CreateDirectory(imagesPath);
 
 Directory.CreateDirectory(Path.Combine(webRootPath, "enhanced-review-images"));
 
+// Folder za profilne slike
+Directory.CreateDirectory(Path.Combine(webRootPath, "profile-images"));
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
