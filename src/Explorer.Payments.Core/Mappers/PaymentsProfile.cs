@@ -28,6 +28,23 @@ namespace Explorer.Payments.Core.Mappers
 
             // PaymentRecord mapovi
             CreateMap<PaymentRecord, PaymentRecordDto>().ReverseMap();
+
+            // SALE mapovi
+            CreateMap<Sale, SaleDto>()
+    .ForMember(d => d.TourIds,
+        opt => opt.MapFrom(s => s.SaleTours.Select(st => st.TourId)))
+    .ForMember(d => d.Status,
+        opt => opt.MapFrom(s => (SaleStatusDto)s.Status))
+    .ReverseMap()
+    .ForMember(s => s.SaleTours,
+        opt => opt.MapFrom(d => d.TourIds.Select(id => new SaleTour
+        {
+            TourId = id
+        })))
+    .ForMember(s => s.Status,
+        opt => opt.MapFrom(d => (SaleStatus)d.Status));
+
+
         }
     }
 }

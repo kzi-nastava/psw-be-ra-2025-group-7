@@ -34,7 +34,8 @@ namespace Explorer.Payments.Infrastructure
             services.AddScoped<IBundlePurchaseService, BundlePurchaseService>();
             services.AddScoped<IPurchaseNotificationService, PurchaseNotificationService>();
             services.AddScoped<ICouponService, CouponService>();
-
+            services.AddScoped<ISaleInternalService, SaleInternalService>();
+            services.AddScoped<ISaleService, SaleService>();
             // NEW (crypto payments)
             services.AddScoped<ICryptoPaymentService, SolanaCryptoPaymentService>();
         }
@@ -55,6 +56,7 @@ namespace Explorer.Payments.Infrastructure
             // NEW (coupons)
             services.AddScoped<ICouponRepository, CouponDbRepository>();
             services.AddScoped<IPaymentRecordRepository, PaymentRecordDbRepository>();
+            services.AddScoped<ISaleRepository, SaleRepository>();
 
             // NEW (crypto deposits)
             services.AddScoped<ICryptoDepositRequestRepository, CryptoDepositRequestDbRepository>();

@@ -12,11 +12,13 @@ namespace Explorer.Stakeholders.Core.UseCases.Internal
     {
         private readonly IUserProfileRepository _profileRepository;
         private readonly IPersonRepository _personRepository;
+        private readonly IUserRepository _userRepository;
 
-        public UserInternalService(IUserProfileRepository profileRepository, IPersonRepository personRepository)
+        public UserInternalService(IUserProfileRepository profileRepository, IPersonRepository personRepository, IUserRepository userRepository)
         {
             _profileRepository = profileRepository;
             _personRepository = personRepository;
+            _userRepository = userRepository;
         }
 
         public UserBasicInfoDto GetUserBasicInfo(long userId)
@@ -45,6 +47,12 @@ namespace Explorer.Stakeholders.Core.UseCases.Internal
                 Motto = profile.Motto,
                 ProfilePicture = profile.ProfilePicture
             };
+        }
+
+        public string GetUsername(long userId)
+        {
+            var user = _userRepository.GetById(userId);
+            return user?.Username ?? "Unknown User";
         }
     }
 }

@@ -13,13 +13,18 @@ namespace Explorer.Stakeholders.API.Public
 
         void Close(long clubId, long ownerId);
         void Open(long clubId, long ownerId);
+
         void RequestMembership(long clubId, long touristId);
         void WithdrawRequest(long clubId, long touristId);
         void AcceptRequest(long clubId, long ownerId, long touristId);
         void RejectRequest(long clubId, long ownerId, long touristId);
+
         void InviteTourist(long clubId, long ownerId, long touristId);
         void AcceptInvitation(long clubId, long touristId);
         void RejectInvitation(long clubId, long touristId);
+
         void RemoveMember(long clubId, long ownerId, long touristId);
+
+        void DeleteImage(long clubId, long ownerId, string fileName);
     }
 }

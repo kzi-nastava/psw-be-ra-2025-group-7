@@ -180,5 +180,24 @@ namespace Explorer.API.Controllers.Tourist.Tours
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("{tourRequestId:long}/responses/{responseId:long}/express-interest")]
+        public ActionResult<TourRequestDto> ExpressInterest(long tourRequestId, long responseId)
+        {
+            try
+            {
+                var touristId = User.PersonId();
+                var result = _tourRequestService.ExpressInterest(tourRequestId, responseId, touristId);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

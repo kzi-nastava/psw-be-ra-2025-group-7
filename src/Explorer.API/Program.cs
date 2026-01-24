@@ -43,6 +43,9 @@ var imagesPath = Path.Combine(webRootPath, "blog-images");
 Directory.CreateDirectory(imagesPath);
 
 Directory.CreateDirectory(Path.Combine(webRootPath, "enhanced-review-images"));
+Directory.CreateDirectory(Path.Combine(webRootPath, "keypoint-images"));
+
+Directory.CreateDirectory(Path.Combine(webRootPath, "clubs"));
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
