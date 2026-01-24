@@ -12,6 +12,7 @@ namespace Explorer.Encounters.Core.Domain.RepositoryInterfaces
         EncounterProgress Update(EncounterProgress encounterProgress);
         void Delete(long id);
         EncounterProgress? Get(long id);
+        public bool isCompleted(long encounterId, int participantId);
         List<EncounterProgress> GetAll();
     }
 }

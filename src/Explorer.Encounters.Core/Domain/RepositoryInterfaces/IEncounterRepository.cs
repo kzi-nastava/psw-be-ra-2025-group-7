@@ -10,12 +10,13 @@ namespace Explorer.Encounters.Core.Domain.RepositoryInterfaces
     public interface IEncounterRepository
     {
         Encounter Create(Encounter encounter);
+        KeyPointEncounter CreateKeyPointEncounter(KeyPointEncounter encounter);
         Encounter Update(Encounter encounter);
         void Delete(long id);
 
         Encounter? Get(long id);
 
-        
+        KeyPointEncounter GetByKeyPointId(long keyPointId);
         PagedResult<Encounter> GetPaged(int page, int pageSize, EncounterStatus? status, EncounterType? type);
     }
 }
