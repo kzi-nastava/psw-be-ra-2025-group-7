@@ -585,13 +585,6 @@ namespace Explorer.Encounters.Tests.Integration
             result.ShouldBeFalse();
         }
         [Fact]
-        public void IsMandatoryEncounterCompleted_returns_false_when_progress_not_completed()
-        {
-            using var scope = Factory.Services.CreateScope();
-
-            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
-            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
-        [Fact]
         public void Social_encounter_completion_adds_xp_to_all_users()
         {
             using var scope = Factory.Services.CreateScope();
@@ -715,8 +708,14 @@ namespace Explorer.Encounters.Tests.Integration
             Should.Throw<InvalidOperationException>(() =>
                 progressService.ActivateHiddenLocationForUser(encounter.Id, 1));
         }
+        [Fact]
+        public void IsMandatoryEncounterCompleted_returns_false_when_progress_not_completed()
+        {
+            using var scope = Factory.Services.CreateScope();
 
-    }
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+
 
             // Arrange
             var encounter = encounterService.Create(-1, new CreateEncounterDto

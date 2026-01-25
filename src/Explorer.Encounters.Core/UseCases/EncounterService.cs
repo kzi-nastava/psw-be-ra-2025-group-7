@@ -259,7 +259,7 @@ namespace Explorer.Encounters.Core.UseCases
             return encounters;
         }
 
-    }
+    
 
         public bool IsMandatoryEncounterCompleted(long keyPointId, long userId)
         {
