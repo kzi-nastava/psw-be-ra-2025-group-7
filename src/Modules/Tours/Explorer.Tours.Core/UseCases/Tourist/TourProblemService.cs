@@ -2,6 +2,8 @@
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Notifications.API.Public;
+using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.API.Public;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
@@ -12,17 +14,21 @@ public class TourProblemService : ITourProblemService
     private readonly ITourProblemRepository _repository;
     private readonly ITourRepository _tourRepository;
     private readonly IMapper _mapper;
-    private readonly INotificationService _notificationService;
+    private readonly Explorer.Notifications.API.Public.INotificationService _notificationService;
+    //private readonly IUserProfileService _userProfileService;
+    private readonly IUserInternalService _userInternalService;
+
 
 
     public TourProblemService(ITourProblemRepository repository, ITourRepository tourRepository,
- IMapper mapper, INotificationService notificationService)
+ IMapper mapper, Explorer.Notifications.API.Public.INotificationService notificationService, IUserInternalService userInternalService)
 
     {
         _repository = repository;
         _tourRepository = tourRepository;
         _mapper = mapper;
         _notificationService = notificationService;
+        _userInternalService = userInternalService;
     }
 
     public PagedResult<TourProblemDto> GetByAuthor(int authorId, int page, int pageSize)
@@ -31,9 +37,19 @@ public class TourProblemService : ITourProblemService
         var items = _mapper.Map<List<TourProblemDto>>(result.Results);
         foreach (var dto in items)
         {
+
+            foreach (var comment in dto.Comments)
+            {
+                var username = _userInternalService.GetUsername(comment.CreatorId);
+                comment.CreatorUsername = $"{username}";
+            }
+
             var tour = _tourRepository.Get(dto.TourId);
             dto.TourName = tour.Name; 
         }
+
+
+
         return new PagedResult<TourProblemDto>(items, result.TotalCount);
     }
     public PagedResult<TourProblemDto> GetTouristProblemsPages(int touristId, int page, int pageSize)
