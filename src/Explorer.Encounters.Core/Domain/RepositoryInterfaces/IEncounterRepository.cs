@@ -18,5 +18,6 @@ namespace Explorer.Encounters.Core.Domain.RepositoryInterfaces
 
         KeyPointEncounter GetByKeyPointId(long keyPointId);
         PagedResult<Encounter> GetPaged(int page, int pageSize, EncounterStatus? status, EncounterType? type);
+        IEnumerable<Encounter> GetAll();
     }
 }

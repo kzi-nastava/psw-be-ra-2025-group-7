@@ -73,5 +73,11 @@ namespace Explorer.Encounters.Infrastructure.Database.Repositories
         { 
             return _context.KeyPointEncounters.FirstOrDefault(x => x.KeyPointId == keyPointId); 
         }
+
+        public IEnumerable<Encounter> GetAll()
+        {
+            return _context.Encounters.ToList();
+        }
+
     }
 }

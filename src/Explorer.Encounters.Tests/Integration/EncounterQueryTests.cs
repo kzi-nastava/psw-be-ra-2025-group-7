@@ -42,6 +42,44 @@ namespace Explorer.Encounters.Tests.Integration
             list.First().Status.ShouldBe("active");
         }
 
+        [Fact] // dodato 
+        public void Admin_gets_all_encounters_when_no_filters()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateAdminController(scope, "1");
+
+            CreateEncounter(controller, "E1", "social");
+            CreateEncounter(controller, "E2", "location");
+            CreateEncounter(controller, "E3", "misc");
+
+            var result = controller.Get(null, null);
+            var ok = result.Result as OkObjectResult;
+            var list = ok?.Value as IEnumerable<EncounterDto>;
+
+            list.ShouldNotBeNull();
+            list.Count().ShouldBe(3);
+        }
+
+        [Fact] // dodato
+        public void Admin_can_filter_only_by_status()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateAdminController(scope, "1");
+
+            var e1 = CreateEncounter(controller, "Active", "social");
+            var e2 = CreateEncounter(controller, "Draft", "social");
+
+            controller.ChangeStatus(e1.Id, new ChangeEncounterStatusDto { Status = "active" });
+
+            var result = controller.Get("active", null);
+            var ok = result.Result as OkObjectResult;
+            var list = ok?.Value as IEnumerable<EncounterDto>;
+
+            list.ShouldNotBeNull();
+            list.Count().ShouldBe(1);
+            list.First().Id.ShouldBe(e1.Id);
+        }
+
         [Fact]
         public void Tourist_gets_only_active_encounters()
         {
@@ -152,5 +190,6 @@ namespace Explorer.Encounters.Tests.Integration
             controller.ControllerContext = ctx;
             return controller;
         }
+
     }
 }

@@ -21,6 +21,8 @@ namespace Explorer.Encounters.API.Public
         bool IsUserAtLocation(long encounterId, long userId);
         bool HasActiveSocialEncounter(long userId);
         EncounterDto GetActiveSocial();
+
+        EncounterProgressDto ActivateMiscEncounter(long encounterId, long userId);
         //List<int> CheckParticipantsLocation(long encounterId);
         //void FinishEncounterProgress(long encounterId, List<int> users);
     }
