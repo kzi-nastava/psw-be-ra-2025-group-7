@@ -1,6 +1,7 @@
 ﻿using Explorer.API.Controllers.Administrator.Administration;
 using Explorer.API.Controllers.Tourist;
 using Explorer.Encounters.API.Dtos;
+using Explorer.Encounters.API.Internal;
 using Explorer.Encounters.API.Public;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -136,6 +137,7 @@ namespace Explorer.Encounters.Tests.Integration
             var controller = new TouristEncountersController(
                 scope.ServiceProvider.GetRequiredService<IEncounterService>(),
                 scope.ServiceProvider.GetRequiredService<IEncounterProgressService>());
+               
 
             var ctx = BuildContext(userId);
 

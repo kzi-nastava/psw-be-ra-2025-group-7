@@ -8,6 +8,7 @@ namespace Explorer.Tours.API.Dtos
 {
     public class TouristKeyPointMapDto
     {
+        public long KeyPointId { get; set; }
         public int Index { get; set; }
 
         public double Latitude { get; set; }

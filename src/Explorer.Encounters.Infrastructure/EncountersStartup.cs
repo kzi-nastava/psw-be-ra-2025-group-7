@@ -31,7 +31,9 @@ public static class EncountersStartup
         services.AddScoped<IEncounterService, EncounterService>();
         services.AddScoped<IEncounterProgressService, EncounterProgressService>();
         services.AddScoped<IUserLocationChangedNotifier, UserLocationChangedNotifier>();
-      
+        services.AddScoped<IEncounterCheckService, EncounterCheckService>();
+
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -48,7 +50,9 @@ public static class EncountersStartup
         services.AddScoped<IEncounterRepository, EncounterRepository>();
         services.AddScoped<IEncounterProgressRepository, EncounterProgressRepository>();
         services.AddScoped<IUserLocationChangedNotifier, UserLocationChangedNotifier>();
-        
+        services.AddScoped<IEncounterCheckService, EncounterCheckService>();
+
+
 
 
     }

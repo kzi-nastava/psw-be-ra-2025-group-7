@@ -14,6 +14,8 @@ public class EncountersContext : DbContext
 
     public DbSet<Encounter> Encounters { get; set; }
     public DbSet<EncounterProgress> EncounterProgresses { get; set; }
+    public DbSet<KeyPointEncounter> KeyPointEncounters { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -105,5 +107,15 @@ public class EncountersContext : DbContext
               .IsRequired()
               .HasConversion<int>();
         });
+        modelBuilder.Entity<KeyPointEncounter>(kpe =>
+        {
+            kpe.ToTable("KeyPointEncounters");
+            kpe.HasKey(x => x.Id);
+
+            kpe.Property(x => x.EncounterId).IsRequired();
+            kpe.Property(x => x.KeyPointId).IsRequired();
+            kpe.Property(x => x.IsMandatory).IsRequired();
+        });
+
     }
 }
