@@ -109,6 +109,19 @@ namespace Explorer.API.Controllers.Tourist
             var progress = _encounterProgressService.GetActiveSocial();
             return Ok(progress);
         }
+        [HttpGet("keypoint/{keyPointId:long}/is_mandatory_completed")]
+        public ActionResult<bool> IsMandatoryEncounterCompleted(long keyPointId)
+        {
+            var userId = User.PersonId();
+            var isCompleted = _service.IsMandatoryEncounterCompleted(keyPointId, userId);
+            return Ok(isCompleted);
+        }
+        [HttpGet("keypoint/{keyPointId:long}/has_mandatory")]
+        public ActionResult<bool> HasMandatoryEncounter(long keyPointId)
+        {
+            var hasMandatory = _service.HasMandatoryEncounter(keyPointId);
+            return Ok(hasMandatory);
+        }
 
         [HttpGet("{latitude}/encounters/{longitude}/available")]
         public ActionResult<IEnumerable<EncounterDto>> Get(double latitude, double longitude)

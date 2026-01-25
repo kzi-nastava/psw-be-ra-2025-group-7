@@ -21,6 +21,9 @@ namespace Explorer.Encounters.API.Public
         EncounterDto AcceptEncounter(long id, UpdateEncounterDto dto);
         EncounterDto DeclineEncounter(long id);
 
+        public bool IsMandatoryEncounterCompleted(long keyPointId, long userId);
+        public bool HasMandatoryEncounter(long keyPointId);
+
         IEnumerable<EncounterDto> GetByLocation(double Latitude, double Longitude);
     }
 }

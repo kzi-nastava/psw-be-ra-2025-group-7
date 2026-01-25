@@ -16,11 +16,13 @@ namespace Explorer.Encounters.Core.UseCases
     {
         private readonly IEncounterRepository _repo;
         private readonly IMapper _mapper;
+        private readonly IEncounterProgressRepository _progressRepo;
 
-        public EncounterService(IEncounterRepository repo, IMapper mapper)
+        public EncounterService(IEncounterRepository repo, IMapper mapper, IEncounterProgressRepository progressRepo)
         {
             _repo = repo;
             _mapper = mapper;
+            _progressRepo = progressRepo;
         }
 
         public EncounterDto Create(int creatorId,CreateEncounterDto dto)
@@ -34,8 +36,8 @@ namespace Explorer.Encounters.Core.UseCases
             }
             var encounter = new Encounter(creatorId,dto.Name, dto.Description, location, dto.Xp, type, dto.RequiredParticipants); // default Draft
             
-
             
+
             // opcionalni HiddenLocation
             if (type == EncounterType.Location && dto.HiddenLocation != null)
             {
@@ -52,8 +54,20 @@ namespace Explorer.Encounters.Core.UseCases
                 encounter.ChangeStatus(ParseStatus(dto.Status));
 
             _repo.Create(encounter);
-         
-                return _mapper.Map<EncounterDto>(encounter);
+
+            if (dto.KeyPointId.HasValue)
+            {
+                var link = new KeyPointEncounter(
+                    encounter.Id,
+                    dto.KeyPointId.Value,
+                    dto.IsMandatory ?? false
+                );
+
+                _repo.CreateKeyPointEncounter(link);
+            }
+
+
+            return _mapper.Map<EncounterDto>(encounter);
         }
         public EncounterDto CreateByTourist(CreateEncounterDto dto)
         {
@@ -225,7 +239,12 @@ namespace Explorer.Encounters.Core.UseCases
                 _ => throw new ArgumentException("Invalid type.")
             };
         }
+        public bool HasMandatoryEncounter(long keyPointId)
+        {
+            var kpEncounter = _repo.GetByKeyPointId(keyPointId);
+            return kpEncounter != null && kpEncounter.IsMandatory;
 
+        }
         public IEnumerable<EncounterDto> GetByLocation(double Latitude, double Longitude)
         {
             var allEncounter = _repo.GetAll() ?? throw new KeyNotFoundException("Encounter not found.");
@@ -240,6 +259,17 @@ namespace Explorer.Encounters.Core.UseCases
             return encounters;
         }
 
+    }
+
+        public bool IsMandatoryEncounterCompleted(long keyPointId, long userId)
+        {
+            var mandatory = _repo
+                .GetByKeyPointId(keyPointId);
+
+            if (mandatory == null) return true;
+
+            return _progressRepo.isCompleted(mandatory.EncounterId, (int)userId);
+        }
     }
 
 }
