@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
+﻿using Explorer.API.Controllers.Tourist;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Infrastructure.Database;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 
 namespace Explorer.Stakeholders.Tests.Integration.UserProfile;
 
@@ -252,5 +254,77 @@ public class UserProfileTests : BaseStakeholdersIntegrationTest
         result.XP.ShouldNotBeNull(); 
         result.Level.ShouldNotBeNull(); 
     }
+    [Fact]
+    public void GetTopByXp_returns_users_sorted_descending()
+    {
+        using var scope = Factory.Services.CreateScope();
+
+        var service = scope.ServiceProvider.GetRequiredService<IUserProfileService>();
+        var repo = scope.ServiceProvider.GetRequiredService<IUserProfileRepository>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+
+        // Arrange – koristi postojeće profile
+        var pera = dbContext.UserProfiles.First(up => up.UserId == -21);
+        var sara = dbContext.UserProfiles.First(up => up.UserId == -13);
+        var mika = dbContext.UserProfiles.First(up => up.UserId == -22);
+
+        pera.XP = 180;
+        sara.XP = 350;
+        mika.XP = 40;
+
+        dbContext.SaveChanges();
+        dbContext.ChangeTracker.Clear();
+
+        // Act
+        var result = repo.GetTopByXp(2);
+
+        // Assert
+        result.Count.ShouldBe(2);
+        result[0].UserId.ShouldBe(-13); // Sara – 150 XP
+        result[1].UserId.ShouldBe(-21); // Pera – 80 XP
+    }
+
+
+    [Fact]
+    public void LeaderboardService_returns_top_users_mapped_to_dto()
+    {
+        using var scope = Factory.Services.CreateScope();
+
+        var leaderboardService = scope.ServiceProvider.GetRequiredService<ILeaderBoardService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+
+        // Arrange
+        var pera = dbContext.UserProfiles.First(up => up.UserId == -21);
+        var sara = dbContext.UserProfiles.First(up => up.UserId == -13);
+
+        pera.XP = 50;
+        sara.XP = 400;
+
+        dbContext.SaveChanges();
+        dbContext.ChangeTracker.Clear();
+
+        // Act
+        var result = leaderboardService.GetTopUsersByXp(1);
+
+        // Assert
+        result.Count.ShouldBe(1);
+        result[0].UserId.ShouldBe(-13);
+        result[0].FirstName.ShouldBe("Sara");
+        result[0].XP.ShouldBe(400);
+    }
+
+
+    [Fact]
+    public void GetTopUsers_returns_ok_and_users()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = new LeaderboardController(
+            scope.ServiceProvider.GetRequiredService<ILeaderBoardService>());
+
+        var result = controller.GetTopUsersByXp(3);
+
+        result.Result.ShouldBeOfType<OkObjectResult>();
+    }
+
 
 }

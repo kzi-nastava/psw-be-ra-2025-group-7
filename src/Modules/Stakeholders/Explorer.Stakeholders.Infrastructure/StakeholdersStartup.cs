@@ -44,6 +44,8 @@ public static class StakeholdersStartup
         services.AddScoped<IClubMessageService, ClubMessageService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IUserInternalService, UserInternalService>();
+        services.AddScoped<ILeaderBoardService, LeaderboardService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -77,6 +79,8 @@ public static class StakeholdersStartup
         services.AddScoped<IFollowerRepository, FollowerDbRepository>();
         services.AddScoped<IFollowerMessageRepository, FollowerMessageDbRepository>();
         services.AddScoped<IClubMessageRepository, ClubMessageDbRepository>();
+        services.AddScoped<ILeaderBoardService, LeaderboardService>();
+
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();
