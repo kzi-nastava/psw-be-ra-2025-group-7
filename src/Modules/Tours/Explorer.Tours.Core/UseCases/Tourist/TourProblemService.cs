@@ -8,6 +8,7 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using System.Xml;
 
 public class TourProblemService : ITourProblemService
 {
@@ -45,7 +46,8 @@ public class TourProblemService : ITourProblemService
             }
 
             var tour = _tourRepository.Get(dto.TourId);
-            dto.TourName = tour.Name; 
+            dto.TourName = tour.Name;
+            
         }
 
 
@@ -58,8 +60,16 @@ public class TourProblemService : ITourProblemService
         var items = _mapper.Map<List<TourProblemDto>>(result.Results);
         foreach (var dto in items)
         {
+            foreach (var comment in dto.Comments)
+            {
+                var username = _userInternalService.GetUsername(comment.CreatorId);
+                comment.CreatorUsername = $"{username}";
+            }
+
             var tour = _tourRepository.Get(dto.TourId);
             dto.TourName = tour.Name;
+            dto.AuthorId = tour.AuthorId;
+
         }
         return new PagedResult<TourProblemDto>(items, result.TotalCount);
     }
@@ -217,6 +227,11 @@ public class TourProblemService : ITourProblemService
 
         foreach (var dto in items)
         {
+            foreach(var comment in dto.Comments)
+            {
+                var username = _userInternalService.GetUsername(comment.CreatorId);
+                comment.CreatorUsername = $"{username}";
+            }
             var tour = _tourRepository.Get(dto.TourId);
             dto.TourName = tour.Name;
         }
@@ -252,6 +267,12 @@ public class TourProblemService : ITourProblemService
         {
             var problem = _repository.Get(id);
             var dto = _mapper.Map<TourProblemDto>(problem);
+
+            foreach (var comment in dto.Comments)
+            {
+                var username = _userInternalService.GetUsername(comment.CreatorId);
+                comment.CreatorUsername = $"{username}";
+            }
 
             var tour = _tourRepository.Get(dto.TourId);
             dto.TourName = tour.Name;
