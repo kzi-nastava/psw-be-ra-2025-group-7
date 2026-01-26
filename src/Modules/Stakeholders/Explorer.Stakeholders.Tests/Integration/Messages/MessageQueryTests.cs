@@ -28,17 +28,19 @@ namespace Explorer.Stakeholders.Tests.Integration.Messages
             // Arrange
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope);
-            var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
 
             // Act
-            var res = ((ObjectResult)controller.GetPagedContacts().Result)?.Value as PagedResult<long>;
+            var actionResult = controller.GetPagedContacts().Result;
+            var objectResult = actionResult as ObjectResult;
+            var res = objectResult?.Value as PagedResult<ContactDto>;
 
             // Assert
             res.ShouldNotBeNull();
             res.TotalCount.ShouldBe(3);
-            res.Results.ShouldContain(-11);
-            res.Results.ShouldContain(-12);
-            res.Results.ShouldContain(-21);
+
+            res.Results.Select(c => c.UserId).ShouldContain(-11);
+            res.Results.Select(c => c.UserId).ShouldContain(-12);
+            res.Results.Select(c => c.UserId).ShouldContain(-21);
         }
 
         [Fact]

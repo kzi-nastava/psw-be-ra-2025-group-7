@@ -22,7 +22,7 @@ public class MessageController : ControllerBase
 
     [HttpGet]
     [Route("contacts")]
-    public ActionResult<PagedResult<MessageDto>> GetPagedContacts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+    public ActionResult<PagedResult<ContactDto>> GetPagedContacts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
     {
         var result = _messageService.GetPagedContacts(User.PersonId(), pageNumber, pageSize);
         return Ok(result);
@@ -64,5 +64,26 @@ public class MessageController : ControllerBase
     {
         _messageService.DeleteMessage(id, User.PersonId());
         return Ok();
+    }
+
+    [HttpGet]
+    [Route("users/search")]
+    public ActionResult<List<UserSearchResultDto>> SearchUsers([FromQuery] string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return BadRequest("Search term cannot be empty");
+        }
+
+        var result = _messageService.SearchUsers(searchTerm, User.PersonId());
+        return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("users")]
+    public ActionResult<List<UserSearchResultDto>> GetAllUsers()
+    {
+        var result = _messageService.GetAllUsers(User.PersonId());
+        return Ok(result);
     }
 }

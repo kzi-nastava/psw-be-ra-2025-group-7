@@ -45,6 +45,8 @@ Directory.CreateDirectory(imagesPath);
 Directory.CreateDirectory(Path.Combine(webRootPath, "enhanced-review-images"));
 Directory.CreateDirectory(Path.Combine(webRootPath, "keypoint-images"));
 
+// Folder za profilne slike
+Directory.CreateDirectory(Path.Combine(webRootPath, "profile-images"));
 Directory.CreateDirectory(Path.Combine(webRootPath, "clubs"));
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
