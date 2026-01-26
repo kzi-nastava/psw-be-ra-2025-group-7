@@ -184,6 +184,9 @@ namespace Explorer.Tours.Core.Mappers
             .ForMember(d => d.ResponseCount, opt => opt.Ignore())
             .ForMember(d => d.DaysUntilExpiration, opt => opt.Ignore());
 
+            // TourPlaylist mappings
+            CreateMap<TourPlaylist, TourPlaylistDto>();
+            CreateMap<PlaylistTrack, PlaylistTrackDto>().ReverseMap();
 
         }
     }
