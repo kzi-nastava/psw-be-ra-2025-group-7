@@ -13,5 +13,6 @@ namespace Explorer.Stakeholders.API.Public
         UserProfileDto Create(UserProfileDto profile);
         UserProfileDto Update(UserProfileDto profile);
         void AddXP(long userId, int XP);
+        List<UserProfileDto> GetTopUsersByXp(int count);
     }
 }
