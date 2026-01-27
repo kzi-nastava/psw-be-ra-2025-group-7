@@ -59,6 +59,7 @@ public static class ToursStartup
         services.AddScoped<IEnhancedReviewService, EnhancedReviewService>();
         services.AddScoped<ITourRequestService, TourRequestService>();
         services.AddScoped<IAuthorTourRequestService, AuthorTourRequestService>();
+        services.AddScoped<ITourReadService, TourReadService>();
 
     }
 
@@ -82,6 +83,7 @@ public static class ToursStartup
         services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
         services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
         services.AddScoped<ITourRequestRepository, TourRequestDbRepository>();
+        services.AddScoped<ITourReadRepository, TourReadRepository>();
 
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
