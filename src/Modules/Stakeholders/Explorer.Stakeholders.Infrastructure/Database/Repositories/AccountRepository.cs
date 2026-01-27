@@ -56,7 +56,7 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
             };
         }
 
-        public IEnumerable<AccountDto> GetAll()
+        public IEnumerable<Account> GetAll()
         {
             var users = _context.Users.AsNoTracking().ToList();
             var people = _context.People.AsNoTracking().ToList();
@@ -65,7 +65,7 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
                 from u in users
                 join p in people on u.Id equals p.UserId into up
                 from p in up.DefaultIfEmpty()
-                select new AccountDto
+                select new Account
                 {
                     Id = (int)u.Id,
                     Username = u.Username,

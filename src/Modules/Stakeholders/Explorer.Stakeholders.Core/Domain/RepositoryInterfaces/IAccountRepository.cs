@@ -12,7 +12,7 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
     {
         Account Create(Account account);
 
-        IEnumerable<AccountDto> GetAll();
+        IEnumerable<Account> GetAll();
 
         Account? Get(int id);
 
