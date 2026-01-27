@@ -10,11 +10,13 @@ namespace Explorer.Payments.Core.Domain
         public long AuthorId { get; private set; }
         public long? TourId { get; private set; }
         public bool IsActive { get; private set; }
+        public bool IsUniversal { get; private set; }
 
         private Coupon() { }
 
-        public Coupon(long authorId, int discountPercentage, DateTime? expirationDate, long? tourId)
+        public Coupon(long authorId, int discountPercentage, DateTime? expirationDate, long? tourId, bool isUniversal = false)
         {
+            IsUniversal = isUniversal;
             AuthorId = authorId;
             DiscountPercentage = discountPercentage;
             ExpirationDate = expirationDate;
@@ -35,13 +37,18 @@ namespace Explorer.Payments.Core.Domain
 
             if (AuthorId == 0)
                 throw new ArgumentException("Author ID must be valid.");
+
+
+            if (IsUniversal && TourId.HasValue)
+                throw new ArgumentException("Universal coupon cannot be tied to a specific tour.");
+
         }
 
         public void Update(int discountPercentage, DateTime? expirationDate, long? tourId)
         {
             DiscountPercentage = discountPercentage;
             ExpirationDate = expirationDate;
-            TourId = tourId;
+            TourId = IsUniversal ? null : tourId;
 
             Validate();
         }
@@ -69,6 +76,8 @@ namespace Explorer.Payments.Core.Domain
 
         public bool AppliesTo(long tourId, long authorId)
         {
+            if (IsUniversal) return true;
+
             if (AuthorId != authorId)
                 return false;
 
@@ -85,5 +94,8 @@ namespace Explorer.Payments.Core.Domain
             return new string(Enumerable.Repeat(chars, 8)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+
+        public static Coupon CreateUniversalIssuedBy(long issuerAuthorId, int discountPercentage)
+        => new Coupon(issuerAuthorId, discountPercentage, expirationDate: null, tourId: null, isUniversal: true);
     }
 }

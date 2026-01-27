@@ -241,6 +241,10 @@ namespace Explorer.Payments.Infrastructure.Database
                 b.Property(c => c.IsActive)
                     .IsRequired();
 
+                b.Property(c => c.IsUniversal)
+                    .IsRequired()
+                    .HasDefaultValue(false);
+
                 b.HasIndex(c => c.Code)
                     .IsUnique();
 

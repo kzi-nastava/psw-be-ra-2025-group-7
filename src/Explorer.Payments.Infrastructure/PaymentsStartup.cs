@@ -38,6 +38,8 @@ namespace Explorer.Payments.Infrastructure
             services.AddScoped<ISaleService, SaleService>();
             // NEW (crypto payments)
             services.AddScoped<ICryptoPaymentService, SolanaCryptoPaymentService>();
+            services.AddScoped<ICouponInternalService, CouponInternalService>();
+
         }
 
         private static void SetupInfrastructure(IServiceCollection services)

@@ -313,5 +313,32 @@ namespace Explorer.Payments.Tests.Unit
             // Assert
             coupon.Code.All(c => char.IsLetterOrDigit(c)).ShouldBeTrue();
         }
+
+        [Fact]
+        public void Universal_coupon_applies_to_any_author_and_any_tour()
+        {
+            var coupon = Coupon.CreateUniversalIssuedBy(-11, 10);
+
+            coupon.IsUniversal.ShouldBeTrue();
+            coupon.AppliesTo(-999, -999).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Universal_coupon_cannot_be_tied_to_specific_tour()
+        {
+            Should.Throw<ArgumentException>(() =>
+                new Coupon(-11, 10, null, tourId: -1, isUniversal: true)
+            ).Message.ShouldBe("Universal coupon cannot be tied to a specific tour.");
+        }
+
+        [Fact]
+        public void AppliesTo_returns_true_for_universal_coupon_regardless_of_author()
+        {
+            var coupon = Coupon.CreateUniversalIssuedBy(-11, 10);
+
+            coupon.AppliesTo(-1, -11).ShouldBeTrue();
+            coupon.AppliesTo(-1, -999).ShouldBeTrue(); 
+        }
+
     }
 }

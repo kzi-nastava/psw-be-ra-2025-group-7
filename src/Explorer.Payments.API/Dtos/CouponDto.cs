@@ -9,5 +9,7 @@ namespace Explorer.Payments.API.Dtos
         public long AuthorId { get; set; }
         public long? TourId { get; set; }
         public bool IsActive { get; set; }
+        public bool IsUniversal { get; set; }
+
     }
 }
