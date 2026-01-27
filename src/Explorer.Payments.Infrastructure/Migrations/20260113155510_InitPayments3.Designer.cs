@@ -3,6 +3,7 @@ using System;
 using Explorer.Payments.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Explorer.Payments.Infrastructure.Migrations
 {
     [DbContext(typeof(PaymentsContext))]
-    partial class PaymentsContextModelSnapshot : ModelSnapshot
+    [Migration("20260113155510_InitPayments3")]
+    partial class InitPayments3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -146,57 +149,6 @@ namespace Explorer.Payments.Infrastructure.Migrations
                     b.ToTable("Coupons", "payments");
                 });
 
-            modelBuilder.Entity("Explorer.Payments.Core.Domain.CryptoDepositRequest", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("BlockchainExplorerUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<decimal>("CoinsAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("ConfirmedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("CryptoAmount")
-                        .HasColumnType("decimal(18,8)");
-
-                    b.Property<DateTime>("RequestedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("SenderWalletAddress")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("TransactionId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("TransactionId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CryptoDepositRequests", "payments");
-                });
-
             modelBuilder.Entity("Explorer.Payments.Core.Domain.OrderItem", b =>
                 {
                     b.Property<long>("Id")
@@ -324,47 +276,6 @@ namespace Explorer.Payments.Infrastructure.Migrations
                     b.ToTable("PurchaseNotifications", "payments");
                 });
 
-            modelBuilder.Entity("Explorer.Payments.Core.Domain.Sale", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("AuthorId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("DiscountPercentage")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("End")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("Start")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Sales", "payments");
-                });
-
-            modelBuilder.Entity("Explorer.Payments.Core.Domain.SaleTour", b =>
-                {
-                    b.Property<long>("SaleId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TourId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("SaleId", "TourId");
-
-                    b.ToTable("SaleTours", "payments");
-                });
-
             modelBuilder.Entity("Explorer.Payments.Core.Domain.ShoppingCart", b =>
                 {
                     b.Property<long>("Id")
@@ -402,16 +313,10 @@ namespace Explorer.Payments.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("SolanaWalletAddress")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SolanaWalletAddress");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -435,25 +340,9 @@ namespace Explorer.Payments.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Explorer.Payments.Core.Domain.SaleTour", b =>
-                {
-                    b.HasOne("Explorer.Payments.Core.Domain.Sale", "Sale")
-                        .WithMany("SaleTours")
-                        .HasForeignKey("SaleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Sale");
-                });
-
             modelBuilder.Entity("Explorer.Payments.Core.Domain.Bundle", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("Explorer.Payments.Core.Domain.Sale", b =>
-                {
-                    b.Navigation("SaleTours");
                 });
 
             modelBuilder.Entity("Explorer.Payments.Core.Domain.ShoppingCart", b =>
