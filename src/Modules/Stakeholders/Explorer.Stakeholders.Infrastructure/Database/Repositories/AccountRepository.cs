@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Infrastructure.Database;
@@ -71,7 +72,9 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
                     Email = p?.Email ?? string.Empty,
                     Role = u.Role.ToString(),
                     IsBlocked = !u.IsActive,
-                    Password = string.Empty
+                 //   Password = string.Empty,
+                    FirstName = p?.Name ?? string.Empty,
+                    LastName = p?.Surname ?? string.Empty
                 };
 
             return result.ToList();
