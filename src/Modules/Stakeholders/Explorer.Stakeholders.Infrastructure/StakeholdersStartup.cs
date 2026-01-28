@@ -13,7 +13,6 @@ using Explorer.Stakeholders.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
-using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.Core.UseCases.Internal;
 
 namespace Explorer.Stakeholders.Infrastructure;
@@ -44,6 +43,8 @@ public static class StakeholdersStartup
         services.AddScoped<IClubMessageService, ClubMessageService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IUserInternalService, UserInternalService>();
+        services.AddScoped<IPersonNameInternalService, PersonNameInternalService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

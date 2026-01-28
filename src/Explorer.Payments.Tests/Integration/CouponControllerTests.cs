@@ -55,6 +55,8 @@ public class CouponControllerTests : BasePaymentsIntegrationTest, IClassFixture<
         result.Code.ShouldNotBeNullOrEmpty();
         result.Code.Length.ShouldBe(8);
         result.IsActive.ShouldBeTrue();
+        result.IsUniversal.ShouldBeFalse();
+
     }
 
     [Fact]
@@ -307,4 +309,16 @@ public class CouponControllerTests : BasePaymentsIntegrationTest, IClassFixture<
         var hasExpired = allCoupons.Any(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value < DateTime.UtcNow);
         hasExpired.ShouldBeTrue("Expected at least one expired coupon from seed data");
     }
+
+    [Fact]
+    public void Can_get_universal_coupon_from_seed()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+
+        var c = context.Coupons.SingleOrDefault(x => x.Code == "UNIV10AA");
+        c.ShouldNotBeNull();
+        c!.IsUniversal.ShouldBeTrue();
+    }
+
 }

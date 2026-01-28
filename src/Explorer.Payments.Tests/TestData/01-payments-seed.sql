@@ -73,6 +73,20 @@ BEGIN
     END IF;
 END $$;
 
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'payments'
+          AND table_name = 'Coupons'
+          AND column_name = 'IsUniversal'
+    ) THEN
+        ALTER TABLE payments."Coupons"
+        ADD COLUMN "IsUniversal" boolean NOT NULL DEFAULT false;
+    END IF;
+END $$;
+
+
 -- ========================================
 -- 0. CLEANUP - Delete existing test data (in reverse foreign key order)
 -- ========================================
@@ -100,20 +114,21 @@ VALUES
 -- 2. COUPONS - Test coupons for authors
 -- ========================================
 INSERT INTO payments."Coupons" 
-    ("Id", "Code", "DiscountPercentage", "ExpirationDate", "AuthorId", "TourId", "IsActive")
+("Id","Code","DiscountPercentage","ExpirationDate","AuthorId","TourId","IsActive","IsUniversal")
 VALUES 
-    -- Author -11 coupons (4 total for testing)
-    (-1, 'TESTCP01', 20, NOW() + INTERVAL '6 months', -11, NULL, true),
-    (-2, 'TESTCP02', 10, NOW() + INTERVAL '1 month', -11, NULL, true),
-    (-3, 'EXPIRED1', 50, NOW() - INTERVAL '10 days', -11, NULL, true),
-    (-4, 'INACTIVE', 15, NOW() + INTERVAL '1 year', -11, NULL, false),
-    
-    -- Author -12 coupons
-    (-5, 'AUTHOR12', 25, NULL, -12, NULL, true),
-    (-6, 'TOUR2CPN', 30, NOW() + INTERVAL '2 months', -12, NULL, true),
-    
-    -- Author -13 coupons
-    (-7, 'AUTHOR13', 40, NOW() + INTERVAL '3 months', -13, NULL, true);
+    (-1,'TESTCP01',20, NOW() + INTERVAL '6 months', -11, NULL, true, false),
+    (-2,'TESTCP02',10, NOW() + INTERVAL '1 month',  -11, NULL, true, false),
+    (-3,'EXPIRED1',50, NOW() - INTERVAL '10 days',  -11, NULL, true, false),
+    (-4,'INACTIVE',15, NOW() + INTERVAL '1 year',   -11, NULL, false, false),
+
+    (-5,'AUTHOR12',25, NULL, -12, NULL, true, false),
+    (-6,'TOUR2CPN',30, NOW() + INTERVAL '2 months', -12, NULL, true, false),
+
+    (-7,'AUTHOR13',40, NOW() + INTERVAL '3 months', -13, NULL, true, false),
+
+    -- NEW: universal issued by -11
+    (-8,'UNIV10AA',10, NULL, -11, NULL, true, true);
+
 
 -- ========================================
 -- 3. PAYMENT RECORDS - Historical purchases

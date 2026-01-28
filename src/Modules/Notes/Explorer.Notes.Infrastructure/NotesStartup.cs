@@ -1,10 +1,11 @@
-﻿using Explorer.Notes.API.Public;
+﻿using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Notes.API.Internal;
+using Explorer.Notes.API.Public;
 using Explorer.Notes.Core.Domain.RepositoryInterfaces;
 using Explorer.Notes.Core.Mappers;
 using Explorer.Notes.Core.UseCases;
 using Explorer.Notes.Infrastructure.Database;
 using Explorer.Notes.Infrastructure.Database.Repositories;
-using Explorer.BuildingBlocks.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -24,6 +25,7 @@ namespace Explorer.Notes.Infrastructure
         private static void SetupCore(IServiceCollection services)
         {
             services.AddScoped<INoteService, NoteService>();
+            services.AddScoped<INoteInternalService, NoteInternalService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
