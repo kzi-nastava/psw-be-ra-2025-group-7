@@ -66,6 +66,7 @@ public static class ToursStartup
         services.AddHttpClient<IDeezerService, DeezerService>();
         services.AddScoped<IWeatherService, WeatherService>();
         services.AddHttpClient<IWeatherService, WeatherService>();
+        services.AddScoped<ITourReadService, TourReadService>();
 
     }
 
@@ -90,6 +91,7 @@ public static class ToursStartup
         services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
         services.AddScoped<ITourRequestRepository, TourRequestDbRepository>();
         services.AddScoped<ITourPlaylistRepository, TourPlaylistDbRepository>();
+        services.AddScoped<ITourReadRepository, TourReadRepository>();
 
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));

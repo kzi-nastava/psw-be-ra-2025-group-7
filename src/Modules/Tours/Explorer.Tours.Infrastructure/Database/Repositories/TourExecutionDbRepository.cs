@@ -129,4 +129,19 @@ public class TourExecutionDbRepository : ITourExecutionRepository
         return execution;
     }
 
+    public bool HasCompletedTour(long touristId, long tourId, long? excludeExecutionId = null)
+    {
+        var query = _dbSet.Where(te =>
+            te.TouristId == touristId &&
+            te.TourId == tourId &&
+            te.Status == TourExecutionStatus.Completed);
+
+        if (excludeExecutionId.HasValue)
+            query = query.Where(te => te.Id != excludeExecutionId.Value);
+
+        return query.Any();
+    }
+
+
+
 }
