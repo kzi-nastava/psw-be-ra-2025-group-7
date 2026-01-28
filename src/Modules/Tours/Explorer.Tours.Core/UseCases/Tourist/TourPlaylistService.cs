@@ -12,7 +12,7 @@ public class TourPlaylistService : ITourPlaylistService
     private readonly ITourPlaylistRepository _playlistRepository;
     private readonly ITourExecutionRepository _executionRepository;
     private readonly ITourRepository _tourRepository;
-    private readonly ISpotifyService _spotifyService;
+    private readonly IDeezerService _deezerService;
     private readonly IWeatherService _weatherService;
     private readonly IMapper _mapper;
 
@@ -20,17 +20,17 @@ public class TourPlaylistService : ITourPlaylistService
     private static readonly Dictionary<string, List<string>> REGIONAL_GENRES = new()
     {
         { "southern_europe", new() { "mediterranean", "latin", "folk" } },
-        { "western_europe", new() { "european pop", "indie", "electronic" } },
-        { "eastern_europe", new() { "balkan", "slavic folk", "electronic" } },
-        { "northern_europe", new() { "nordic folk", "indie", "metal" } },
-        { "east_asia", new() { "k-pop", "j-pop", "mandopop", "indie" } },
-        { "southeast_asia", new() { "asian pop", "traditional", "indie" } },
-        { "south_asia", new() { "bollywood", "indie", "traditional" } },
+        { "western_europe", new() { "pop", "indie", "electronic" } },
+        { "eastern_europe", new() { "folk", "electronic" } },
+        { "northern_europe", new() { "indie", "metal" } },
+        { "east_asia", new() { "pop", "indie" } },
+        { "southeast_asia", new() { "pop", "indie" } },
+        { "south_asia", new() { "pop", "indie" } },
         { "north_america", new() { "pop", "rock", "hip-hop", "country" } },
-        { "latin_america", new() { "latin", "reggaeton", "salsa", "pop latino" } },
-        { "africa", new() { "afrobeat", "african pop", "world", "reggae" } },
+        { "latin_america", new() { "latin", "reggae", "pop" } },
+        { "africa", new() { "reggae", "world", "pop" } },
         { "oceania", new() { "indie", "pop", "reggae", "alternative" } },
-        { "middle_east", new() { "arabic pop", "world", "traditional" } }
+        { "middle_east", new() { "pop", "world" } }
     };
 
     // Mapiranje žanrova prema državama
@@ -80,14 +80,14 @@ public class TourPlaylistService : ITourPlaylistService
         ITourPlaylistRepository playlistRepository,
         ITourExecutionRepository executionRepository,
         ITourRepository tourRepository,
-        ISpotifyService spotifyService,
+        IDeezerService deezerService,
         IWeatherService weatherService,
         IMapper mapper)
     {
         _playlistRepository = playlistRepository;
         _executionRepository = executionRepository;
         _tourRepository = tourRepository;
-        _spotifyService = spotifyService;
+        _deezerService = deezerService;
         _weatherService = weatherService;
         _mapper = mapper;
     }
@@ -139,7 +139,7 @@ public class TourPlaylistService : ITourPlaylistService
         var numberOfTracks = (int)Math.Ceiling(tourDurationMinutes / 3.5);
         numberOfTracks = Math.Min(numberOfTracks, 50);
 
-        var trackDtos = await _spotifyService.GetRecommendations(
+        var trackDtos = await _deezerService.GetRecommendations(
             combinedGenres,
             energy,
             valence,

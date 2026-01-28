@@ -2,7 +2,7 @@
 
 namespace Explorer.Tours.API.Public.Tourist;
 
-public interface ISpotifyService
+public interface IDeezerService
 {
     Task<List<PlaylistTrackDto>> GetRecommendations(
         List<string> genres,

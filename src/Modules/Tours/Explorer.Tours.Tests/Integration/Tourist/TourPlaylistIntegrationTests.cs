@@ -15,7 +15,7 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest
 {
     public TourPlaylistIntegrationTests(ToursTestFactory factory) : base(factory) { }
 
-    [Fact(Skip = "Requires Spotify API credentials - waiting for registration to open")]
+    [Fact]
     public async Task GeneratePlaylist_Creates_Playlist_Successfully()
     {
         // Arrange
@@ -56,7 +56,7 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest
         playlist.TotalDurationMinutes.ShouldBeGreaterThan(0);
     }
 
-    [Fact(Skip = "Requires Spotify API credentials - waiting for registration to open")]
+    [Fact]
     public async Task GeneratePlaylist_With_Weather_Includes_Weather_Data()
     {
         // Arrange
@@ -181,7 +181,7 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest
             await controller.GeneratePlaylist(execution.Id, dto));
     }
 
-    [Fact(Skip = "Requires Spotify API credentials - waiting for registration to open")]
+    [Fact]
     public async Task GeneratePlaylist_Replaces_Existing_Playlist()
     {
         // Arrange
@@ -229,7 +229,7 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest
         playlists.Count.ShouldBe(1);
     }
 
-    [Fact(Skip = "Requires Spotify API credentials - waiting for registration to open")]
+    [Fact]
     public async Task GetPlaylist_Returns_Existing_Playlist()
     {
         // Arrange
@@ -292,7 +292,7 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest
             controller.GetPlaylist(execution.Id));
     }
 
-    [Fact(Skip = "Requires Spotify API credentials - waiting for registration to open")]
+    [Fact]
     public async Task GetPlaylist_Throws_When_Not_Owner()
     {
         // Arrange
@@ -325,7 +325,7 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest
             controller.GetPlaylist(execution.Id));
     }
 
-    [Fact(Skip = "Requires Spotify API credentials - waiting for registration to open")]
+    [Fact]
     public async Task DeletePlaylist_Removes_Playlist_Successfully()
     {
         // Arrange
@@ -391,7 +391,7 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest
             controller.DeletePlaylist(execution.Id));
     }
 
-    [Fact(Skip = "Requires Spotify API credentials - waiting for registration to open")]
+    [Fact]
     public async Task DeletePlaylist_Throws_When_Not_Owner()
     {
         // Arrange
@@ -428,20 +428,19 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest
 
     /// <summary>
     /// Ensures a tour has at least one duration by adding one via raw SQL if needed.
-    /// Uses INSERT with WHERE NOT EXISTS to avoid duplicates.
+    /// Uses INSERT with WHERE NOT EXISTS to be idempotent.
     /// </summary>
-    /// <summary>
     private async Task EnsureTourHasDuration(ToursContext dbContext, long tourId)
     {
         // Single SQL query that inserts only if duration doesn't exist
         // TransportType.Walking = 1, Duration = 120 minutes
         await dbContext.Database.ExecuteSqlRawAsync(
             @"INSERT INTO tours.""TourDurations"" (""TourId"", ""TransportType"", ""DurationInMinutes"") 
-          SELECT {0}, {1}, {2}
-          WHERE NOT EXISTS (
-              SELECT 1 FROM tours.""TourDurations"" 
-              WHERE ""TourId"" = {0}
-          )",
+              SELECT {0}, {1}, {2}
+              WHERE NOT EXISTS (
+                  SELECT 1 FROM tours.""TourDurations"" 
+                  WHERE ""TourId"" = {0}
+              )",
             tourId, 1, 120);
     }
 

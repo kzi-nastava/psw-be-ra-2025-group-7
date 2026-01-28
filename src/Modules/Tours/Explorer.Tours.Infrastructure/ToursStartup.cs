@@ -62,9 +62,9 @@ public static class ToursStartup
         services.AddScoped<ITourRequestService, TourRequestService>();
         services.AddScoped<IAuthorTourRequestService, AuthorTourRequestService>();
         services.AddScoped<ITourPlaylistService, TourPlaylistService>();
-        services.AddScoped<ISpotifyService, SpotifyService>();
+        services.AddScoped<IDeezerService, DeezerService>();
+        services.AddHttpClient<IDeezerService, DeezerService>();
         services.AddScoped<IWeatherService, WeatherService>();
-        services.AddHttpClient<ISpotifyService, SpotifyService>();
         services.AddHttpClient<IWeatherService, WeatherService>();
 
     }
