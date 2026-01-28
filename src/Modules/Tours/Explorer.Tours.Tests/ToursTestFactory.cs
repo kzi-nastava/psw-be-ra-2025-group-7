@@ -4,6 +4,8 @@ using Explorer.Tours.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Tours.API.Public.Tourist;
+using Explorer.Tours.Tests.Integration.Tourist;
 namespace Explorer.Tours.Tests;
 
 public class ToursTestFactory : BaseTestFactory<ToursContext>
@@ -20,5 +22,6 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
         services.Remove(descriptor!);
         services.AddDbContext<EncountersContext>(SetupTestContext());
         return services;
+
     }
 }
