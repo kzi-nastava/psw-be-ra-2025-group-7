@@ -105,11 +105,9 @@ namespace Explorer.Payments.Core.UseCases
             foreach (var tourId in tourIds)
             {
                 if (_tokenRepository.HasUserPurchasedTour(touristId, tourId))
-                {
                     throw new InvalidOperationException($"Tour with ID {tourId} has already been purchased.");
-                }
             }
-            
+
             Coupon? coupon = null;
             if (!string.IsNullOrWhiteSpace(couponCode))
             {
@@ -119,27 +117,29 @@ namespace Explorer.Payments.Core.UseCases
             }
 
             var tours = tourIds.Select(id => _tourRepository.Get(id)).ToList();
-            var totalBeforeDiscount = cart.TotalPrice;
-            var totalAfterDiscount = totalBeforeDiscount;
-            var discountPercentage = 0m;
 
             var sales = tours.ToDictionary(
-                        t => t.Id,
-                        t => _saleRepository.GetActiveSaleForTour(t.Id, DateTime.UtcNow)
-                    );
+                t => t.Id,
+                t => _saleRepository.GetActiveSaleForTour(t.Id, DateTime.UtcNow)
+            );
 
+            long? couponTargetTourId = null;
 
             if (coupon != null)
             {
-                if (coupon.TourId.HasValue)
+                if (coupon.IsUniversal)
                 {
-                    var targetTour = tours.FirstOrDefault(t => t.Id == coupon.TourId.Value && t.AuthorId == coupon.AuthorId);
+                    couponTargetTourId = tours.OrderByDescending(t => t.Price).First().Id;
+                }
+                else if (coupon.TourId.HasValue)
+                {
+                    var targetTour = tours.FirstOrDefault(t =>
+                        t.Id == coupon.TourId.Value && t.AuthorId == coupon.AuthorId);
+
                     if (targetTour == null)
                         throw new InvalidOperationException("Coupon does not apply to any tour in the cart.");
 
-                    var discount = targetTour.Price * (coupon.DiscountPercentage / 100m);
-                    totalAfterDiscount -= discount;
-                    discountPercentage = (discount / totalBeforeDiscount) * 100m;
+                    couponTargetTourId = targetTour.Id;
                 }
                 else
                 {
@@ -147,21 +147,57 @@ namespace Explorer.Payments.Core.UseCases
                     if (!authorTours.Any())
                         throw new InvalidOperationException("Coupon does not apply to any tour in the cart.");
 
-                    var mostExpensiveTour = authorTours.OrderByDescending(t => t.Price).First();
-                    var discount = mostExpensiveTour.Price * (coupon.DiscountPercentage / 100m);
-                    totalAfterDiscount -= discount;
-                    discountPercentage = (discount / totalBeforeDiscount) * 100m;
+                    couponTargetTourId = authorTours.OrderByDescending(t => t.Price).First().Id;
+                }
+
+                if (!couponTargetTourId.HasValue)
+                    throw new InvalidOperationException("Coupon target tour could not be determined.");
+
+                if (!coupon.IsUniversal)
+                {
+                    var targetTour = tours.First(t => t.Id == couponTargetTourId.Value);
+                    if (!coupon.AppliesTo(targetTour.Id, targetTour.AuthorId))
+                        throw new InvalidOperationException("Coupon does not apply to selected tour.");
                 }
             }
 
+            // ✅ 1) Izračunaj ukupno (sale + coupon na target samo)
+            decimal totalAfterDiscount = 0m;
+
+            foreach (var tour in tours)
+            {
+                var tourFinalPrice = tour.Price;
+
+                // Sale discount prvo
+                var sale = sales[tour.Id];
+                if (sale != null)
+                {
+                    tourFinalPrice = tourFinalPrice * (1 - sale.DiscountPercentage / 100m);
+                }
+
+                // Coupon discount samo na target
+                var appliesCouponToThisTour =
+                    coupon != null &&
+                    couponTargetTourId.HasValue &&
+                    tour.Id == couponTargetTourId.Value &&
+                    (coupon.IsUniversal || tour.AuthorId == coupon.AuthorId);
+
+                if (appliesCouponToThisTour)
+                {
+                    tourFinalPrice = tourFinalPrice * (1 - coupon!.DiscountPercentage / 100m);
+                }
+
+                totalAfterDiscount += tourFinalPrice;
+            }
+
+            // ✅ 2) Tek sad proveri i skini pare
             var balance = _walletInternalService.GetBalance(touristId);
             if (balance < totalAfterDiscount)
-            {
                 throw new InvalidOperationException("Insufficient funds");
-            }
 
             _walletInternalService.Withdraw(touristId, totalAfterDiscount);
 
+            // ✅ 3) Tek posle withdraw-a pravi tokene + records
             var createdTokenDtos = new List<ToursDto.TourPurchaseTokenDto>();
             var purchasedTourNames = new List<string>();
 
@@ -169,33 +205,38 @@ namespace Explorer.Payments.Core.UseCases
             {
                 purchasedTourNames.Add(tour.Name);
 
-                // Check if this specific tour got a discount
                 var tourDiscountPercentage = 0m;
                 var tourFinalPrice = tour.Price;
-                var sale = sales[tour.Id];
 
-                // 1) Sale discount
+                // Sale
+                var sale = sales[tour.Id];
                 if (sale != null)
                 {
                     tourDiscountPercentage = sale.DiscountPercentage;
-                    tourFinalPrice = tour.Price * (1 - sale.DiscountPercentage / 100m);
+                    tourFinalPrice = tourFinalPrice * (1 - sale.DiscountPercentage / 100m);
                 }
 
-                if (coupon != null && coupon.AppliesTo(tour.Id, tour.AuthorId))
+                var appliesCouponToThisTour =
+                    coupon != null &&
+                    couponTargetTourId.HasValue &&
+                    tour.Id == couponTargetTourId.Value &&
+                    (coupon.IsUniversal || tour.AuthorId == coupon.AuthorId);
+
+                if (appliesCouponToThisTour)
                 {
-                    tourDiscountPercentage = coupon.DiscountPercentage;
-                    tourFinalPrice = tourFinalPrice * (1 - tourDiscountPercentage / 100m);
+                    // ovde po želji možeš da sabereš popuste, ali ti si htela da kupon "prepiše" discountPercentage
+                    tourDiscountPercentage = coupon!.DiscountPercentage;
+                    tourFinalPrice = tourFinalPrice * (1 - coupon.DiscountPercentage / 100m);
                 }
 
                 var token = TourPurchaseToken.CreateForTour(touristId, tour);
                 var createdToken = _tokenRepository.Create(token);
 
-                // Map to DTO and add payment information
                 var tokenDto = _mapper.Map<ToursDto.TourPurchaseTokenDto>(createdToken);
                 tokenDto.OriginalPrice = tour.Price;
                 tokenDto.DiscountPercentage = tourDiscountPercentage;
                 tokenDto.FinalPrice = tourFinalPrice;
-                tokenDto.CouponCode = coupon != null && coupon.AppliesTo(tour.Id, tour.AuthorId) ? couponCode : null;
+                tokenDto.CouponCode = appliesCouponToThisTour ? couponCode : null;
 
                 createdTokenDtos.Add(tokenDto);
 
@@ -205,7 +246,7 @@ namespace Explorer.Payments.Core.UseCases
                     null,
                     tourFinalPrice,
                     tourDiscountPercentage,
-                    coupon != null && coupon.AppliesTo(tour.Id, tour.AuthorId) ? couponCode : null
+                    appliesCouponToThisTour ? couponCode : null
                 );
                 _paymentRecordRepository.Create(paymentRecord);
             }
@@ -217,6 +258,8 @@ namespace Explorer.Payments.Core.UseCases
 
             return createdTokenDtos.Cast<object>().ToList();
         }
+
+
 
         private ShoppingCart GetOrCreateCart(long touristId)
         {

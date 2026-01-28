@@ -21,6 +21,8 @@ namespace Explorer.Tours.API.Dtos
         public string Status { get; set; } = "";
         public List<TourProblemMessageDto> Comments { get; set; } = new();
 
+        public long AuthorId { get; set; }
+
 
     }
 }

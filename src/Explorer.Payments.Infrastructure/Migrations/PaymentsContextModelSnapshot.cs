@@ -133,6 +133,11 @@ namespace Explorer.Payments.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsUniversal")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<long?>("TourId")
                         .HasColumnType("bigint");
 
@@ -324,6 +329,47 @@ namespace Explorer.Payments.Infrastructure.Migrations
                     b.ToTable("PurchaseNotifications", "payments");
                 });
 
+            modelBuilder.Entity("Explorer.Payments.Core.Domain.Sale", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AuthorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("DiscountPercentage")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Sales", "payments");
+                });
+
+            modelBuilder.Entity("Explorer.Payments.Core.Domain.SaleTour", b =>
+                {
+                    b.Property<long>("SaleId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TourId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("SaleId", "TourId");
+
+                    b.ToTable("SaleTours", "payments");
+                });
+
             modelBuilder.Entity("Explorer.Payments.Core.Domain.ShoppingCart", b =>
                 {
                     b.Property<long>("Id")
@@ -394,9 +440,25 @@ namespace Explorer.Payments.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("Explorer.Payments.Core.Domain.SaleTour", b =>
+                {
+                    b.HasOne("Explorer.Payments.Core.Domain.Sale", "Sale")
+                        .WithMany("SaleTours")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sale");
+                });
+
             modelBuilder.Entity("Explorer.Payments.Core.Domain.Bundle", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Explorer.Payments.Core.Domain.Sale", b =>
+                {
+                    b.Navigation("SaleTours");
                 });
 
             modelBuilder.Entity("Explorer.Payments.Core.Domain.ShoppingCart", b =>
