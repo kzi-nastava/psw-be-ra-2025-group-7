@@ -16,48 +16,6 @@ public class TourPlaylistService : ITourPlaylistService
     private readonly IWeatherService _weatherService;
     private readonly IMapper _mapper;
 
-    // Mapiranje žanrova prema regijama
-    private static readonly Dictionary<string, List<string>> REGIONAL_GENRES = new()
-    {
-        { "southern_europe", new() { "mediterranean", "latin", "folk" } },
-        { "western_europe", new() { "pop", "indie", "electronic" } },
-        { "eastern_europe", new() { "folk", "electronic" } },
-        { "northern_europe", new() { "indie", "metal" } },
-        { "east_asia", new() { "pop", "indie" } },
-        { "southeast_asia", new() { "pop", "indie" } },
-        { "south_asia", new() { "pop", "indie" } },
-        { "north_america", new() { "pop", "rock", "hip-hop", "country" } },
-        { "latin_america", new() { "latin", "reggae", "pop" } },
-        { "africa", new() { "reggae", "world", "pop" } },
-        { "oceania", new() { "indie", "pop", "reggae", "alternative" } },
-        { "middle_east", new() { "pop", "world" } }
-    };
-
-    // Mapiranje žanrova prema državama
-    private static readonly Dictionary<string, string> COUNTRY_TO_REGION = new()
-    {
-        { "italy", "southern_europe" },
-        { "spain", "southern_europe" },
-        { "france", "western_europe" },
-        { "germany", "western_europe" },
-        { "serbia", "eastern_europe" },
-        { "poland", "eastern_europe" },
-        { "norway", "northern_europe" },
-        { "sweden", "northern_europe" },
-        { "japan", "east_asia" },
-        { "china", "east_asia" },
-        { "thailand", "southeast_asia" },
-        { "india", "south_asia" },
-        { "usa", "north_america" },
-        { "canada", "north_america" },
-        { "mexico", "latin_america" },
-        { "brazil", "latin_america" },
-        { "south africa", "africa" },
-        { "egypt", "africa" },
-        { "australia", "oceania" },
-        { "new zealand", "oceania" }
-    };
-
     // Mapiranje po vremenskoj prognozi 
     private static readonly Dictionary<string, (double energy, double valence)> WEATHER_MOODS = new()
     {
@@ -126,13 +84,7 @@ public class TourPlaylistService : ITourPlaylistService
             weatherData = await _weatherService.GetCurrentWeather(firstKeyPoint.Latitude, firstKeyPoint.Longitude);
         }
 
-        var regionalGenres = GetRegionalGenres(tour);
-
-        var combinedGenres = dto.Genres
-            .Concat(regionalGenres)
-            .Distinct()
-            .Take(5)
-            .ToList();
+        var combinedGenres = dto.Genres.Take(5).ToList();
 
         var (energy, valence, tempo) = CalculateMoodParameters(weatherData);
 
@@ -206,21 +158,6 @@ public class TourPlaylistService : ITourPlaylistService
         }
 
         return tour.TourDurations.Sum(d => d.Minutes);
-    }
-
-    private List<string> GetRegionalGenres(Tour tour)
-    {
-        var tourText = $"{tour.Name} {tour.Description}".ToLower();
-
-        foreach (var (country, region) in COUNTRY_TO_REGION)
-        {
-            if (tourText.Contains(country))
-            {
-                return REGIONAL_GENRES.GetValueOrDefault(region, new List<string>());
-            }
-        }
-
-        return new List<string> { "pop", "indie" };
     }
 
     private (double energy, double valence, int tempo) CalculateMoodParameters(WeatherDataDto? weatherData)

@@ -48,91 +48,74 @@ public class DeezerService : IDeezerService
         int limit)
     {
         var tracks = new List<PlaylistTrackDto>();
+        var tracksPerGenre = (int)Math.Ceiling((double)limit / genres.Count) + 10; // +10 rezerve
 
-        // Deezer nema direktnu pretragu po mood parametrima kao Spotify,
-        // tako da koristimo žanrove i preuzimamo top pesme
-        foreach (var genre in genres.Take(3)) // Max 3 žanra da ne pretrpamo API
+        foreach (var genre in genres.Take(3)) // Max 3 žanra
         {
             var genreId = GetGenreId(genre);
-            var genreTracks = await GetTopTracksForGenre(genreId, limit / genres.Count);
+            var genreTracks = await GetPopularTracksForGenre(genreId, tracksPerGenre);
             tracks.AddRange(genreTracks);
-
-            if (tracks.Count >= limit)
-                break;
         }
 
-        // Ako nismo dobili dovoljno pesama iz žanrova, dodaj popularne pesme
-        if (tracks.Count < limit)
-        {
-            var chartTracks = await GetChartTracks(limit - tracks.Count);
-            tracks.AddRange(chartTracks);
-        }
-
-        return tracks.Take(limit).ToList();
+        // Shuffle i uzmi traženi broj
+        return tracks
+            .OrderBy(_ => Random.Shared.Next())
+            .Take(limit)
+            .ToList();
     }
 
-    private async Task<List<PlaylistTrackDto>> GetTopTracksForGenre(int genreId, int limit)
+    private async Task<List<PlaylistTrackDto>> GetPopularTracksForGenre(int genreId, int limit)
     {
         try
         {
-            // Deezer radio endpoint za žanr daje playlist pesama
-            var url = $"radio/{genreId}/tracks?limit={limit}";
-            var response = await _httpClient.GetAsync(url);
+            var tracks = new List<PlaylistTrackDto>();
 
-            if (!response.IsSuccessStatusCode)
+            // 1. Uzmi TOP izvođače iz žanra (najpopularnije)
+            var artistsUrl = $"genre/{genreId}/artists?limit=10";
+            var artistsResponse = await _httpClient.GetAsync(artistsUrl);
+
+            if (!artistsResponse.IsSuccessStatusCode)
                 return new List<PlaylistTrackDto>();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var deezerResponse = JsonSerializer.Deserialize<DeezerTracksResponse>(content, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var artistsContent = await artistsResponse.Content.ReadAsStringAsync();
+            var artistsData = JsonSerializer.Deserialize<DeezerArtistsResponse>(artistsContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (deezerResponse?.Data == null)
+            if (artistsData?.Data == null || artistsData.Data.Count == 0)
                 return new List<PlaylistTrackDto>();
 
-            return deezerResponse.Data.Select(track => new PlaylistTrackDto
+            // 2. Za svakog izvođača uzmi njihove TOP pesme (najslušanije)
+            var tracksPerArtist = Math.Max(3, limit / artistsData.Data.Count);
+
+            foreach (var artist in artistsData.Data)
             {
-                SpotifyTrackId = track.Id.ToString(), // Koristimo isto polje za Deezer ID
-                Name = track.Title,
-                Artist = track.Artist?.Name ?? "Unknown Artist",
-                SpotifyUri = track.Link, // Koristimo isto polje za Deezer link
-                DurationMs = track.Duration * 1000 // Deezer vraća sekunde, konvertujemo u ms
-            }).ToList();
-        }
-        catch
-        {
-            return new List<PlaylistTrackDto>();
-        }
-    }
+                var tracksUrl = $"artist/{artist.Id}/top?limit={tracksPerArtist}";
+                var tracksResponse = await _httpClient.GetAsync(tracksUrl);
 
-    private async Task<List<PlaylistTrackDto>> GetChartTracks(int limit)
-    {
-        try
-        {
-            var url = $"chart/0/tracks?limit={limit}";
-            var response = await _httpClient.GetAsync(url);
+                if (!tracksResponse.IsSuccessStatusCode)
+                    continue;
 
-            if (!response.IsSuccessStatusCode)
-                return new List<PlaylistTrackDto>();
+                var tracksContent = await tracksResponse.Content.ReadAsStringAsync();
+                var tracksData = JsonSerializer.Deserialize<DeezerTracksResponse>(tracksContent,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            var content = await response.Content.ReadAsStringAsync();
-            var deezerResponse = JsonSerializer.Deserialize<DeezerTracksResponse>(content, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+                if (tracksData?.Data == null)
+                    continue;
 
-            if (deezerResponse?.Data == null)
-                return new List<PlaylistTrackDto>();
+                tracks.AddRange(tracksData.Data.Select(track => new PlaylistTrackDto
+                {
+                    SpotifyTrackId = track.Id.ToString(),
+                    Name = track.Title,
+                    Artist = track.Artist?.Name ?? "Unknown Artist",
+                    SpotifyUri = track.Link,
+                    DurationMs = track.Duration * 1000
+                }));
 
-            return deezerResponse.Data.Select(track => new PlaylistTrackDto
-            {
-                SpotifyTrackId = track.Id.ToString(),
-                Name = track.Title,
-                Artist = track.Artist?.Name ?? "Unknown Artist",
-                SpotifyUri = track.Link,
-                DurationMs = track.Duration * 1000
-            }).ToList();
+                if (tracks.Count >= limit)
+                    break;
+            }
+
+            return tracks;
         }
         catch
         {
@@ -151,7 +134,21 @@ public class DeezerService : IDeezerService
         return 132;
     }
 
-    // Pomoćne klase za JSON deserializaciju
+    // ===========================
+    // JSON Deserializacija klase
+    // ===========================
+
+    private class DeezerArtistsResponse
+    {
+        public List<DeezerArtistInfo> Data { get; set; }
+    }
+
+    private class DeezerArtistInfo
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+    }
+
     private class DeezerTracksResponse
     {
         public List<DeezerTrack> Data { get; set; }
