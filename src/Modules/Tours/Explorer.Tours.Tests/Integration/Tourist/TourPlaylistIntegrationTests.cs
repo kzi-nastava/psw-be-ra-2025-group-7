@@ -46,7 +46,13 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest, IAsyncLife
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
+        // Cleanup test data
         await CleanupPersons(dbContext);
+
+        // OBRIŠI CELU stakeholders šemu DA BI Stakeholders testovi mogli da je kreiraju ponovo
+        await dbContext.Database.ExecuteSqlRawAsync(@"
+        DROP SCHEMA IF EXISTS stakeholders CASCADE;
+    ");
     }
 
     [Fact]
