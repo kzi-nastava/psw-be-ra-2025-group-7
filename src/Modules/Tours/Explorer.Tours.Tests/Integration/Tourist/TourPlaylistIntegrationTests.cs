@@ -462,59 +462,78 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest, IAsyncLife
 
     private async Task EnsurePersonsExist(ToursContext dbContext)
     {
-        // 1. Kreiraj Users
-        await dbContext.Database.ExecuteSqlRawAsync(@"
-            INSERT INTO stakeholders.""Users"" (""Id"", ""Username"", ""Password"", ""Role"", ""IsActive"")
-            VALUES 
-                (-1, 'author1', 'password', 1, true),
-                (-2, 'author2', 'password', 1, true),
-                (-3, 'turista1@gmail.com', 'password', 2, true),
-                (-21, 'turista2@gmail.com', 'password', 2, true)
-            ON CONFLICT (""Id"") DO NOTHING;
+        //  PRVO obriši postojeće test Users i People (da izbegnemo Username konflikte)
+        try
+        {
+            await dbContext.Database.ExecuteSqlRawAsync(@"
+            DELETE FROM stakeholders.""People"" 
+            WHERE ""Id"" IN (-1, -2, -3, -21, -4, -5, -10)
+            OR ""Email"" LIKE '%@test.com';
         ");
 
-        await dbContext.Database.ExecuteSqlRawAsync(@"
-            INSERT INTO stakeholders.""Users"" (""Id"", ""Username"", ""Password"", ""Role"", ""IsActive"")
-            SELECT DISTINCT 
-                t.""AuthorId"",
-                CONCAT('author', t.""AuthorId""),
-                'password',
-                1,
-                true
-            FROM tours.""Tours"" t
-            WHERE NOT EXISTS (
-                SELECT 1 FROM stakeholders.""Users"" u 
-                WHERE u.""Id"" = t.""AuthorId""
-            )
-            ON CONFLICT (""Id"") DO NOTHING;
+            await dbContext.Database.ExecuteSqlRawAsync(@"
+            DELETE FROM stakeholders.""Users"" 
+            WHERE ""Id"" IN (-1, -2, -3, -21, -4, -5, -10)
+            OR ""Username"" IN ('author1', 'author2', 'turista1@gmail.com', 'turista2@gmail.com')
+            OR ""Username"" LIKE 'author%';
         ");
+        }
+        catch
+        {
+            // Ignoriši ako tabele ne postoje
+        }
 
-        // 2. Kreiraj People
+        // 2. TEK SAD insertuj nove Users
         await dbContext.Database.ExecuteSqlRawAsync(@"
-            INSERT INTO stakeholders.""People"" (""Id"", ""UserId"", ""Name"", ""Surname"", ""Email"")
-            VALUES 
-                (-1, -1, 'Author', 'One', 'author1@test.com'),
-                (-2, -2, 'Author', 'Two', 'author2@test.com'),
-                (-3, -3, 'Tourist', 'Test', 'turista1@gmail.com'),
-                (-21, -21, 'Tourist', 'Test2', 'turista2@gmail.com')
-            ON CONFLICT (""Id"") DO NOTHING;
-        ");
+        INSERT INTO stakeholders.""Users"" (""Id"", ""Username"", ""Password"", ""Role"", ""IsActive"")
+        VALUES 
+            (-1, 'author1', 'password', 1, true),
+            (-2, 'author2', 'password', 1, true),
+            (-3, 'turista1@gmail.com', 'password', 2, true),
+            (-21, 'turista2@gmail.com', 'password', 2, true);
+    ");
 
+        // 3. Insertuj Users za sve tour AuthorId-eve
         await dbContext.Database.ExecuteSqlRawAsync(@"
-            INSERT INTO stakeholders.""People"" (""Id"", ""UserId"", ""Name"", ""Surname"", ""Email"")
-            SELECT DISTINCT 
-                t.""AuthorId"",
-                t.""AuthorId"",
-                'Author',
-                CONCAT('User', t.""AuthorId""),
-                CONCAT('author', t.""AuthorId"", '@test.com')
-            FROM tours.""Tours"" t
-            WHERE NOT EXISTS (
-                SELECT 1 FROM stakeholders.""People"" p 
-                WHERE p.""Id"" = t.""AuthorId""
-            )
-            ON CONFLICT (""Id"") DO NOTHING;
-        ");
+        INSERT INTO stakeholders.""Users"" (""Id"", ""Username"", ""Password"", ""Role"", ""IsActive"")
+        SELECT DISTINCT 
+            t.""AuthorId"",
+            CONCAT('author', t.""AuthorId""),
+            'password',
+            1,
+            true
+        FROM tours.""Tours"" t
+        WHERE NOT EXISTS (
+            SELECT 1 FROM stakeholders.""Users"" u 
+            WHERE u.""Id"" = t.""AuthorId""
+        );
+    ");
+
+        // 4. Insertuj People
+        await dbContext.Database.ExecuteSqlRawAsync(@"
+        INSERT INTO stakeholders.""People"" (""Id"", ""UserId"", ""Name"", ""Surname"", ""Email"")
+        VALUES 
+            (-1, -1, 'Author', 'One', 'author1@test.com'),
+            (-2, -2, 'Author', 'Two', 'author2@test.com'),
+            (-3, -3, 'Tourist', 'Test', 'turista1@gmail.com'),
+            (-21, -21, 'Tourist', 'Test2', 'turista2@gmail.com');
+    ");
+
+        // 5. Insertuj People za sve tour AuthorId-eve
+        await dbContext.Database.ExecuteSqlRawAsync(@"
+        INSERT INTO stakeholders.""People"" (""Id"", ""UserId"", ""Name"", ""Surname"", ""Email"")
+        SELECT DISTINCT 
+            t.""AuthorId"",
+            t.""AuthorId"",
+            'Author',
+            CONCAT('User', t.""AuthorId""),
+            CONCAT('author', t.""AuthorId"", '@test.com')
+        FROM tours.""Tours"" t
+        WHERE NOT EXISTS (
+            SELECT 1 FROM stakeholders.""People"" p 
+            WHERE p.""Id"" = t.""AuthorId""
+        );
+    ");
     }
 
     private async Task EnsurePurchaseToken(ToursContext dbContext, long touristId, long tourId)
