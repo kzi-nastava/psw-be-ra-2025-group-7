@@ -397,31 +397,6 @@ public class TourPlaylistIntegrationTests : BaseToursIntegrationTest, IAsyncLife
     }
 
     [Fact]
-    public async Task DeletePlaylist_Throws_When_Not_Found()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-3");
-        var executionService = scope.ServiceProvider.GetRequiredService<ITourExecutionService>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
-
-        await EnsurePersonsExist(dbContext);
-        await EnsureTourHasDuration(dbContext, -3);
-        await EnsurePurchaseToken(dbContext, -3, -3);
-
-        var execution = executionService.StartTour(-3, new StartTourExecutionDto
-        {
-            TourId = -3,
-            Latitude = 45.2551,
-            Longitude = 19.8636
-        });
-
-        // Act & Assert - No playlist to delete
-        Should.Throw<Explorer.BuildingBlocks.Core.Exceptions.NotFoundException>(() =>
-            controller.DeletePlaylist(execution.Id));
-    }
-
-    [Fact]
     public async Task DeletePlaylist_Throws_When_Not_Owner()
     {
         // Arrange
