@@ -17,6 +17,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Explorer.Tours.API.Public.Author;
 using Explorer.Tours.Core.UseCases.Author;
+using Explorer.Tours.Core.UseCases.ExternalServices;
+using Microsoft.Extensions.Http;
 
 
 namespace Explorer.Tours.Infrastructure;
@@ -59,6 +61,11 @@ public static class ToursStartup
         services.AddScoped<IEnhancedReviewService, EnhancedReviewService>();
         services.AddScoped<ITourRequestService, TourRequestService>();
         services.AddScoped<IAuthorTourRequestService, AuthorTourRequestService>();
+        services.AddScoped<ITourPlaylistService, TourPlaylistService>();
+        services.AddScoped<IDeezerService, DeezerService>();
+        services.AddHttpClient<IDeezerService, DeezerService>();
+        services.AddScoped<IWeatherService, WeatherService>();
+        services.AddHttpClient<IWeatherService, WeatherService>();
         services.AddScoped<ITourReadService, TourReadService>();
 
     }
@@ -83,6 +90,7 @@ public static class ToursStartup
         services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
         services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
         services.AddScoped<ITourRequestRepository, TourRequestDbRepository>();
+        services.AddScoped<ITourPlaylistRepository, TourPlaylistDbRepository>();
         services.AddScoped<ITourReadRepository, TourReadRepository>();
 
 

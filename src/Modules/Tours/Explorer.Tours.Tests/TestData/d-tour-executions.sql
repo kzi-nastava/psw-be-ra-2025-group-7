@@ -42,3 +42,4 @@ VALUES
     
     -- For TourReview tests - Tourist -2 execution with only 1 of 3 keypoints (33.3% < 35%)
     (-14, -2, -3, NOW() - INTERVAL '1 hour', NULL, NULL, 0, 45.2551, 19.8636, NOW() - INTERVAL '30 minutes', '[0]'::jsonb, '{{"0": "2024-01-20T10:15:00Z"}}'::jsonb);
+

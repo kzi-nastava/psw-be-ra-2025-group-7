@@ -36,10 +36,16 @@ BEGIN
         DELETE FROM tours."TourPurchaseTokens";
     END IF;
 
-    -- Delete TourReviews before TourExecutions (FK dependency)
+     -- Delete TourPlaylists before TourExecutions (FK dependency) -- NOVO
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'tours' AND table_name = 'TourPlaylists') THEN
+       DELETE FROM tours."TourPlaylists";
+    END IF;
+
+        -- Delete TourReviews before TourExecutions (FK dependency)
     IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'tours' AND table_name = 'TourReviews') THEN
         DELETE FROM tours."TourReviews";
     END IF;
+
 
     -- Delete TourExecutions before Tours (FK dependency)
     IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'tours' AND table_name = 'TourExecutions') THEN

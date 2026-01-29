@@ -84,3 +84,4 @@ CREATE INDEX IF NOT EXISTS "IX_EnhancedReviewTags_EnhancedReviewId"
 
 CREATE INDEX IF NOT EXISTS "IX_EnhancedReviewImages_EnhancedReviewId"
     ON tours."EnhancedReviewImages" ("EnhancedReviewId");
+
