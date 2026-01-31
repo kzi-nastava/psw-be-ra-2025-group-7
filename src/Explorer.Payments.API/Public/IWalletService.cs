@@ -11,7 +11,7 @@ namespace Explorer.Payments.API.Public
     {
         void CreateWallet(long userId);
         decimal GetBalance(long userId);
-        void AddFunds(long touristUserId, decimal amount);
+        Task AddFunds(long touristUserId, decimal amount);
         WalletDto GetWallet(long userId);
     }
 }

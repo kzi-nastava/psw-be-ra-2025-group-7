@@ -1,16 +1,19 @@
 ﻿using Explorer.Notifications.API.Public;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Notifications.Infrastructure
 {
     public class NotificationService : INotificationService
     {
         private readonly INotificationRepository _notificationRepository;
+        private readonly IRealTimeNotificationService _realTimeNotificationService;
 
-        public NotificationService(INotificationRepository notificationRepository)
+        public NotificationService(INotificationRepository notificationRepository, IRealTimeNotificationService realTimeNotificationService)
         {
             _notificationRepository = notificationRepository;
+            _realTimeNotificationService = realTimeNotificationService;
         }
 
         public void CreateProblemMessageNotification(
@@ -28,6 +31,7 @@ namespace Explorer.Notifications.Infrastructure
             );
 
             _notificationRepository.Create(notification);
+            _ = _realTimeNotificationService.SendToUserAsync(recipientUserId, notification.Title + ": " + notification.Preview);
         }
     }
 }

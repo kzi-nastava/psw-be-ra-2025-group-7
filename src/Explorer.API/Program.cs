@@ -1,6 +1,9 @@
+using Explorer.API.Services;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.API.Middleware;
 using Explorer.API.Startup;
 using Explorer.API.BackgroundServices;
+using Explorer.API.Hubs;
 using Microsoft.Extensions.FileProviders;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<StakeholdersContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IRealTimeNotificationService, RealTimeNotificationService>();
 builder.Services.ConfigureSwagger(builder.Configuration);
 const string corsPolicy = "_corsPolicy";
 builder.Services.ConfigureCors(corsPolicy);
@@ -73,6 +78,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hub/notifications");
 
 app.Run();
 

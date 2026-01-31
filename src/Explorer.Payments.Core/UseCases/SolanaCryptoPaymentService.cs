@@ -1,4 +1,4 @@
-using Explorer.Payments.API.Dtos;
+﻿using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public;
 using Explorer.Payments.Core.Domain;
 using Explorer.Payments.Core.Domain.RepositoryInterfaces;
@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Payments.Core.UseCases
 {
@@ -15,6 +16,7 @@ namespace Explorer.Payments.Core.UseCases
         private readonly IWalletRepository _walletRepository;
         private readonly IPaymentNotificationRepository _notificationRepository;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IRealTimeNotificationService _realTimeNotificationService;
 
         private const string PROJECT_WALLET_ADDRESS = "66NRnYFtAovyi4qFUbmbrD4ZdiLui2QZR8RyJnor4tXG";
         private const string SOLANA_RPC_URL = "https://api.devnet.solana.com";
@@ -26,12 +28,14 @@ namespace Explorer.Payments.Core.UseCases
             ICryptoDepositRequestRepository depositRepository,
             IWalletRepository walletRepository,
             IPaymentNotificationRepository notificationRepository,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            IRealTimeNotificationService realTimeNotificationService)
         {
             _depositRepository = depositRepository;
             _walletRepository = walletRepository;
             _notificationRepository = notificationRepository;
             _httpClientFactory = httpClientFactory;
+            _realTimeNotificationService = realTimeNotificationService;
         }
 
         public CryptoWalletInfoDto GetWalletInfo()
@@ -393,10 +397,26 @@ namespace Explorer.Payments.Core.UseCases
                 // Create notification
                 var notification = new PaymentNotification(
                     wallet.UserId,
-                    $"?? Crypto deposit confirmed! {txDetails.AmountInSol:F4} SOL ? {coinsAmount:F2} AC added to your wallet."
+                    $"Crypto deposit confirmed! {txDetails.AmountInSol:F4} SOL → {coinsAmount:F2} AC added to your wallet."
                 );
                 _notificationRepository.Create(notification);
                 Console.WriteLine($"Notification created for user {wallet.UserId}");
+
+                // Send real-time SignalR notifications
+                try
+                {
+                    await _realTimeNotificationService.SendDepositConfirmationAsync(
+                        wallet.UserId,
+                        coinsAmount,
+                        wallet.Balance
+                    );
+                    Console.WriteLine($"SignalR notifications sent to user {wallet.UserId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending SignalR notification: {ex.Message}");
+                    // Don't fail the deposit if SignalR fails
+                }
             }
             catch (Exception ex)
             {

@@ -34,9 +34,9 @@ namespace Explorer.API.Controllers
 
         [HttpPost("deposit")]
         [Authorize(Policy = "administratorPolicy")]
-        public IActionResult AddFunds([FromBody] WalletDepositDto dto)
+        public async Task<IActionResult> AddFunds([FromBody] WalletDepositDto dto)
         {
-            _walletService.AddFunds(dto.TouristUserId, dto.Amount);
+            await _walletService.AddFunds(dto.TouristUserId, dto.Amount);
             return Ok();
         }
     }
