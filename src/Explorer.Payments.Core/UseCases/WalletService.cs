@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Payments.Core.UseCases
 {
@@ -14,11 +15,16 @@ namespace Explorer.Payments.Core.UseCases
     {
         private readonly IWalletRepository _walletRepository;
         private readonly IPaymentNotificationRepository _paymentNotificationRepository;
+        private readonly IRealTimeNotificationService _realTimeNotificationService;
 
-        public WalletService(IWalletRepository walletRepository, IPaymentNotificationRepository paymentNotificationRepository)
+        public WalletService(
+            IWalletRepository walletRepository, 
+            IPaymentNotificationRepository paymentNotificationRepository,
+            IRealTimeNotificationService realTimeNotificationService)
         {
             _walletRepository = walletRepository;
             _paymentNotificationRepository = paymentNotificationRepository;
+            _realTimeNotificationService = realTimeNotificationService;
         }
 
         public void CreateWallet(long userId)
@@ -29,12 +35,13 @@ namespace Explorer.Payments.Core.UseCases
             var wallet = new Wallet(userId);
             _walletRepository.Create(wallet);
         }
+        
         public decimal GetBalance(long userId)
         {
             return _walletRepository.GetByUserId(userId).Balance;
         }
 
-        public void AddFunds(long touristUserId, decimal amount)
+        public async Task AddFunds(long touristUserId, decimal amount)
         {
             var wallet = _walletRepository.GetByUserId(touristUserId);
             wallet.AddFunds(amount);
@@ -46,6 +53,21 @@ namespace Explorer.Payments.Core.UseCases
             );
 
             _paymentNotificationRepository.Create(notification);
+
+            // Send real-time SignalR notifications
+            try
+            {
+                await _realTimeNotificationService.SendDepositConfirmationAsync(
+                    touristUserId,
+                    amount,
+                    wallet.Balance
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending SignalR notification: {ex.Message}");
+                // Don't fail the operation if SignalR fails
+            }
         }
 
         public WalletDto GetWallet(long userId)

@@ -26,5 +26,24 @@ namespace Explorer.API.Services
             // Ako je userId long, verovatno ga treba konvertovati u string.
             await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", message);
         }
+
+        public async Task SendWalletUpdateAsync(long userId, decimal newBalance)
+        {
+            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveWalletUpdate", new
+            {
+                balance = newBalance,
+                timestamp = DateTime.UtcNow
+            });
+        }
+
+        public async Task SendDepositConfirmationAsync(long userId, decimal amount, decimal newBalance)
+        {
+            // Send wallet update
+            await SendWalletUpdateAsync(userId, newBalance);
+
+            // Also send a general notification about the deposit
+            var message = $"Crypto deposit confirmed! {amount:F2} AC added to your wallet. New balance: {newBalance:F2} AC";
+            await SendToUserAsync(userId, message);
+        }
     }
 }
