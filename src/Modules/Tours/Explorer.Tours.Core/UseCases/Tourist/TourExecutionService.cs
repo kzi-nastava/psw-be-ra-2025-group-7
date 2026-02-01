@@ -6,6 +6,13 @@ using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Encounters.API.Internal;
+using Explorer.Notes.API.Internal;
+using System.Collections.Generic;
+using Explorer.Stakeholders.API.Internal;
+using System.Linq;
+using Explorer.Payments.API.Internal;
+
+
 
 namespace Explorer.Tours.Core.UseCases.Tourist;
 
@@ -16,19 +23,28 @@ public class TourExecutionService : ITourExecutionService
     private readonly ITourPurchaseTokenRepository _purchaseTokenRepository;
     private readonly IMapper _mapper;
     private readonly IEncounterCheckService _encounterCheckService;
+    private readonly INoteInternalService _noteInternalService;
+    private readonly IPersonNameInternalService _personNameInternalService;
+    private readonly ICouponInternalService _couponInternalService;
 
     public TourExecutionService(
         ITourExecutionRepository executionRepository,
         ITourRepository tourRepository,
         ITourPurchaseTokenRepository purchaseTokenRepository,
         IMapper mapper,
-        IEncounterCheckService encounterCheckService)
+        IEncounterCheckService encounterCheckService,
+        INoteInternalService noteInternalService,
+        IPersonNameInternalService personNameInternalService,
+        ICouponInternalService couponInternalService)
     {
         _executionRepository = executionRepository;
         _tourRepository = tourRepository;
         _purchaseTokenRepository = purchaseTokenRepository;
         _mapper = mapper;
         _encounterCheckService = encounterCheckService;
+        _noteInternalService = noteInternalService;
+        _personNameInternalService = personNameInternalService;
+        _couponInternalService = couponInternalService;
     }
 
     public TourExecutionDto StartTour(long touristId, StartTourExecutionDto dto)
@@ -47,7 +63,7 @@ public class TourExecutionService : ITourExecutionService
 
         // Proveri da li već postoji aktivna sesija za ovu turu
         var existingExecution = _executionRepository.GetActiveExecutionForTourist(touristId, dto.TourId);
-        if (existingExecution != null && existingExecution.TourId != dto.TourId)
+        if (existingExecution != null)
             throw new InvalidOperationException("There is already an active tour execution for this tour.");
 
         // Kreiraj novu sesiju
@@ -67,15 +83,30 @@ public class TourExecutionService : ITourExecutionService
         if (execution.TouristId != touristId)
             throw new ForbiddenException("You can only complete your own tour executions.");
 
+        var completedBefore = _executionRepository.HasCompletedTour(touristId, execution.TourId, executionId);
+
         execution.Complete();
         var updatedExecution = _executionRepository.Update(execution);
-        
-        var result = _mapper.Map<TourExecutionDto>(updatedExecution);
+
         var tour = _tourRepository.Get(updatedExecution.TourId);
+
+        if (!completedBefore)
+        {
+            var createdCoupon = _couponInternalService.CreateUniversalCouponForAuthor(tour.AuthorId, 10);
+
+            var authorName = _personNameInternalService.GetFullName(tour.AuthorId);
+
+            _noteInternalService.CreateCouponNote(touristId, createdCoupon.Code, authorName, tour.Id);
+
+        }
+
+        var result = _mapper.Map<TourExecutionDto>(updatedExecution);
         result.Tour = _mapper.Map<TourDto>(tour);
-        
         return result;
     }
+
+
+
 
     public TourExecutionDto AbandonTour(long touristId, long executionId)
     {

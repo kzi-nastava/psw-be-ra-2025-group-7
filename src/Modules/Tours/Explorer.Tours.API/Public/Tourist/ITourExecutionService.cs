@@ -17,4 +17,5 @@ public interface ITourExecutionService
     KeyPointProximityCheckResultDto CheckKeyPointProximity(long touristId, long executionId, CheckKeyPointProximityDto dto);
     List<TouristKeyPointMapDto> GetKeyPointsForMap(long touristId, long executionId);
 
+
 }

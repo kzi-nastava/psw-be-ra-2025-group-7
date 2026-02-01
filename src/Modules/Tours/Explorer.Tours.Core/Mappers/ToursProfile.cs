@@ -184,6 +184,18 @@ namespace Explorer.Tours.Core.Mappers
             .ForMember(d => d.ResponseCount, opt => opt.Ignore())
             .ForMember(d => d.DaysUntilExpiration, opt => opt.Ignore());
 
+            // TourPlaylist mappings
+            CreateMap<TourPlaylist, TourPlaylistDto>();
+            CreateMap<PlaylistTrack, PlaylistTrackDto>().ReverseMap();
+            // Tour → Full details for tourist (marketplace details)
+            CreateMap<Tour, TourFullForTouristDto>()
+                .ForMember(dest => dest.Difficulty,
+                           opt => opt.MapFrom(src => src.Difficulty.ToString()))
+                .ForMember(dest => dest.Tags,
+                           opt => opt.MapFrom(src => src.Tags))
+                .ForMember(dest => dest.LengthInKm,
+                           opt => opt.MapFrom(src => src.LengthInKm));
+
 
         }
     }

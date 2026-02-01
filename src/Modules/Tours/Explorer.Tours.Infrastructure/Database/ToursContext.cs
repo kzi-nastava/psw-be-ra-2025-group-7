@@ -34,6 +34,7 @@ namespace Explorer.Tours.Infrastructure.Database
         
         public DbSet<TourRequest> TourRequests { get; set; }
         public DbSet<TourRequestResponse> TourRequestResponses { get; set; }
+        public DbSet<TourPlaylist> TourPlaylists { get; set; }
         public ToursContext(DbContextOptions<ToursContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -555,6 +556,18 @@ namespace Explorer.Tours.Infrastructure.Database
 
                 b.HasOne<TourRequest>().WithMany().HasForeignKey(trr => trr.TourRequestId).OnDelete(DeleteBehavior.Cascade);
                 b.HasOne<Tour>().WithMany().HasForeignKey(trr => trr.TourId).OnDelete(DeleteBehavior.Restrict).IsRequired(false);
+            });
+
+            // TourPlaylist configuration
+            modelBuilder.Entity<TourPlaylist>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SelectedGenres).HasColumnType("jsonb");
+                entity.Property(e => e.Tracks).HasColumnType("jsonb");
+                entity.HasOne(e => e.TourExecution)
+                    .WithMany()
+                    .HasForeignKey(e => e.TourExecutionId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
