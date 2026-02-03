@@ -1,4 +1,4 @@
-using Explorer.Payments.API.Internal;
+using Explorer.Payments.API.Public;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Microsoft.AspNetCore.Authorization;
@@ -11,9 +11,9 @@ namespace Explorer.API.Controllers.Tourist
     public class WheelOfFortuneController : ControllerBase
     {
         private readonly IUserProfileService _userProfileService;
-        private readonly IWalletInternalService _walletService;
+        private readonly IWalletService _walletService;
 
-        public WheelOfFortuneController(IUserProfileService userProfileService, IWalletInternalService walletService)
+        public WheelOfFortuneController(IUserProfileService userProfileService, IWalletService walletService)
         {
             _userProfileService = userProfileService;
             _walletService = walletService;
@@ -38,7 +38,7 @@ namespace Explorer.API.Controllers.Tourist
         }
 
         [HttpPost("spin")]
-        public ActionResult<decimal> Spin()
+        public async Task<ActionResult<decimal>> Spin()
         {
             try
             {
@@ -54,7 +54,7 @@ namespace Explorer.API.Controllers.Tourist
                 var amounts = new[] { 50, 100, 200, 500, 1000, 1500 };
                 var reward = amounts[Random.Shared.Next(amounts.Length)];
 
-                _walletService.AddFunds(userId, reward);
+                await _walletService.AddFunds(userId, reward);
 
                 return Ok(reward);
             }
