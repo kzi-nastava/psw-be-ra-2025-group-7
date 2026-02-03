@@ -40,4 +40,19 @@ public class UserProfileDbRepository : IUserProfileRepository
         _dbContext.SaveChanges();
         return profile;
     }
+    public List<UserProfile> GetTopByXp(int count)
+    {
+        return _dbSet
+            .Where(up => up.XP.HasValue)
+            .OrderByDescending(up => up.XP)
+            .Take(count)
+            .ToList();
+    }
+    public List<UserProfile> GetAllByXp()
+    {
+        return _dbSet
+            .Where(up => up.XP.HasValue)
+            .OrderByDescending(up => up.XP)
+            .ToList();
+    }
 }

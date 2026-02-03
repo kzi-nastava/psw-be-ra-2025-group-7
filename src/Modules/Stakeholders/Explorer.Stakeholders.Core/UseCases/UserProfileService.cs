@@ -114,5 +114,11 @@ namespace Explorer.Stakeholders.Core.UseCases
             var updatedProfile = _userProfileRepository.Update(profile);
             return _mapper.Map<UserProfileDto>(updatedProfile);
         }
+
+        public List<UserProfileDto> GetTopUsersByXp(int count)
+        {
+            var profiles = _userProfileRepository.GetTopByXp(count);
+            return _mapper.Map<List<UserProfileDto>>(profiles);
+        }
     }
 }

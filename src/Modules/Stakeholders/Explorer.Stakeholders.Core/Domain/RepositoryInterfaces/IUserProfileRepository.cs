@@ -14,5 +14,7 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
         UserProfile Create(UserProfile profile);
         UserProfile Update(UserProfile profile);
         UserProfile GetById(long userId);
+        public List<UserProfile> GetAllByXp();
+        public List<UserProfile> GetTopByXp(int count);
     }
 }
