@@ -66,12 +66,6 @@ namespace Explorer.Payments.Infrastructure
             // Add HttpClient for Solana RPC calls
             services.AddHttpClient();
 
-            // NEW (crypto deposits)
-            services.AddScoped<ICryptoDepositRequestRepository, CryptoDepositRequestDbRepository>();
-
-            // Add HttpClient for Solana RPC calls
-            services.AddHttpClient();
-
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("payments"));
             dataSourceBuilder.EnableDynamicJson();
             var dataSource = dataSourceBuilder.Build();
