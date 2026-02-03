@@ -42,7 +42,8 @@ namespace Explorer.API.Controllers.Author
                 AuthorId = User.PersonId(),
                 Status = 0,       // Draft
                 PublishedAt = null,
-                ArchivedAt = null
+                ArchivedAt = null,
+                Images = createDto.Images ?? new List<TourImageDto>() // <-- copy images here
             };
 
             return Ok(_tourService.Create(tourDto));

@@ -21,6 +21,8 @@ namespace Explorer.Payments.Infrastructure.Database
         // NEW (coupons)
         public DbSet<Coupon> Coupons { get; set; }
         public DbSet<PaymentRecord> PaymentRecords { get; set; }
+        public DbSet<Sale> Sales { get; set; }
+        public DbSet<SaleTour> SaleTours { get; set; }
 
         // NEW (crypto deposits)
         public DbSet<CryptoDepositRequest> CryptoDepositRequests { get; set; }
@@ -239,6 +241,10 @@ namespace Explorer.Payments.Infrastructure.Database
                 b.Property(c => c.IsActive)
                     .IsRequired();
 
+                b.Property(c => c.IsUniversal)
+                    .IsRequired()
+                    .HasDefaultValue(false);
+
                 b.HasIndex(c => c.Code)
                     .IsUnique();
 
@@ -280,6 +286,41 @@ namespace Explorer.Payments.Infrastructure.Database
                 b.HasIndex(pr => pr.TouristId);
             });
 
+            // ===== Sale konfiguracija =====
+            modelBuilder.Entity<Sale>(b =>
+            {
+                b.ToTable("Sales");
+                b.HasKey(s => s.Id);
+
+                b.Property(s => s.AuthorId).IsRequired();
+
+                b.Property(s => s.Start)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(s => s.End)
+                    .IsRequired()
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property(s => s.DiscountPercentage).IsRequired();
+                b.Property(s => s.Status).IsRequired();
+
+                b.HasMany(s => s.SaleTours)
+                    .WithOne(st => st.Sale)          // NAVIGACIJA
+                    .HasForeignKey(st => st.SaleId)  // FK
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+
+            modelBuilder.Entity<SaleTour>(b =>
+            {
+                b.ToTable("SaleTours");
+
+                b.HasKey(st => new { st.SaleId, st.TourId });
+
+                b.Property(st => st.TourId)
+                    .IsRequired();
+            });
             // ===== CryptoDepositRequest konfiguracija =====
             modelBuilder.Entity<CryptoDepositRequest>(b =>
             {

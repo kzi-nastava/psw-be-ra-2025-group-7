@@ -11,12 +11,19 @@ namespace Explorer.Stakeholders.API.Dtos
         Active = 1,
         Closed = 2
     }
+    public class TouristLookupDto
+    {
+        public long Id { get; set; }        
+        public string Username { get; set; }
+    }
+
+
     public class ClubDto
     {
         public long Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public List<string> ImageUrls { get; set; }
+        public List<string>? ImageUrls { get; set; } = null;
         public long CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

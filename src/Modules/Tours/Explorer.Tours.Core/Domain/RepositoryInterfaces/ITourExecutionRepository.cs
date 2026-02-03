@@ -12,5 +12,5 @@ public interface ITourExecutionRepository
     TourExecution Update(TourExecution execution);
     void Delete(long id);
     TourExecution GetExecutionWithTourAndKeyPoints(long touristId, long executionId);
-
+    bool HasCompletedTour(long touristId, long tourId, long? excludeExecutionId = null);
 }

@@ -14,4 +14,6 @@ public interface ITourRepository
     void Delete(long id);
     List<Tour> GetAll();
     IEnumerable<Tour> GetPublishedWithKeyPoints();
+
+    Tour GetForPreview(long id);
 }

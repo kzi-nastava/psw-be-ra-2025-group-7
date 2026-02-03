@@ -17,5 +17,10 @@ namespace Explorer.Stakeholders.API.Dtos
         public string Role { get; set; } = string.Empty;
 
         public bool IsBlocked { get; set; }
+
+
+
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 }

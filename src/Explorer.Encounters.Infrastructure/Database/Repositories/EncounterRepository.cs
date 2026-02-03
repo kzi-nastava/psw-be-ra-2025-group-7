@@ -62,5 +62,22 @@ namespace Explorer.Encounters.Infrastructure.Database.Repositories
 
             return new PagedResult<Encounter>(items, total);
         }
+
+        public KeyPointEncounter CreateKeyPointEncounter(KeyPointEncounter encounter)
+        {
+            _context.KeyPointEncounters.Add(encounter);
+            _context.SaveChanges();
+            return encounter;
+        }
+        public KeyPointEncounter GetByKeyPointId(long keyPointId)
+        { 
+            return _context.KeyPointEncounters.FirstOrDefault(x => x.KeyPointId == keyPointId); 
+        }
+
+        public IEnumerable<Encounter> GetAll()
+        {
+            return _context.Encounters.ToList();
+        }
+
     }
 }

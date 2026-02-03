@@ -2,6 +2,7 @@
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Infrastructure.Database;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -71,7 +72,11 @@ namespace Explorer.Stakeholders.Tests.Integration.Clubs
 
         private static ClubsController CreateController(IServiceScope scope)
         {
-            return new ClubsController(scope.ServiceProvider.GetRequiredService<IClubService>())
+            var clubService = scope.ServiceProvider.GetRequiredService<IClubService>();
+            var db = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+            var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
+
+            return new ClubsController(clubService, db, env)
             {
                 ControllerContext = BuildContext("1")
             };

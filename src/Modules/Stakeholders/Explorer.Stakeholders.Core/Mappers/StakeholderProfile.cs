@@ -38,6 +38,7 @@ public class StakeholderProfile : Profile
         CreateMap<UserProfile, UserLocationDto>()
             .ForMember(d => d.Latitude, opt => opt.MapFrom(s => s.CurrentLatitude))
             .ForMember(d => d.Longitude, opt => opt.MapFrom(s => s.CurrentLongitude));
+        CreateMap<UserProfile, LeaderboardUserDto>();
 
     }
 }

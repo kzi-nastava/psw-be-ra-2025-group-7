@@ -46,5 +46,9 @@ namespace Explorer.Encounters.Infrastructure.Database.Repositories
         {
             return _context.EncounterProgresses.ToList();
         }
+        public bool isCompleted(long encounterId, int participantId)
+        {
+            return _context.EncounterProgresses.Any(ep => ep.EncounterId == encounterId && ep.UserId == participantId && ep.Status == EncounterProgress.EncounterProgressStatus.Completed);
+        }
     }
 }

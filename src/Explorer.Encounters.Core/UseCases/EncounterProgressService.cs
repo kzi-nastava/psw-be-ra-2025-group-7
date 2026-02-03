@@ -354,5 +354,33 @@ namespace Explorer.Encounters.Core.UseCases
             };
         }
 
+        public EncounterProgressDto ActivateMiscEncounter(long encounterId, long userId)
+        {
+            bool alreadyActive = _repo.GetAll().Any(p =>
+                p.EncounterId == encounterId &&
+                p.UserId == userId &&
+                p.Status == EncounterProgressStatus.Active);
+
+            bool alreadyFinished = _repo.GetAll().Any(p =>
+                p.EncounterId == encounterId &&
+                p.UserId == userId &&
+                p.Status == EncounterProgressStatus.Completed);
+
+            if (alreadyActive)
+                throw new InvalidOperationException("Encounter already activated.");
+
+            if (alreadyFinished)
+                throw new InvalidOperationException("Encounter already completed.");
+
+            var encounter = _encounterRepo.Get(encounterId)
+                ?? throw new KeyNotFoundException("Encounter not found.");
+
+            var status = EncounterProgressStatus.Completed;
+            var encounterProgress = new EncounterProgress(encounterId, userId, status);
+            _userProfileLocService.AddXP((int)userId, encounter.Xp);
+            _repo.Create(encounterProgress);
+            return _mapper.Map<EncounterProgressDto>(encounterProgress);
+        }
+
     }
 }

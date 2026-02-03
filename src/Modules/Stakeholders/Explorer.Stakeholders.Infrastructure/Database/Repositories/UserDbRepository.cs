@@ -40,4 +40,24 @@ public class UserDbRepository : IUserRepository
     {
         return _dbContext.Users.FirstOrDefault(user => user.Id == userId);
     }
+
+    public List<User> SearchByUsername(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return new List<User>();
+
+        return _dbContext.Users
+            .Where(user => user.IsActive && user.Username.Contains(searchTerm))
+            .OrderBy(user => user.Username)
+            .Take(20)
+            .ToList();
+    }
+
+    public List<User> GetAllActiveUsers()
+    {
+        return _dbContext.Users
+            .Where(user => user.IsActive)
+            .OrderBy(user => user.Username)
+            .ToList();
+    }
 }

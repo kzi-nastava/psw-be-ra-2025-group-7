@@ -1,5 +1,4 @@
-﻿-- UserProfiles za autore
-INSERT INTO stakeholders."UserProfiles"(
+﻿INSERT INTO stakeholders."UserProfiles"(
     "Id", "UserId", "FirstName", "LastName", "ProfilePicture", "Biography", "Motto")
 VALUES (-11, -11, 'Ana', 'Anić', 'https://example.com/ana.jpg', 
     'Entuzijasta turizma sa strašću za istraživanje novih destinacija.', 
@@ -17,16 +16,14 @@ VALUES (-13, -13, 'Sara', 'Sarić', 'https://example.com/sara.jpg',
     'Ljubitelj prirode i avanturista koji voli da deli svoja iskustva.', 
     'Adventure is out there!');
 
--- UserProfiles za turiste
 INSERT INTO stakeholders."UserProfiles"(
-    "Id", "UserId", "FirstName", "LastName", "ProfilePicture", "Biography", "Motto", "CurrentLatitude", "CurrentLongitude")
+    "Id", "UserId", "FirstName", "LastName", "ProfilePicture", "Biography", "Motto", "CurrentLatitude", "CurrentLongitude", "XP", "Level")
 VALUES (-21, -21, 'Pera', 'Perić', 'https://example.com/pera.jpg', 
     'Student računarstva koji voli da putuje i upoznaje nove kulture.', 
-    'Carpe diem!', 44.8176, 20.4633);
+    'Carpe diem!', 44.8176, 20.4633, 0, 1);
 
 INSERT INTO stakeholders."UserProfiles"(
-    "Id", "UserId", "FirstName", "LastName", "ProfilePicture", "Biography", "Motto")
+    "Id", "UserId", "FirstName", "LastName", "ProfilePicture", "Biography", "Motto", "XP", "Level")
 VALUES (-22, -22, 'Mika', 'Mikić', 'https://example.com/mika.jpg', 
     'Turista koji voli arhitekturu i istoriju evropskih gradova.', 
-    'Collect moments, not things.');
-
+    'Collect moments, not things.', 0, 1); 

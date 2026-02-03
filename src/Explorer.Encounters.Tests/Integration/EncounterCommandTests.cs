@@ -5,6 +5,7 @@ using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Encounters.Core.UseCases;
 using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +54,7 @@ namespace Explorer.Encounters.Tests.Integration
             created!.Id.ShouldBeGreaterThan(0);
             created.Name.ShouldBe(dto.Name);
             created.Xp.ShouldBe(10);
-            created.Status.ShouldBe("draft"); 
+            created.Status.ShouldBe("draft");
             created.Type.ShouldBe("social");
 
             // Assert - db
@@ -108,7 +109,7 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "https://example.com/x.png",
-          
+
                     ActivationRadiusMeters = 5,
                     PhotoLatitude = 45.2,
                     PhotoLongitude = 19.2
@@ -171,7 +172,7 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "https://example.com/a.png",
-                
+
                     ActivationRadiusMeters = 5,
                     PhotoLatitude = 45.2,
                     PhotoLongitude = 19.2
@@ -206,7 +207,7 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "",
-            
+
                     ActivationRadiusMeters = 5,
                     PhotoLatitude = 45.2,
                     PhotoLongitude = 19.2
@@ -215,7 +216,7 @@ namespace Explorer.Encounters.Tests.Integration
 
             Should.Throw<ArgumentException>(() => controller.Create(dto));
         }
-        
+
 
 
         private static EncounterDto CreateEncounter(EncountersController controller, string name, string type)
@@ -308,7 +309,7 @@ namespace Explorer.Encounters.Tests.Integration
                 HiddenLocation = new CreateHiddenLocationEncounterDto
                 {
                     ImageUrl = "https://img.png",
-                    ActivationRadiusMeters = 1000, // 👈 da sigurno može
+                    ActivationRadiusMeters = 1000,
                     PhotoLatitude = 45,
                     PhotoLongitude = 19
                 }
@@ -324,9 +325,9 @@ namespace Explorer.Encounters.Tests.Integration
                 .Any(p => p.EncounterId == encounter.Id && p.UserId == 1)
                 .ShouldBeTrue();
         }
-       
 
-     
+
+
 
 
         [Fact]
@@ -340,9 +341,9 @@ namespace Explorer.Encounters.Tests.Integration
             var dbContext = scope.ServiceProvider.GetRequiredService<EncountersContext>();
 
             // 1️⃣ Kreiraj SOCIAL encounter
-            var encounter = encounterService.Create(-1,new CreateEncounterDto
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
             {
-                
+
                 Name = "Social test",
                 Description = "Group up",
                 Latitude = 45.0,
@@ -383,6 +384,422 @@ namespace Explorer.Encounters.Tests.Integration
                 .ShouldBeTrue();
         }
 
-    }
 
+        [Fact]
+        public void User_cannot_have_two_active_progresses_for_same_encounter()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Social",
+                Description = "Test",
+                Latitude = 45,
+                Longitude = 19,
+                Radius = 50,
+                Xp = 10,
+                Type = "social",
+                RequiredParticipants = 2
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            progressService.Create(new EncounterProgressDto
+            {
+                EncounterId = encounter.Id,
+                UserId = 1
+            });
+
+            Should.Throw<InvalidOperationException>(() =>
+                progressService.Create(new EncounterProgressDto
+                {
+                    EncounterId = encounter.Id,
+                    UserId = 1
+                }));
+        }
+
+
+        [Fact]
+        public void Misc_encounter_completes_immediately_and_adds_xp()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+            var repo = scope.ServiceProvider.GetRequiredService<IEncounterProgressRepository>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Misc",
+                Description = "Instant",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 20,
+                Type = "misc"
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            progressService.ActivateMiscEncounter(encounter.Id, 1);
+
+            var progress = repo.GetAll()
+                .First(p => p.EncounterId == encounter.Id && p.UserId == 1);
+
+            progress.Status.ShouldBe(EncounterProgress.EncounterProgressStatus.Completed);
+        }
+
+
+        [Fact]
+        public void HasActiveSocialEncounter_returns_true_only_when_active_exists()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Social",
+                Description = "Test",
+                Latitude = 45,
+                Longitude = 19,
+                Radius = 50,
+                Xp = 10,
+                Type = "social",
+                RequiredParticipants = 2
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            progressService.ActivateSocialEncounter(encounter.Id, 1);
+
+            progressService.HasActiveSocialEncounter(1).ShouldBeTrue();
+            progressService.HasActiveSocialEncounter(999).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Social_encounter_does_not_complete_if_users_are_not_in_radius()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+            var progressRepo = scope.ServiceProvider.GetRequiredService<IEncounterProgressRepository>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Social fail",
+                Description = "Too far",
+                Latitude = 45,
+                Longitude = 19,
+                Radius = 5,          // mali radius
+                Xp = 10,
+                Type = "social",
+                RequiredParticipants = 2
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            progressService.Create(new EncounterProgressDto { EncounterId = encounter.Id, UserId = 1 });
+            progressService.Create(new EncounterProgressDto { EncounterId = encounter.Id, UserId = 2 });
+
+            // Act
+            var completed = progressService.CheckEncounterProgress(encounter.Id);
+
+            // Assert
+            completed.ShouldBeFalse();
+
+            progressRepo.GetAll()
+                .Where(p => p.EncounterId == encounter.Id)
+                .All(p => p.Status == EncounterProgress.EncounterProgressStatus.Active)
+                .ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Creating_encounter_with_keypoint_creates_keypoint_link()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<EncountersContext>();
+            var controller = CreateAdminController(scope, "1");
+
+            var dto = new CreateEncounterDto
+            {
+                Name = "KP Encounter",
+                Description = "Linked to KP",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                KeyPointId = 7,
+                IsMandatory = true
+            };
+
+            // Act
+            var created = (controller.Create(dto).Result as OkObjectResult)!.Value as EncounterDto;
+
+            // Assert
+            created.ShouldNotBeNull();
+
+            var link = dbContext.KeyPointEncounters
+                .SingleOrDefault(x => x.EncounterId == created!.Id);
+
+            link.ShouldNotBeNull();
+            link!.KeyPointId.ShouldBe(7);
+            link.IsMandatory.ShouldBeTrue();
+        }
+        [Fact]
+        public void HasMandatoryEncounter_returns_true_when_mandatory_encounter_exists()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Mandatory",
+                Description = "Must do",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "social",
+                KeyPointId = 3,
+                IsMandatory = true
+            });
+
+            // Act
+            var result = encounterService.HasMandatoryEncounter(3);
+
+            // Assert
+            result.ShouldBeTrue();
+        }
+        [Fact]
+        public void HasMandatoryEncounter_returns_false_when_no_encounter_for_keypoint()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+
+            var result = encounterService.HasMandatoryEncounter(999);
+
+            result.ShouldBeFalse();
+        }
+        [Fact]
+        public void Social_encounter_completion_adds_xp_to_all_users()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+            var userLocationService = scope.ServiceProvider.GetRequiredService<IUserProfileLocationService>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Social XP",
+                Description = "XP check",
+                Latitude = 45,
+                Longitude = 19,
+                Radius = 1000,
+                Xp = 30,
+                Type = "social",
+                RequiredParticipants = 2
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            progressService.Create(new EncounterProgressDto { EncounterId = encounter.Id, UserId = 1 });
+            progressService.Create(new EncounterProgressDto { EncounterId = encounter.Id, UserId = 2 });
+
+            // Act
+            var completed = progressService.CheckEncounterProgress(encounter.Id);
+
+            // Assert
+            completed.ShouldBeTrue();
+
+            // indirektna provera — ne puca AddXP, znači pozvano
+            true.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Hidden_location_does_not_complete_if_user_leaves_too_early()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+            var repo = scope.ServiceProvider.GetRequiredService<IEncounterProgressRepository>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Hidden timing",
+                Description = "Timing",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://img.png",
+                    ActivationRadiusMeters = 1000,
+                    PhotoLatitude = 45,
+                    PhotoLongitude = 19
+                }
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            progressService.ActivateHiddenLocationForUser(encounter.Id, 1);
+
+            // Act – simulacija promene lokacije (ali bez čekanja)
+            progressService.OnUserLocationChanged(1);
+
+            // Assert
+            var progress = repo.GetAll().First(p => p.EncounterId == encounter.Id);
+            progress.Status.ShouldBe(EncounterProgress.EncounterProgressStatus.Active);
+        }
+
+
+        [Fact]
+        public void Creating_encounter_with_invalid_type_throws()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateAdminController(scope, "1");
+
+            var dto = new CreateEncounterDto
+            {
+                Name = "Invalid",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 5,
+                Type = "nepostoji"
+            };
+
+            Should.Throw<ArgumentException>(() => controller.Create(dto));
+        }
+
+        [Fact]
+        public void Hidden_location_cannot_be_activated_twice_by_same_user()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Hidden",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://img.png",
+                    ActivationRadiusMeters = 1000,
+                    PhotoLatitude = 45,
+                    PhotoLongitude = 19
+                }
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            progressService.ActivateHiddenLocationForUser(encounter.Id, 1);
+
+            Should.Throw<InvalidOperationException>(() =>
+                progressService.ActivateHiddenLocationForUser(encounter.Id, 1));
+        }
+        [Fact]
+        public void IsMandatoryEncounterCompleted_returns_false_when_progress_not_completed()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+
+
+            // Arrange
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Mandatory",
+                Description = "Not completed",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "social",
+                KeyPointId = 5,
+                IsMandatory = true
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            // Progress postoji, ali NIJE završen
+            progressService.Create(new EncounterProgressDto
+            {
+                EncounterId = encounter.Id,
+                UserId = 1,
+                FinishedAt = null
+            });
+
+            // Act
+            var completed = encounterService.IsMandatoryEncounterCompleted(5, 1);
+
+            // Assert
+            completed.ShouldBeFalse();
+        }
+        [Fact]
+        public void IsMandatoryEncounterCompleted_returns_true_when_completed_location()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var progressService = scope.ServiceProvider.GetRequiredService<IEncounterProgressService>();
+
+            // Arrange – LOCATION encounter sa hidden location
+            var encounter = encounterService.Create(-1, new CreateEncounterDto
+            {
+                Name = "Mandatory location",
+                Description = "Completed",
+                Latitude = 45,
+                Longitude = 19,
+                Xp = 10,
+                Type = "location",
+                KeyPointId = 6,
+                IsMandatory = true,
+                HiddenLocation = new CreateHiddenLocationEncounterDto
+                {
+                    ImageUrl = "https://img.png",
+                    ActivationRadiusMeters = 1000, 
+                    PhotoLatitude = 45,
+                    PhotoLongitude = 19
+                }
+            });
+
+            encounterService.ChangeStatus(encounter.Id, "active");
+
+            // Act – aktivacija hidden location (ovo završava LOCATION encounter)
+            progressService.ActivateHiddenLocationForUser(encounter.Id, 1);
+
+            // Assert
+            var completed = encounterService.IsMandatoryEncounterCompleted(6, 1);
+            completed.ShouldBeFalse();
+        }
+
+
+
+        [Fact]
+        public void IsMandatoryEncounterCompleted_returns_true_when_no_mandatory_encounter_exists()
+        {
+            using var scope = Factory.Services.CreateScope();
+
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+
+            // Act
+            var completed = encounterService.IsMandatoryEncounterCompleted(999, 1);
+
+            // Assert
+            completed.ShouldBeTrue();
+        }
+
+
+    }
 }

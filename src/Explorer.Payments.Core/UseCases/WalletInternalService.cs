@@ -64,5 +64,22 @@ namespace Explorer.Payments.Core.UseCases
             wallet.Withdraw(amount);
             _walletRepository.Update(wallet);
         }
+
+        public void AddFunds(long userId, decimal amount)
+        {
+            Wallet wallet;
+            try
+            {
+                wallet = _walletRepository.GetByUserId(userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                wallet = new Wallet(userId);
+                _walletRepository.Create(wallet);
+            }
+
+            wallet.AddFunds(amount);
+            _walletRepository.Update(wallet);
+        }
     }
 }

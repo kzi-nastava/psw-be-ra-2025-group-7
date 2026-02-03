@@ -1,6 +1,9 @@
+using Explorer.API.Services;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.API.Middleware;
 using Explorer.API.Startup;
 using Explorer.API.BackgroundServices;
+using Explorer.API.Hubs;
 using Microsoft.Extensions.FileProviders;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<StakeholdersContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IRealTimeNotificationService, RealTimeNotificationService>();
 builder.Services.ConfigureSwagger(builder.Configuration);
 const string corsPolicy = "_corsPolicy";
 builder.Services.ConfigureCors(corsPolicy);
@@ -43,6 +48,11 @@ var imagesPath = Path.Combine(webRootPath, "blog-images");
 Directory.CreateDirectory(imagesPath);
 
 Directory.CreateDirectory(Path.Combine(webRootPath, "enhanced-review-images"));
+Directory.CreateDirectory(Path.Combine(webRootPath, "keypoint-images"));
+
+// Folder za profilne slike
+Directory.CreateDirectory(Path.Combine(webRootPath, "profile-images"));
+Directory.CreateDirectory(Path.Combine(webRootPath, "clubs"));
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -68,6 +78,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hub/notifications");
 
 app.Run();
 

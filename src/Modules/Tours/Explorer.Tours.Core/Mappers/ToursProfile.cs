@@ -93,7 +93,9 @@ namespace Explorer.Tours.Core.Mappers
             // Tour Purchase Token mapovi - includes purchased tour info
             CreateMap<TourPurchaseToken, TourPurchaseTokenDto>()
                 .ForMember(dest => dest.Tour, 
-                           opt => opt.MapFrom(src => src.Tour));
+                           opt => opt.MapFrom(src => src.Tour))
+                .ForMember(dest => dest.TourName,
+               opt => opt.MapFrom(src => src.Tour != null ? src.Tour.Name : string.Empty));
             CreateMap<AnnualAward, AnnualAwardDto>()
                 .ForMember(d => d.Status, opt => opt.MapFrom(s => s.Status.ToString()));
 
@@ -181,6 +183,18 @@ namespace Explorer.Tours.Core.Mappers
             .ForMember(d => d.ContactDisclaimer, opt => opt.Ignore())
             .ForMember(d => d.ResponseCount, opt => opt.Ignore())
             .ForMember(d => d.DaysUntilExpiration, opt => opt.Ignore());
+
+            // TourPlaylist mappings
+            CreateMap<TourPlaylist, TourPlaylistDto>();
+            CreateMap<PlaylistTrack, PlaylistTrackDto>().ReverseMap();
+            // Tour → Full details for tourist (marketplace details)
+            CreateMap<Tour, TourFullForTouristDto>()
+                .ForMember(dest => dest.Difficulty,
+                           opt => opt.MapFrom(src => src.Difficulty.ToString()))
+                .ForMember(dest => dest.Tags,
+                           opt => opt.MapFrom(src => src.Tags))
+                .ForMember(dest => dest.LengthInKm,
+                           opt => opt.MapFrom(src => src.LengthInKm));
 
 
         }

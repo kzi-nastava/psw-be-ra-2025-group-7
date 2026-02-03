@@ -11,5 +11,7 @@ namespace Explorer.Tours.API.Dtos
         public int CreatorId { get; set; }
         public string Message { get; set; } = "";
         public DateTime CreatedAt { get; set; }
+
+        public string CreatorUsername { get; set; } = "";
     }
 }

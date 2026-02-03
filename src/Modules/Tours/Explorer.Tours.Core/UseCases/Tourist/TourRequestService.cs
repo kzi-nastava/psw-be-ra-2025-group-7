@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
@@ -14,11 +15,19 @@ namespace Explorer.Tours.Core.UseCases.Tourist
     {
         private readonly ITourRequestRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IUserInternalService _userInternalService;
+        private readonly ITourRepository _tourRepository;
 
-        public TourRequestService(ITourRequestRepository repository, IMapper mapper)
+        public TourRequestService(
+            ITourRequestRepository repository,
+            IMapper mapper,
+            IUserInternalService userInternalService,
+            ITourRepository tourRepository)
         {
             _repository = repository;
             _mapper = mapper;
+            _userInternalService = userInternalService;
+            _tourRepository = tourRepository;
         }
 
         public TourRequestDto Create(CreateTourRequestDto dto, long touristId)
@@ -149,7 +158,6 @@ namespace Explorer.Tours.Core.UseCases.Tourist
             return dto;
         }
 
-
         public TourRequestDto Close(long id, long touristId)
         {
             var tourRequest = _repository.Get(id);
@@ -175,7 +183,57 @@ namespace Explorer.Tours.Core.UseCases.Tourist
                 throw new UnauthorizedAccessException("You are not authorized to view responses for this tour request.");
 
             var responses = _repository.GetResponsesByRequest(tourRequestId);
-            return _mapper.Map<List<TourRequestResponseDto>>(responses);
+            var dtos = _mapper.Map<List<TourRequestResponseDto>>(responses);
+
+            foreach (var dto in dtos)
+            {
+                var response = responses.First(r => r.Id == dto.Id);
+
+                try
+                {
+                    var authorInfo = _userInternalService.GetUserBasicInfo(response.AuthorId);
+
+                    if (authorInfo != null)
+                    {
+                        dto.AuthorName = authorInfo.DisplayName ?? $"Author #{response.AuthorId}";
+                        dto.AuthorAvatar = authorInfo.ProfilePicture;
+                    }
+                    else
+                    {
+                        dto.AuthorName = $"Author #{response.AuthorId}";
+                        dto.AuthorAvatar = null;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    dto.AuthorName = $"Author #{response.AuthorId}";
+                    dto.AuthorAvatar = null;
+                }
+
+                if (response.TourId.HasValue)
+                {
+                    try
+                    {
+                        var tour = _tourRepository.GetForPreview(response.TourId.Value);
+
+                        if (tour != null)
+                        {
+                            dto.Tour = _mapper.Map<TourPreviewDto>(tour);
+                        }
+                        else
+                        {
+                            dto.Tour = null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to load tour {response.TourId}: {ex.Message}");
+                        dto.Tour = null;
+                    }
+                }
+            }
+
+            return dtos;
         }
 
         public TourRequestDto AcceptResponse(AcceptResponseDto dto, long touristId)
@@ -183,20 +241,32 @@ namespace Explorer.Tours.Core.UseCases.Tourist
             var tourRequest = _repository.Get(dto.TourRequestId);
 
             if (tourRequest.TouristId != touristId)
-                throw new UnauthorizedAccessException("You are not authorized to accept responses for this tour request.");
-
-            if (tourRequest.Status == TourRequestStatus.Fulfilled)
-                throw new InvalidOperationException("This offer has already been accepted.");
-
-            if (tourRequest.Status == TourRequestStatus.Closed)
-                throw new InvalidOperationException("This request is closed.");
+                throw new UnauthorizedAccessException("You are not authorized.");
 
             var response = _repository.GetResponse(dto.ResponseId);
+
             if (response.TourRequestId != dto.TourRequestId)
                 throw new InvalidOperationException("Response does not belong to this tour request.");
 
-            if (response.Status != ResponseStatus.Pending)
-                throw new InvalidOperationException("This response has already been processed.");
+            if (response.ResponseType == ResponseType.CustomProposal)
+            {
+                if (response.Status != ResponseStatus.Ready)
+                {
+                    throw new InvalidOperationException(
+                        "This custom proposal is not ready yet. The author needs to finalize the tour first.");
+                }
+
+                if (!response.TourId.HasValue)
+                {
+                    throw new InvalidOperationException("Tour has not been created yet.");
+                }
+
+                var tour = _tourRepository.Get(response.TourId.Value);
+                if (tour.Status != TourStatus.Published)
+                {
+                    throw new InvalidOperationException("Tour must be published before acceptance.");
+                }
+            }
 
             _repository.AcceptResponse(dto.ResponseId, dto.TourRequestId);
 
@@ -221,6 +291,34 @@ namespace Explorer.Tours.Core.UseCases.Tourist
 
             response.Reject();
             _repository.UpdateResponse(response);
+        }
+
+        public TourRequestDto ExpressInterest(long tourRequestId, long responseId, long touristId)
+        {
+            var tourRequest = _repository.Get(tourRequestId);
+
+            if (tourRequest.TouristId != touristId)
+                throw new UnauthorizedAccessException("You are not authorized.");
+
+            var response = _repository.GetResponse(responseId);
+
+            if (response.TourRequestId != tourRequestId)
+                throw new InvalidOperationException("Response does not belong to this tour request.");
+
+            if (response.ResponseType != ResponseType.CustomProposal)
+                throw new InvalidOperationException("You can only express interest for custom proposals.");
+
+            _repository.ExpressInterest(responseId);
+
+            // TODO: Pošalji notifikaciju autoru
+            // _notificationService.NotifyAuthor(response.AuthorId, "Tourist is interested in your proposal!");
+
+            var updated = _repository.Get(tourRequestId);
+            var result = _mapper.Map<TourRequestDto>(updated);
+            result.ResponseCount = _repository.GetResponseCount(updated.Id);
+            result.DaysUntilExpiration = updated.DaysUntilExpiration();
+
+            return result;
         }
     }
 }

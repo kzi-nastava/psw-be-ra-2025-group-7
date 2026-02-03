@@ -49,7 +49,7 @@ namespace Explorer.Payments.Tests.Unit
         }
 
         [Fact]
-        public void AddFunds_Updates_Wallet_Balance_For_Admin()
+        public async Task AddFunds_Updates_Wallet_Balance_For_Admin()
         {
             using var scope = Factory.Services.CreateScope();
             long testUserId = -2301;
@@ -64,7 +64,7 @@ namespace Explorer.Payments.Tests.Unit
                 Amount = 50
             };
 
-            var actionResult = controller.AddFunds(depositDto);
+            var actionResult = await controller.AddFunds(depositDto);
             actionResult.ShouldBeOfType<OkResult>();
 
             var wallet = dbContext.Wallets.FirstOrDefault(x => x.UserId == testUserId);
