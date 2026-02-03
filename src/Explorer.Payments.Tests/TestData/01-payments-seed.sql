@@ -146,7 +146,7 @@ VALUES
 INSERT INTO payments."PurchaseNotifications" ("Id", "TouristId", "Message", "IsRead", "CreatedAt")
 VALUES
     (-1, -21, 'Successfully purchased "Obilazak Petrovaradinske tvr?ave"', false, NOW() - INTERVAL '10 days'),
-    (-2, -21, 'Successfully purchased "Dunav - voûnja brodom" with 20% discount', true, NOW() - INTERVAL '5 days');
+    (-2, -21, 'Successfully purchased "Dunav - vo≈ænja brodom" with 20% discount', true, NOW() - INTERVAL '5 days');
 
 
 

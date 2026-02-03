@@ -27,6 +27,9 @@ namespace Explorer.Payments.Infrastructure.Database
         // NEW (crypto deposits)
         public DbSet<CryptoDepositRequest> CryptoDepositRequests { get; set; }
 
+        // NEW (crypto deposits)
+        public DbSet<CryptoDepositRequest> CryptoDepositRequests { get; set; }
+
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
