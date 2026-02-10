@@ -131,9 +131,7 @@ public class TourPlaylistService : ITourPlaylistService
             throw new ForbiddenException("You can only access playlists for your own tour executions.");
 
         var playlist = _playlistRepository.GetByTourExecutionId(executionId);
-        if (playlist == null)
-            throw new NotFoundException("Playlist not found for this tour execution.");
-
+        
         return _mapper.Map<TourPlaylistDto>(playlist);
     }
 
